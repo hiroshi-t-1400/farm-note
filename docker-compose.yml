@@ -1,0 +1,89 @@
+services:
+  # --------------------------------
+  # １．アプリケーションコンテナ(PHP-FPM 8.4)
+  ## docker step1
+  # --------------------------------
+  src:
+    # ./infara/php/Dockerfileを使用してイメージをビルド
+    build:
+      context: .
+      dockerfile: ./infra/php/Dockerfile
+      # WSL2のユーザー権限問題を解決するためにUID/GIDをビルド引数として渡す
+      args:
+        UID: 1000
+        GID: 1000
+    container_name: laravel_src
+    ports:
+      # Vite開発サーバーのポートをホストにも公開
+      - '5173:5173'
+      # Laravelアプリケーションのポートも公開
+      # - '80:80'
+    # コンテナ内のデフォルト作業ディレクトリ
+    working_dir: /var/www/src
+    # ホストの現在のディレクトリ（Laravelプロジェクトルートsrc/）をコンテナ内の/var/html/srcにマウント
+    volumes:
+      - ./src:/var/www/src
+      # - ./sec_src:/var/www/src
+    # 使用するWEBサーバーコンテナを指定
+    # ファイル下部のネットワーク定義が必須
+    networks:
+      - laravel_farm_note_network
+
+  # --------------------------------
+  # ２．ＷＥＢサーバーコンテナ(Nginx)
+  ## docker step2
+  # --------------------------------
+  nginx:
+    # 最新の安定板を読み込む
+    image: nginx:stable-alpine
+    container_name: laravel_nginx
+    # ホストOSの8080をコンテナ内のポート80にマウント
+    ports:
+      - "8080:80"
+    volumes:
+      # srcのlaravelのコードをnginxにもマウント
+        - ./src:/var/www/src
+        # - .:/var/www/src
+      # Nginxの設定ファイルをコンテナ何にバインドマウント
+        - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - laravel_farm_note_network
+    # PHP-FPMが起動してから起動する
+    depends_on:
+      - src
+
+  # --------------------------------
+  # ３．データベースコンテナ(MariaDB)
+  ## docker step3
+  # --------------------------------
+  db:
+    # MariaDBの最新安定版イメージを使用
+    image: mariadb:latest
+    container_name: laravel_db
+    # 外部からアクセスするためのポートマウント
+    ports:
+      - "3306:3306"
+    # .env で設定s他環境変数を基にDBをセットアップ
+    # ROOT_PASSWORD と PASSWORD はローカル開発環境で簡便化のために同じものを使う
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    # データを永続化するための名前付きボリューム
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - laravel_farm_note_network
+
+# ボリューム定義
+# コンテナとは別にDocker管理領域内に db_data というストレージを確保させる
+# コンテナの再起動でデータが削除されないようにする
+volumes:
+  db_data:
+    driver: local
+
+# ネットワーク定義
+networks:
+  laravel_farm_note_network:
+    driver: bridge
