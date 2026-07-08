@@ -13,6 +13,26 @@ return new class extends Migration
     {
         Schema::create('work_logs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('crop_season_id')->constrained()->onDelete('cascade');
+            $table->foreignId('created_by')->constrained(
+                table: 'users', column: 'id'
+            )->onDelete('cascade');
+            $table->foreignId('performed_by')->constrained(
+                table: 'users', column: 'id'
+            )->onDelete('cascade');
+            // $table->integer('crop_season_id');
+            // $table->foreign('crop_season_id')->references('id')->on('crop_seasons');
+            // $table->integer('created_by');
+            // $table->foreign('created_by')->references('id')->on('users');
+            // $table->integer('performed_by');
+            // $table->foreign('performed_by')->references('id')->on('users');
+            $table->timestamp('work_date');
+            $table->string('status');
+            $table->string('title');
+            $table->string('content')->nullable();
+            $table->foreignId('updated_by')->constrained(
+                table: 'users', column: 'id'
+            )->onDelete('cascade');
             $table->timestamps();
         });
     }

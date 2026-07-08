@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('materials', function (Blueprint $table) {
             $table->id();
+            $table->string('name')->unique();
+            $table->string('type');
+            $table->string('manufacturer')->nullable();
+            $table->boolean('is_reusable');
             $table->timestamps();
         });
     }

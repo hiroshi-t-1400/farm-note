@@ -7,4 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Material extends Model
 {
     //
+    protected $fillable = [
+        'name',
+        'type',
+        'manufacturer',
+        'is_reusable',
+    ];
 }

@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('work_log_materials', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('work_log_id')->constrained()->onDelete('cascade');
+            $table->foreignId('material_id')->constrained()->onDelete('cascade');
+            $table->string('quantity');
+            $table->double('dilution_rate')->nullable();
             $table->timestamps();
         });
     }
