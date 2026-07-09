@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('work_log_id')->constrained()->onDelete('cascade');
             $table->foreignId('material_id')->constrained()->onDelete('cascade');
             $table->string('quantity');
-            $table->double('dilution_rate')->nullable();
+            $table->string('dilution_rate')->nullable();
+            $table->string('material_amount')->nullable();
             $table->timestamps();
         });
     }

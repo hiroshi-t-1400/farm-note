@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('type');
+            $table->double('default_dilution_rate')->nullable();
+            $table->double('standard_spray_volume')->nullable();
+            $table->string('unit');
             $table->string('manufacturer')->nullable();
             $table->boolean('is_reusable');
             $table->timestamps();

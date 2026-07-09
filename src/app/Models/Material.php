@@ -10,6 +10,9 @@ class Material extends Model
     protected $fillable = [
         'name',
         'type',
+        'default_dilution_rate',
+        'standard_spray_volume',
+        'unit',
         'manufacturer',
         'is_reusable',
     ];

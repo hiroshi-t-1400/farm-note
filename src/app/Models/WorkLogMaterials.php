@@ -12,5 +12,6 @@ class WorkLogMaterials extends Model
         'material_id',
         'quantity',
         'dilution_rate',
+        'material_amount',
     ];
 }
