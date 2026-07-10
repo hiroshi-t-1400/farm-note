@@ -28,14 +28,6 @@
             <h2 class="font-bold text-3x1">作業登録</h2>
         </div>
 
-    <div x-data="{ count: 0 }">
-        <button @click="count++" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            カウントを増やす
-        </button>
-
-        <p class="mt-4">現在のカウント: <span x-text="count" class="font-extrabold text-red-600"></span></p>
-    </div>
-
         <div class="input-form-wrapper">
 
             <form action="" method="post">
