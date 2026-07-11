@@ -8,6 +8,7 @@ use App\Models\Field;
 use App\Models\Material;
 use App\Models\User;
 use App\Models\WorkLog;
+use App\Models\MaterialWorkLog;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,7 @@ class DatabaseSeeder extends Seeder
         Material::truncate();
         User::truncate();
         WorkLog::truncate();
+        // MaterialWorkLog::truncate();
 
         $this->call([
             initCropSeeder::class,
@@ -43,6 +45,7 @@ class DatabaseSeeder extends Seeder
             initMaterialSeeder::class,
             initUserSeeder::class,
             initWorkLogSeeder::class,
+            initMaterialWorkLogSeeder::class,
         ]);
 
         // 外部キー制約を有効に戻す

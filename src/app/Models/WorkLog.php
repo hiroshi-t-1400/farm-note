@@ -18,8 +18,10 @@ class WorkLog extends Model
         'updated_by',
     ];
 
-    public function work_logs()
+    public function materials()
     {
-        return $this->belongsToMany(Material::class);
+        return $this->belongsToMany(Material::class)
+                    ->withPivot('quantity', 'dilution_rate')
+                    ->withTimestamps();
     }
 }
