@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Crop;
+use App\Models\CropSeason;
+use App\Models\User;
+use App\Models\Material;
 
 class WorkController extends Controller
 {
@@ -22,8 +25,12 @@ class WorkController extends Controller
     public function create()
     {
         //
-        $items = Crop::find(1)->id;
-        return response()->view('create');
+        // $crop_seasons = CropSeason::all();
+        $crop_seasons = CropSeason::all();
+        $users = User::all();
+        $materials = Material::all();
+
+        return response()->view('create', compact('crop_seasons', 'users', 'materials'));
     }
 
     /**

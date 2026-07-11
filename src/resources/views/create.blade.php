@@ -24,18 +24,17 @@
 
         <div class="input-form-wrapper">
 
-
             <form action="" method="post">
                 @csrf
-
                 <div class="input-form-inner ">
                     {{-- 作物選択 --}}
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
                         <label for="crop_season_id" class="form-label sm:col-span-2 font-semibold text-lg">作業した作物</label>
                         <select name="crop_season_id" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="crop_season_id">
                             <option value="">作物を選択</option>
-                            <option value="1">トマト2026年</option>
-                            <option value="2">ナス2026年</option>
+                            @foreach ($crop_seasons as $crops)
+                            <option value="{{ $crops->id }}">{{ $crops->crops->name }}</option>
+                            @endforeach
                         </select>
                         {{-- 作付マスターに遷移 --}}
                         <a href="" class="mx-5 text-bold">＋作付けを新規に追加する</a>
@@ -63,8 +62,10 @@
                         <label for="performed_by" class="form-label sm:col-span-2 font-semibold text-lg">作業実施者</label>
                         <select name="performed_by" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="performed_by">
                             <option value="">作業実施者</option>
-                            <option value="1">田中太郎</option>
-                            <option value="2">佐藤花子</option>
+                            @foreach ($users as $user)
+
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
                             {{-- 登録者作業者のidをデフォルトで選択させる --}}
                         </select>
                         {{-- ユーザ登録に遷移 --}}
@@ -86,15 +87,23 @@
                             <h4 class="mb-1 sm:col-span-2 font-bold text-md ">資材１</h4>
                             <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
                                 <label for="material_type" >区分・種別</label>
+
                                 <select name="material_type" id="material_type" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5 ">
-                                    <option value=""></option>
+                                    <option value="pesticide">農薬</option>
+                                    <option value="fertilizer">肥料</option>
+                                    <option value="pot">ポット・鉢</option>
+                                    <option value="mulch">マルチ</option>
+                                    <option value="prop">支柱・鉄筋</option>
                                 </select>
                             </div>
 
                             <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
                                 <label for="material_name" >名称</label>
                                 <select name="material_name" id="material_name" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5">
-                                    <option value=""></option>
+                                    @foreach ($materials as $material)
+
+                                        <option value="{{ $material->id }}">{{ $material->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
