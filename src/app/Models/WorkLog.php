@@ -17,4 +17,9 @@ class WorkLog extends Model
         'content',
         'updated_by',
     ];
+
+    public function work_logs()
+    {
+        return $this->belongsToMany(Material::class);
+    }
 }

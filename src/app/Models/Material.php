@@ -16,4 +16,9 @@ class Material extends Model
         'manufacturer',
         'is_reusable',
     ];
+
+    public function materials()
+    {
+        return $this->belongsToMany(WorkLog::class);
+    }
 }

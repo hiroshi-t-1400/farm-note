@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('status');
             $table->string('title');
             $table->string('content')->nullable();
-            $table->foreignId('updated_by')->constrained(
+            $table->foreignId('updated_by')->nullable()->constrained(
                 table: 'users', column: 'id'
             )->onDelete('cascade');
             $table->timestamps();

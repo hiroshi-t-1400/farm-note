@@ -2,24 +2,51 @@
 
 namespace Database\Seeders;
 
+use App\Models\Crop;
+use App\Models\CropSeason;
+use App\Models\Field;
+use App\Models\Material;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\WorkLog;
+
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
+     *  ##### このファイルに書き込んであることが
+     *
+     *      php artisan db:seed     (--class= ~~ なし)
+     *      ^^^^^^^^^^^^^^^^^^^
+     *
+     *      のコマンドで実行される。
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 外部キー制約を一時的に無効化
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // テーブルのデータを初期化（truncate）
+        Crop::truncate();
+        CropSeason::truncate();
+        Field::truncate();
+        Material::truncate();
+        User::truncate();
+        WorkLog::truncate();
+
+        $this->call([
+            initCropSeeder::class,
+            initCropSeasonSeeder::class,
+            initFieldSeeder::class,
+            initMaterialSeeder::class,
+            initUserSeeder::class,
+            initWorkLogSeeder::class,
         ]);
+
+        // 外部キー制約を有効に戻す
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
     }
 }
