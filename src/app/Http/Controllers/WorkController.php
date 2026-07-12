@@ -8,6 +8,7 @@ use App\Models\Crop;
 use App\Models\CropSeason;
 use App\Models\User;
 use App\Models\Material;
+use App\Models\MaterialCategory;
 
 class WorkController extends Controller
 {
@@ -30,7 +31,10 @@ class WorkController extends Controller
         $users = User::all();
         $materials = Material::all();
 
-        return response()->view('create', compact('crop_seasons', 'users', 'materials'));
+        //
+        $types = MaterialCategory::all();
+
+        return response()->view('create', compact('crop_seasons', 'users', 'materials', 'types'));
     }
 
     /**

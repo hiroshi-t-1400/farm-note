@@ -15,10 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('crop_id')->constrained();
             $table->foreignId('field_id')->constrained();
-            // $table->integer('crop_id');
-            // $table->foreign('crop_id')->references('id')->on('crops');
-            // $table->integer('field_id');
-            // $table->foreign('field_id')->references('id')->on('fields');
             $table->string('variety')->nullable();
             $table->string('supplier')->nullable();
             $table->double('planted_area')->nullable();

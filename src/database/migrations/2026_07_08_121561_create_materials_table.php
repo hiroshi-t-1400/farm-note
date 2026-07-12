@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('materials', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('type');
+            $table->foreignId('type_id')
+                ->constrained(table: 'material_categories', column: 'id');
             $table->double('default_dilution_rate')->nullable();
             $table->double('standard_spray_volume')->nullable();
             $table->string('unit');

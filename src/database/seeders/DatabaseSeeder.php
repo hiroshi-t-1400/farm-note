@@ -6,9 +6,9 @@ use App\Models\Crop;
 use App\Models\CropSeason;
 use App\Models\Field;
 use App\Models\Material;
+use App\Models\MaterialCategory;
 use App\Models\User;
 use App\Models\WorkLog;
-use App\Models\MaterialWorkLog;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -36,12 +36,13 @@ class DatabaseSeeder extends Seeder
         Material::truncate();
         User::truncate();
         WorkLog::truncate();
-        // MaterialWorkLog::truncate();
+        MaterialCategory::truncate();
 
         $this->call([
             initCropSeeder::class,
             initCropSeasonSeeder::class,
             initFieldSeeder::class,
+            initMaterialCategorySeeder::class,
             initMaterialSeeder::class,
             initUserSeeder::class,
             initWorkLogSeeder::class,

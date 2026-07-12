@@ -15,19 +15,11 @@ class initMaterialSeeder extends Seeder
      */
     public function run(): void
     {
-        // 外部キー制約を一時的に無効化
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-        // テーブルのデータを初期化（truncate）
-        Material::truncate();
-
-        // 外部キー制約を有効に戻す
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $materials = [
             [
                 'name' => '単管パイプ2m',
-                'type' => 'prop',
+                'type_id' => 5,
                 'default_dilution_rate' => null,
                 'standard_spray_volume' => null,
                 'unit' => '本',
@@ -38,7 +30,7 @@ class initMaterialSeeder extends Seeder
             ],
             [
                 'name' => 'ストロビーフロアブル',
-                'type' => 'pesticide',
+                'type_id' => '1',
                 'default_dilution_rate' => 3000,
                 'standard_spray_volume' => 150,
                 'unit' => 'ml',
