@@ -29,10 +29,16 @@ class WorkController extends Controller
         // $crop_seasons = CropSeason::all();
         $crop_seasons = CropSeason::all();
         $users = User::all();
-        $materials = Material::all();
+        // $materials = Material::all();
+        $materials = Material::all(['id', 'name', 'type_id', 'default_dilution_rate', 'standard_spray_volume', 'manufacturer']);
 
         //
         $types = MaterialCategory::all();
+
+        $mat_new = $materials->map(function ($item) use($types) {
+            return $item->type_label = $types[$item->type_id - 1]->label;
+        });
+
 
         return response()->view('create', compact('crop_seasons', 'users', 'materials', 'types'));
     }

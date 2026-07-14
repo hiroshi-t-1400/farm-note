@@ -88,16 +88,20 @@
                             types: {{ $types->toJson() }},
 
                             selectedType: '',
-                            searchKeyword: '',
                             selectedMaterialId: '',
+
+                            {{-- 追加された資材の配列を格納する --}}
+                            ingredients: [],
+                            {{-- ingredients: [{ name: '', amount: '' }], --}}
 
                             {{-- 選択された種別や入力フォームのあいまい検索から資材選択を助ける --}}
                             get filteredMaterials() {
                                 return this.allMaterials.filter(material => {
                                     const matchType = this.selectedType === '' || material.type_id == this.selectedType;
-                                    const matchKeyword = material.name.toLowerCase().includes(this.searchKeyword.toLowerCase());
+                                    {{-- const matchKeyword = material.name.toLowerCase().includes(this.searchKeyword.toLowerCase()); --}}
 
-                                    return matchType && matchKeyword;
+                                    {{-- return matchType && matchKeyword; --}}
+                                    return matchType;
                                 });
                             },
 
@@ -105,9 +109,9 @@
                             get selectedMaterial() {
                                 return this.allMaterials.find(material => material.id == this.selectedMaterialId) || null;
                             },
-                        }" class="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
+                        }">
 
-                            <div class="mb-4">
+                            <div class="mb-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">種別で絞り込み</label>
                                 <div class="flex flex-wrap gap-3">
                                     <label class="inline-flex items-center">
@@ -123,165 +127,104 @@
                                 </div>
                             </div>
 
-                            <div class="mb-4">
-                                <label for="material_search" class="block text-sm font-medium text-gray-700 mb-1">登録する資材</label>
-
-                                <input type="text" id="material_search" x-model="searchKeyword" placeholder="資材名を入力して絞り込み..."
-                                    class="w-full border border-gray-300 rounded-md p-2 mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-
-                                <select name="material_id" x-model="selectedMaterialId" size="5"
-                                        class="w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <div class="mb-2">
+                                <select name="material_id" x-model="selectedMaterialId"
+                                        class="w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- 資材を選択してください（<span x-text="filteredMaterials.length"></span>件該当） --</option>
                                     <template x-for="material in filteredMaterials" :key="material.id">
-                                        <option :value="material.id" x-text="material.name" ></option>
+                                        <option :value="material.id" x-text="material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') " ></option>
                                     </template>
                                 </select>
                             </div>
 
-                            <div class="text-xs text-gray-400 mt-2">
-                                選択中の資材ID: <span x-text="selectedMaterialId || '未選択'"></span>
-                            </div>
-
-                            <div x-show="selectedMaterial" x-transition class="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200 text-sm">
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div class="text-gray-500">メーカー名：</div>
-                                    <div class="font-medium text-gray-900" x-text="selectedMaterial?.manufacturer || '未登録'"></div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                            {{-- <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                <label for="material_name" >名称</label>
-                                <select name="material_name" id="material_name" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5">
-                                    @foreach ($materials as $material)
-
-                                        <option value="{{ $material->id }}">{{ $material->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-
-                                <span class="">メーカー名</span>
-                                <span class=""></span>
-                            </div>
-
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                <label for="quantity" >使用量</label>
-                                <input type="text" name="quantity" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5" placeholder="使用量">
-                            </div>
-
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                <label for="dilution_rate" >希釈倍率</label>
-                                <input type="text" name="dilution_rate" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5" placeholder="希釈倍率" >
-                            </div>
-
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                <label for="material_amount" >原液量</label>
-                                <input type="text" name="material_amount" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5" placeholder="原液量">
-                            </div>
-
-                        <div class="grid sm:grid-cols-2 grid-cols-1 gap-x-6 mx-2 mb-1">
-                            <h4 class="mb-1 sm:col-span-2 font-bold text-md ">資材１</h4>
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                <label for="material_type" >区分・種別</label>
-
-                                <select name="material_type" id="material_type" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5 ">
-                                    <option value="pesticide">農薬</option>
-                                    <option value="fertilizer">肥料</option>
-                                    <option value="pot">ポット・鉢</option>
-                                    <option value="mulch">マルチ</option>
-                                    <option value="prop">支柱・鉄筋</option>
-                                </select>
-                            </div>
-
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                <label for="material_name" >名称</label>
-                                <select name="material_name" id="material_name" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5">
-                                    @foreach ($materials as $material)
-
-                                        <option value="{{ $material->id }}">{{ $material->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-
-                                <span class="">メーカー名</span>
-                                <span class=""></span>
-                            </div>
-
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                <label for="quantity" >使用量</label>
-                                <input type="text" name="quantity" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5" placeholder="使用量">
-                            </div>
-
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                <label for="dilution_rate" >希釈倍率</label>
-                                <input type="text" name="dilution_rate" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5" placeholder="希釈倍率" >
-                            </div>
-
-                            <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                <label for="material_amount" >原液量</label>
-                                <input type="text" name="material_amount" class="rounded-md outline-2 outline-gray-600 px-2 m-0.5" placeholder="原液量">
-                            </div>
-
-                        </div> --}}
-
-                        {{-- <div x-data="{
-                            ingredients: [{ name: '', amount: '' }]
-                        }" class="max-w-xl mx-auto p-6 bg-white rounded-lg shadow">
-
-                            <template x-for="(ingredient, index) in ingredients" :key="index">
-                                <div>
-                                    <div class="flex-1">
-                                        <input
-                                            type="text"
-                                            :name="`ingredients[${index}][name]`"
-                                            x-model="ingredient.name"
-                                            placeholder="例：農薬"
-                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                            required
-                                        >
-                                    </div>
-
-                                    <div class="w-32">
-                                        <input
-                                            type="text"
-                                            :name="`ingredients[${index}][amount]`"
-                                            x-model="ingredient.amount"
-                                            placeholder="例：20ml"
-                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                            required
-                                        >
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        @click="ingredients.splice(index, 1)"
-                                        x-show="ingredients.length > 1"
-                                        class="p-2 text-red-600 hover:bg-red-50 rounded-md transition"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </template>
-
                             <button
                                 type="button"
-                                @click="ingredients.push({ name: '', amount: '' })"
-                                class="mt-2 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                                :disabled="selectedMaterialId === ''"
+                                @click="ingredients.push({ selectedMaterial })"
+                                class="mt-1 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
                             >
-
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                材料を追加する
+                                資材を追加する
                             </button>
-                        </div> --}}
+
+                            <template x-for="(ingredient, index) in ingredients" :key="index">
+                                <div class="grid grid-cols-2 rounded-md border border-gray-200 text-sm">
+                                    <div class="col-span-2">
+                                        <span class="" x-text="'資材' + (index + 1)"></span>
+                                        <button
+                                            type="button"
+                                            @click="ingredients.splice(index, 1)"
+                                            x-show="ingredients.length > 1"
+                                            class="px-1 py-1 text-red-600 hover:bg-red-50 rounded-md transition"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div class="col-span-2">
+                                        <span class="text-xs text-gray-600">種別：</span>
+                                        <span class="font-medium text-gray-900" x-text="ingredients[index].selectedMaterial.type_label"></span>
+                                    </div>
+
+                                    <div>
+                                        <span class="text-xs text-gray-600">名称：</span>
+                                        <span class="font-medium text-gray-900" x-text="ingredients[index].selectedMaterial.name"></span>
+                                    </div>
+
+                                    <div>
+                                        <span class="text-xs text-gray-600">メーカー名：</span>
+                                        <span class="font-medium text-gray-900" x-text="ingredients[index].selectedMaterial.manufacturer"></span>
+                                    </div>
+
+                                    <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
+                                        <label for="quantity" >使用量</label>
+                                        <input
+                                            type="text"
+                                            name="quantity"
+                                            class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
+                                            placeholder="例：10本"
+
+                                        >
+                                    </div>
+
+                                    <div
+                                        x-show="ingredients[index].selectedMaterial.type_id == 1 || ingredients[index].selectedMaterial.type_id == 1"
+                                        class="">
+                                        <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
+                                            <label for="dilution_rate" >希釈倍率</label>
+                                            <input
+                                            type="text"
+                                            name="dilution_rate"
+                                            :value="ingredients[index].selectedMaterial.default_dilution_rate || 'なし'"
+                                            class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
+                                            placeholder="例：150"
+                                            >
+                                        </div>
+
+                                        <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
+                                            <label for="material_amount" >原液量</label>
+                                            <input
+                                            type="text"
+                                            name="material_amount"
+                                            class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
+                                            placeholder="例：150"
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+
+
+                        </div>
+
+                    </div>
+
+
 
                     {{-- 下部ボタンエリア --}}
                     <div class="submit-button grid grid-cols-3 gap-2  sm:max-w-1/2 ">
