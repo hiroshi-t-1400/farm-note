@@ -19,11 +19,12 @@ class Material extends Model
         'is_reusable',
     ];
 
-    public function wrok_logs(): BelongsToMany
+    public function work_logs(): BelongsToMany
     {
         return $this->belongsToMany(WorkLog::class)
-                    ->withPivot('quantity', 'dilution_rate')
-                    ->withTimestamps();
+                    ->withPivot('quantity', 'dilution_rate', 'material_amount')
+                    ->withTimestamps()
+                    ->using(MaterialWorkLog::class);
     }
 
     public function material_categories(): HasOne

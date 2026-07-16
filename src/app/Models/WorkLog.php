@@ -24,8 +24,9 @@ class WorkLog extends Model
     public function materials(): BelongsToMany
     {
         return $this->belongsToMany(Material::class)
-                    ->withPivot('quantity', 'dilution_rate')
-                    ->withTimestamps();
+                    ->withPivot('quantity', 'dilution_rate', 'meterial_amount')
+                    ->withTimestamps()
+                    ->using(MaterialWorkLog::class);
     }
 
     public function users_created (): HasOne

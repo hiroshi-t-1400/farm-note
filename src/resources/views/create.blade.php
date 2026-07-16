@@ -16,7 +16,7 @@
 </head>
 <body>
 
-    <div class="main-container grid grid-cols-[minmax(min-content,_800px)] gap-4 px-2 place-content-center bg-green-50 ">
+    <div class="main-container grid grid-cols-[minmax(min-content,_800px)] gap-4 px-2 place-content-center bg-green-50 min-h-screen ">
 
         <div class="title-wrapper py-5 my-5 text-center">
             <h2 class="font-bold text-3xl">作業登録</h2>
@@ -24,16 +24,26 @@
 
         <div class="input-form-wrapper">
 
-            <form action="" method="post">
+            @foreach ($errors->workCreation->all() as $error)
+                <li> : {{ $error }}</li>
+            @endforeach
+
+            <form action="{{ route('store') }}" method="post">
                 @csrf
+
+                <div class="block text-sm font-medium text-gray-700 mb-2" >
+                    作業登録者：　{{ $users[0]->name }}
+                    <input type="hidden" name="created_by" value="{{ $users[0]->id }}">
+                </div>
+
                 <div class="input-form-inner ">
                     {{-- 作物選択 --}}
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
                         <label for="crop_season_id" class="form-label sm:col-span-2 font-semibold text-lg">作業した作物</label>
                         <select name="crop_season_id" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="crop_season_id">
                             <option value="">作物を選択</option>
-                            @foreach ($crop_seasons as $crops)
-                            <option value="{{ $crops->id }}">{{ $crops->crops->name }}</option>
+                            @foreach ($crop_seasons as $crop)
+                            <option value="{{ $crop->id }}">{{ $crop->crops->name }}</option>
                             @endforeach
                         </select>
                         {{-- 作付マスターに遷移 --}}
@@ -43,16 +53,18 @@
                     {{-- 作業名称 --}}
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
                         <label for="title" class="form-label sm:col-span-2 font-semibold text-lg">作業名称</label>
-                        <input type="text" name="title" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="（例）防除１回目">
+                        <input type="text" name="title" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="（例）防除１回目"
+                        value="防除１１回目">
                     </div>
 
                     {{-- 作業日 --}}
                     <div class="grid grid-cols-1 bg-white mb-1 px-1 py-2">
                         <label for="work_date" class="form-label font-semibold text-lg">作業日</label>
                         <div>
-                            <input type="date" name="work_date" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg max-w-40" >
+                            <input type="date" name="work_date" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg max-w-40"
+                            value="{{ date('Y-m-d') }}">
                             {{-- 完了した作業を登録する場合は予定日のチェックオフ、今後の予定を登録する場合はチェックオン、投稿が下書きになった場合は上書きしてチェックオフ、現在より過去か未来かで自動的に値を決定する？>>するつもりだった作業を登録する場合を考慮する？ --}}
-                                <input type="checkbox" name="status" id="status" class="ms-2" >
+                                <input type="checkbox" name="status" value="plan" id="status" class="ms-2" >
                                 <label for="status" class="form-label font-semibold text-lg sub-checkbox">予定</label>
                         </div>
                     </div>
@@ -75,7 +87,8 @@
                     {{-- 作業内容 --}}
                     <div class="grid grid-cols-1 bg-white mb-1 px-1 py-2">
                         <label for="content" class="form-label font-semibold text-lg">作業内容</label>
-                        <textarea type="text" name="content" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="作業した内容を記入してください。"></textarea>
+                        <textarea type="text" name="content" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="作業した内容を記入してください。">防除１１回目　ストロビーフロアブル
+                        </textarea>
                         {{-- 内容のテンプレートを作成する？ --}}
                     </div>
 
@@ -91,8 +104,7 @@
                             selectedMaterialId: '',
 
                             {{-- 追加された資材の配列を格納する --}}
-                            ingredients: [],
-                            {{-- ingredients: [{ name: '', amount: '' }], --}}
+                            ingredients:{{ json_encode(old('ingredients', [])) }},
 
                             {{-- 選択された種別や入力フォームのあいまい検索から資材選択を助ける --}}
                             get filteredMaterials() {
@@ -150,8 +162,9 @@
                             </button>
 
                             <template x-for="(ingredient, index) in ingredients" :key="index">
-                                <div class="grid grid-cols-2 rounded-md border border-gray-200 text-sm">
-                                    <div class="col-span-2">
+                                <div class="grid sm:grid-cols-2 rounded-md border border-gray-200 text-sm">
+                                    {{-- <div class="col-span-2"> --}}
+                                    <div class="">
                                         <span class="" x-text="'資材' + (index + 1)"></span>
                                         <button
                                             type="button"
@@ -165,7 +178,9 @@
                                         </button>
                                     </div>
 
-                                    <div class="col-span-2">
+                                    <input type="hidden" :name="`material_on_work[${index}][material_id]`" :value="ingredients[index].selectedMaterial.id" >
+
+                                    <div class="sm:col-span-2">
                                         <span class="text-xs text-gray-600">種別：</span>
                                         <span class="font-medium text-gray-900" x-text="ingredients[index].selectedMaterial.type_label"></span>
                                     </div>
@@ -180,45 +195,42 @@
                                         <span class="font-medium text-gray-900" x-text="ingredients[index].selectedMaterial.manufacturer"></span>
                                     </div>
 
-                                    <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
+                                    <div class="grid sm:grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
                                         <label for="quantity" >使用量</label>
                                         <input
                                             type="text"
-                                            name="quantity"
+                                            :name="`material_on_work[${index}][quantity]`"
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：10本"
-
                                         >
                                     </div>
 
                                     <div
                                         x-show="ingredients[index].selectedMaterial.type_id == 1 || ingredients[index].selectedMaterial.type_id == 1"
-                                        class="">
-                                        <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                            <label for="dilution_rate" >希釈倍率</label>
-                                            <input
+                                        class="grid sm:grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
+                                        <label for="dilution_rate" >希釈倍率</label>
+                                        <input
                                             type="text"
-                                            name="dilution_rate"
-                                            :value="ingredients[index].selectedMaterial.default_dilution_rate || 'なし'"
+                                            :name="`material_on_work[${index}][dilution_rate]`"
+                                            :value="ingredients[index].selectedMaterial.default_dilution_rate"
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
-                                            >
-                                        </div>
+                                        >
+                                    </div>
 
-                                        <div class="grid grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                            <label for="material_amount" >原液量</label>
-                                            <input
+                                    <div
+                                        x-show="ingredients[index].selectedMaterial.type_id == 1 || ingredients[index].selectedMaterial.type_id == 1"
+                                        class="grid sm:grid-cols-[auto_1fr] sm:col-start-2 gap-x-4 px-2 m-0.5 ">
+                                        <label for="material_amount" >原液量</label>
+                                        <input
                                             type="text"
-                                            name="material_amount"
+                                            :name="`material_on_work[${index}][material_amount]`"
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
-                                            >
-                                        </div>
+                                        >
                                     </div>
                                 </div>
                             </template>
-
-
 
                         </div>
 
