@@ -144,10 +144,9 @@
                                         class="w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- 資材を選択してください（<span x-text="filteredMaterials.length"></span>件該当） --</option>
                                     <template x-for="material in filteredMaterials" :key="material.id">
-                                        <option :value="material.id" x-text="material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') " ></option>
+                                        <option :value="material.id" x-text="isDuplicated(material.id) + material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') "></option>
                                     </template>
                                 </select>
-                            </div>
 
                             <button
                                 type="button"
@@ -333,8 +332,12 @@
                 },
 
                 // 登録資材重複の確認
-                isDuplicated() {
-                    const hasMaterial = this.material_logs.some(material => material.id == )
+                isDuplicated(materialId) {
+                    if (this.material_logs.some(material => material.id == materialId)) {
+                        return '登録済み：';
+                    } else {
+                        return '';
+                    };
                 }
             }));
         });
