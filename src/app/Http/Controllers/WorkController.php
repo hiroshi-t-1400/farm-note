@@ -59,7 +59,7 @@ class WorkController extends Controller
         //
 
         $validated = $request->validated();
-
+        dd($validated);
         // 登録する作業が予定plan、完了completed、下書きdraftで分岐
         $status = $validated['status'] ?? 'completed';
 
@@ -78,9 +78,9 @@ class WorkController extends Controller
 
         // 登録された作業記録のなかで使用資材が記録されていれば登録を行う
         // 資材が複数あればすべて中間テーブルに登録する
-        if (isset($validated['material_on_work'])) {
-            $material_work_log = $validated['material_on_work'];
-            foreach ($material_work_log as $key => $material) {
+        if (isset($validated['material_logs'])) {
+            $material_logs = $validated['material_logs'];
+            foreach ($material_logs as $key => $material) {
                 $worklog->materials()->attach($material["material_id"], [
                     'quantity' => $material["quantity"],
                     'dilution_rate' => $material["dilution_rate"],
