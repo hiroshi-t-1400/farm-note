@@ -38,7 +38,7 @@ class StoreWorkLogRequest extends FormRequest
             'updated_by' => ['nullable', 'date'],
 
             // 使用した資材がある場合のみmaterial_on_workを受け取るので条件付きでバリデーションを行う
-            'material_on_work' => ['sometimes', 'required', 'array'],
+            'material_logs' => ['sometimes', 'required', 'array'],
 
             'material_logs.*.material_id' => ['required_with:material_on_work', 'numeric', 'exists:materials,id'],
             'material_logs.*.quantity' => ['required_with:material_on_work', 'string', 'max:10000'],
