@@ -32,13 +32,14 @@ class StoreWorkLogRequest extends FormRequest
             'created_by' => ['required', 'numeric', 'exists:users,id'],
             'performed_by' => ['required', 'numeric', 'exists:users,id'],
             'work_date' => ['required', 'date'],
-            'status' => ['sometimes', 'in:plan,completed,draft'],
+            // 'status' => ['sometimes', 'in:plan,completed,draft'],
+            'status' => ['required', 'boolean', 'nullable'],
             'title' => ['required', 'string', 'max:50'],
             'content' => ['nullable', 'string', 'max:200'],
             'updated_by' => ['nullable', 'date'],
 
             // 使用した資材がある場合のみmaterial_on_workを受け取るので条件付きでバリデーションを行う
-            'material_logs' => ['sometimes', 'required', 'array'],
+            'material_logs' => ['sometimes', 'array'],
 
             'material_logs.*.material_id' => ['required_with:material_on_work', 'numeric', 'exists:materials,id'],
             'material_logs.*.quantity' => ['required_with:material_on_work', 'string', 'max:10000'],

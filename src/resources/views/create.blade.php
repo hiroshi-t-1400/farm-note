@@ -29,7 +29,7 @@
                     initialMaterials: @js($materials),
                     initialTypes: @js($types),
                     oldmaterial_logs: @js(old('formData.material_logs', [])),
-                    serverErrors: @js($errors->toArray()),
+                    {{-- initToday: getToday(), --}}
                 })"
                 @submit.prevent="submitForm"
                 action="{{ route('store') }}"
@@ -37,6 +37,18 @@
             >
                 @csrf
 
+                <button
+                    type="button"
+                    @click="chkLocalstrage()"
+                    class="mt-1 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    localStorageうつす
+                </button>
+
+                {{-- <div x-text="chkLocalstrage()"></div> --}}
                 <div class="block text-sm font-medium text-gray-700 mb-2" >
                     作業登録者：　{{ $users[0]->name }}
                     <input type="hidden" x-model="formData.created_by">
@@ -54,9 +66,12 @@
                         </select>
                         {{-- 作付マスターに遷移 --}}
                         <a href="" class="mx-5 text-bold">＋作付けを新規に追加する</a>
-                        @error('crop_season_id')
-                            <span class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">{{ $message }}</span>
-                        @enderror
+                        {{-- バリデーションメッセージ --}}
+                        <span
+                            x-text="getError('crop_season_id')"
+                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
+                        </span>
+
                     </div>
 
                     {{-- 作業名称 --}}
@@ -64,9 +79,11 @@
                         <label for="title" class="form-label sm:col-span-2 font-semibold text-lg">作業名称</label>
                         <input type="text" x-model="formData.title" name="title" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="（例）防除１回目"
                         value="防除１１回目">
-                        @error('title')
-                            <span class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">{{ $message }}</span>
-                        @enderror
+                        {{-- バリデーションメッセージ --}}
+                        <span
+                            x-text="getError('title')"
+                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
+                        </span>
                     </div>
 
                     {{-- 作業日 --}}
@@ -74,15 +91,18 @@
                         <label for="work_date" class="form-label block font-semibold text-lg">作業日</label>
                         {{-- <div class="sm:col-start-1"> --}}
                         <input type="date" x-model="formData.work_date" name="work_date" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg max-w-40"
-                            value="{{ date('Y-m-d') }}">
+                            {{-- value="{{ date('Y-m-d') }}"> --}}
+                            >
                         <div class="inline-block">
                             {{-- 完了した作業を登録する場合は予定日のチェックオフ、今後の予定を登録する場合はチェックオン、投稿が下書きになった場合は上書きしてチェックオフ、現在より過去か未来かで自動的に値を決定する？>>するつもりだった作業を登録する場合を考慮する？ --}}
-                            <input type="checkbox" name="status" value="plan" id="status" class="ms-2" >
-                            <label for="status" x-model="formData.status" class="form-label font-semibold text-lg sub-checkbox">予定</label>
+                            <input type="checkbox" x-model="formData.status" name="status" value="plan" id="status" class="ms-2" >
+                            <label for="status" class="form-label font-semibold text-lg sub-checkbox">予定</label>
                         </div>
-                        @error('work_date')
-                            <span class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">{{ $message }}</span>
-                        @enderror
+                        {{-- バリデーションメッセージ --}}
+                        <span
+                            x-text="getError('work_date')"
+                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
+                        </span>
                     </div>
 
                     {{-- 作業実施者 --}}
@@ -140,7 +160,8 @@
                                         class="w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- 資材を選択してください（<span x-text="filteredMaterials.length"></span>件該当） --</option>
                                     <template x-for="material in filteredMaterials" :key="material.id">
-                                        <option :value="material.id" x-text="isDuplicated(material.id) + material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') "></option>
+                                        {{-- <option :value="material.id" x-text="isDuplicated(material.id) + material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') "></option> --}}
+                                        <option :value="material.id" x-text="material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') "></option>
                                     </template>
                                 </select>
 
@@ -274,7 +295,7 @@
             Alpine.data('postForm', (config) => ({
                 formData: {
                     crop_season_id: '',
-                    created_by: '',
+                    created_by: 1,
                     performed_by: '',
                     work_date: '',
                     status: '',
@@ -290,7 +311,21 @@
                 selectedMaterialId: '',
 
                 // バリデーションエラーメッセージ配列を受け取る
-                errors: config.serverErrors || {},
+                // errors: config.serverErrors || {},
+                errors: {},
+
+                init() {
+                    this.formData.work_date = this.getToday();
+                },
+
+                getToday() {
+                    const today = new Date();
+
+                    const yyyy = today.getFullYear();
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    return `${yyyy}-${mm}-${dd}`;
+                },
 
                 // 選択された種別から資材選択を助ける
                 get filteredMaterials() {
@@ -310,8 +345,6 @@
                 addMaterial_log() {
                     if (this.selectedMaterialId === '') return;
                     if (this.selectedMaterial) {
-                        // this.material_logs.push({ ...this.selectedMaterial });
-                        // this.formData.material_logs.push(this.selectedMaterial);
                         this.formData.material_logs.push({
                                                     type_label: '',
                                                     material_id: '',
@@ -328,7 +361,9 @@
                     this.formData.material_logs[index].material_id = this.allMaterials[matId].id;
                     this.formData.material_logs[index].name = this.allMaterials[matId].name;
                     this.formData.material_logs[index].manufacturer = this.allMaterials[matId].manufacturer;
+                    this.formData.material_logs[index].quantity = '';
                     this.formData.material_logs[index].dilution_rate = this.allMaterials[matId].default_dilution_rate;
+                    this.formData.material_logs[index].material_amount = '';
 
                     // 追加したら選択欄をリセット
                     this.selectedMaterialId = '';
@@ -340,52 +375,128 @@
                 },
 
                 // バリデーションエラーの有無を判定
-                getError(index, field) {
-                    const errorKey = `formData.material_logs.${index}.${field}`;
-                    // Laravelのエラーは配列で返ってくるため
-                    return this.errors[errorKey] ? this.errors[errorKey][0] : null;
+                getError(field, index = null) {
+                    if (!index) {
+                        const errorKey = `${field}`;
+                        return this.errors[errorKey] ? this.errors[errorKey][0] : null;
+                    } else {
+                        const errorKey = `formData.material_logs.${index}.${field}`;
+                        return this.errors[errorKey] ? this.errors[errorKey][0] : null;
+                    }
                 },
 
                 // 登録資材重複の確認
-                isDuplicated(materialId) {
-                    if (this.formData.material_logs.some(material => material.id == materialId)) {
-                        return '登録済み：';
-                    } else {
-                        return '';
-                    };
-                },
+                // isDuplicated(materialId) {
+                //     if (this.formData.material_logs.some(material => material.id == materialId)) {
+                //         return '登録済み：';
+                //     } else {
+                //         return '';
+                //     };
+                // },
 
                 /////
                 // ネットワークオフライン時の下書き機能
                 // isOnline: navigator.onLine,
-                isOnline: false,
+                // isOnline: false,
                 draft_work_log: JSON.parse(localStorage.getItem('draft_work_log') || '[]'),
-
-                // 接続状態の取得
-                initForm() {
-                    // window.addEventListener('online', () => {this.isOnline = true});
-                    window.addEventListener('offline', () => {this.isOnline = false});
-                },
 
                 // post送信時に呼び出される
                 // @submit.preventで呼び出し
                 submitForm() {
-                    if (this.isOnline) {
-                        return;
+                    // if (this.isOnline) {
+                    // if (window.navigator.onLine) {
+                    if (false) {
+                        // オンライン時の処理、fetch()でJSONを送信
+                        // fetch('{{ route('store') }}', {
+                        fetch('{{ route('store') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify(this.formData),
+                        })
+                        .then(response => {
+                            return response.json().then(data => {
+                                if (response.status === 422) {
+                                    // 422 バリデーションエラーを想定してアラートとメッセージを表示
+                                    this.errors = data.errors;
+                                    alert('保存に失敗しました： ' + (data.message || 'エラーが発生しました。'));
+                                    return;
+                                } else if (!response.ok) {
+                                    console.error('サーバーエラー', data);
+                                    alert('保存に失敗しました： ' + (data.message || 'エラーが発生しました。'));
+                                    return;
+                                }
+
+                                // 保存成功
+                                alert(data.message);
+                                // コントローラから帰ってきたURLへリダイレクト
+                                window.location.href = data.redirect_url;
+                            })
+                        })
+                        .catch(error => {
+                            // console.error('通信に失敗しました', error);
+                            console.error('通信自体に失敗しました', error);
+                        });
                     } else {
-                        this.draft_work_log.push('this.formData');
+                        this.draft_work_log.push(JSON.parse(JSON.stringify(this.formData)));
                         localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
                         alert('オフラインのためブラウザに一時保存しました。(localStorage)');
-                        this.formData = '';
+
+                        this.formData = {
+                            crop_season_id: '',
+                            created_by: '',
+                            performed_by: '',
+                            work_date: '',
+                            status: '',
+                            title: '',
+                            content: '',
+                            updated_by: '',
+                            material_logs: config.oldmaterial_logs,
+                        };
                     }
                 },
 
-                // 未postのオフラインキャッシュデータがあったとき
-                // ホーム画面や登録画面から「未送信あり」のアラートを表示し、送信の完了や編集をうながす？
-                //
-                callData() {
-                }
+                testLSvalue: [],
+                testLS() {
+                    this.testLSvalue.push({name: ''});
+                    console.log(this.testLSvalue);
+                    return 'test ok';
+                },
+                getDraft: [],
+                chkLocalstrage() {
+                    // const oneHistory = this.draft_work_log[0];
+                    // const hist = '';
+                    // oneHistory.forEach(value => {
 
+                    //     hist = $value;
+                    // })
+                    // return hist;
+                    // if (true) {
+                    //     const allDraft = { ...this.draft_work_log };
+                    this.getDraft.push({...this.draft_work_log[0]});
+
+                    console.log('this.draft_work_log[0] : ');
+                    console.log(this.draft_work_log[0]);
+                    console.log('this.draft_work_log : ');
+                    console.log(this.draft_work_log);
+                    console.log('this.getDraft : ');
+                    console.log(this.getDraft);
+                    console.log('this.formData : ');
+                    console.log(this.formData);
+                    console.log('this.getDraft[0].work_date : ' + this.getDraft[0].work_date);
+                    this.formData = this.draft_work_log[0];
+                    console.log('this.formData : ');
+                    console.log(this.formData);
+                    // this.formData =
+                    return 'chkLocalstrage()実行されました';
+                    //     this.formData = '';
+                    //     this.formData = { ...this.draft_work_log };
+                    //     return allDraft;
+                    // }
+                },
             }));
         });
 
