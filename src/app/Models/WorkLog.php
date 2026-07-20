@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class WorkLog extends Model
 {
@@ -13,7 +12,7 @@ class WorkLog extends Model
     protected $fillable = [
         'crop_season_id',
         'created_by',
-        'performed_by',
+        // 'performed_by',
         'work_date',
         'status',
         'title',
@@ -23,24 +22,25 @@ class WorkLog extends Model
 
     public function materials(): BelongsToMany
     {
-        return $this->belongsToMany(Material::class)
-                    ->withPivot('quantity', 'dilution_rate', 'meterial_amount')
-                    ->withTimestamps()
-                    ->using(MaterialWorkLog::class);
+        return $this->belongsToMany(Material::class, 'material_work_log')
+                    ->withPivot('quantity', 'dilution_rate', 'material_amount')
+                    ->withTimestamps();
     }
 
-    public function users_created (): HasOne
+
+    public function createdBy (): BelongsTo
     {
-        return $this->hasOne(User::class, 'id', 'created_by');
+        return $this->belongsTo(User::class, 'id', 'created_by');
     }
 
-    public function users_performed (): HasOne
+    public function performedBy (): BelongsToMany
     {
-        return $this->hasOne(User::class, 'id', 'performed_by');
+        return $this->BelongsToMany(User::class, 'performed_by_work_log')
+                    ->withTimestamps();
     }
 
-    public function users_updated (): HasOne
+    public function updatedBy (): BelongsTo
     {
-        return $this->hasOne(User::class, 'id', 'updated_by');
+        return $this->belongsTo(User::class, 'id', 'updated_by');
     }
 }

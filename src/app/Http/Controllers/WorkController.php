@@ -30,17 +30,11 @@ class WorkController extends Controller
      */
     public function create()
     {
-        //
-        $crop_seasons = CropSeason::all();
+        $crop_seasons = CropSeason::with('crops')->get();
         $users = User::all();
-        $materials = Material::all(['id', 'name', 'type_id', 'default_dilution_rate', 'standard_spray_volume', 'manufacturer']);
+        $materials = Material::with('materialCategories')->get();
 
-        //
         $types = MaterialCategory::all();
-
-        $mat_new = $materials->map(function ($item) use($types) {
-            return $item->type_label = $types[$item->type_id - 1]->label;
-        });
 
         return response()->view('create', compact('crop_seasons', 'users', 'materials', 'types'));
     }
@@ -62,7 +56,6 @@ class WorkController extends Controller
         $workLog = WorkLog::create([
             'crop_season_id' => $validated['crop_season_id'],
             'created_by' => $validated['created_by'],
-            'performed_by' => $validated['performed_by'],
             'work_date' => $validated['work_date'],
             'status' => $status,
             'title' => $validated['title'],
@@ -70,10 +63,11 @@ class WorkController extends Controller
             'updated_by' => null,
         ]);
 
+        $workLog->performedBy()->sync($validated['performed_by']);
+
         // 登録された作業記録のなかで使用資材が記録されていれば登録を行う
         // 資材が複数あればすべて中間テーブルに登録する
         if (!empty($validated['material_logs'])) {
-            // $material_logs = $validated['material_logs'];
             foreach ($validated['material_logs'] as $material) {
                 $workLog->materials()->attach($material["material_id"], [
                     'quantity' => $material["quantity"],
@@ -83,7 +77,6 @@ class WorkController extends Controller
             }
         }
 
-        // return redirect()->route('create')->with('success', '作業記録を保存しました。');
         return response()->json([
             'status' => 'success',
             'message' => '日誌を保存しました。',

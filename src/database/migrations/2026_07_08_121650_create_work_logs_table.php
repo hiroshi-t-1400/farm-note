@@ -15,15 +15,17 @@ return new class extends Migration
             $table->id();
             $table->foreignId('crop_season_id')->constrained();
             $table->foreignId('created_by')
-                ->constrained(table: 'users', column: 'id');
-            $table->foreignId('performed_by')
-                ->constrained(table: 'users', column: 'id');
+                // ->constrained(table: 'users', column: 'id');
+                ->constrained('users');
+            // $table->foreignId('performed_by')
+            //     ->constrained(table: 'users', column: 'id');
             $table->timestamp('work_date');
             $table->string('status');
             $table->string('title');
             $table->string('content')->nullable();
             $table->foreignId('updated_by')->nullable()
-                ->constrained(table: 'users', column: 'id');
+                // ->constrained(table: 'users', column: 'id');
+                ->constrained('users');
             $table->timestamps();
         });
     }

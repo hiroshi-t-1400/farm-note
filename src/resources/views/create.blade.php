@@ -28,8 +28,7 @@
                 x-data="postForm({
                     initialMaterials: @js($materials),
                     initialTypes: @js($types),
-                    oldmaterial_logs: @js(old('formData.material_logs', [])),
-                    {{-- initToday: getToday(), --}}
+                    initialCropSeasons: @js($crop_seasons),
                 })"
                 @submit.prevent="submitForm"
                 action="{{ route('store') }}"
@@ -37,22 +36,37 @@
             >
                 @csrf
 
-                <button
-                    type="button"
-                    @click="chkLocalstrage()"
-                    class="mt-1 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    localStorageうつす
-                </button>
 
-                {{-- <div x-text="chkLocalstrage()"></div> --}}
                 <div class="block text-sm font-medium text-gray-700 mb-2" >
                     作業登録者：　{{ $users[0]->name }}
                     <input type="hidden" x-model="formData.created_by">
                 </div>
+
+                <div x-show="hasDraft" class="mb-2">
+                    <label  for="draft_select" class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2">
+                        保存されていない下書きがあります。
+
+                    </label>
+                    <select x-model="selectedDraftId"
+                            name="draft_select"
+                            class="w-full border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- 選択して下書きを確認してください。（<span x-text="hasDraft.length"></span>件） --</option>
+                        <template x-for="(draft, index) in hasDraft" :key="index">
+                            <option :value="index" x-text="draft.work_date + ' | ' + draft.crop + ' | ' + draft.title"></option>
+                        </template>
+                    </select>
+                    <button
+                        type="button"
+                        @click="fillWithDraft()"
+                        class="my-1 px-2 py-1 rounded-md border border-gray-500 bg-blue-300 items-center text-sm font-medium text-white"
+                        >
+                        下書きを読み込む
+                    </button>
+                    <span class="text-sm font-medium text-black">入力欄に下書きが再入力されます</span>
+
+                </div>
+
+                {{-- @dd($crop_seasons) --}}
 
                 <div class="input-form-inner ">
                     {{-- 作物選択 --}}
@@ -60,9 +74,9 @@
                         <label for="crop_season_id" class="form-label sm:col-span-2 font-semibold text-lg">作業した作物</label>
                         <select x-model="formData.crop_season_id" name="crop_season_id" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="crop_season_id">
                             <option value="">作物を選択</option>
-                            @foreach ($crop_seasons as $crop)
-                            <option value="{{ $crop->id }}">{{ $crop->crops->name }}</option>
-                            @endforeach
+                            <template x-for="cropSeason in showCropSeason" :key="cropSeason.id">
+                                <option :value="cropSeason.id" x-text="cropSeason.name"></option>
+                            </template>
                         </select>
                         {{-- 作付マスターに遷移 --}}
                         <a href="" class="mx-5 text-bold">＋作付けを新規に追加する</a>
@@ -77,8 +91,7 @@
                     {{-- 作業名称 --}}
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
                         <label for="title" class="form-label sm:col-span-2 font-semibold text-lg">作業名称</label>
-                        <input type="text" x-model="formData.title" name="title" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="（例）防除１回目"
-                        value="防除１１回目">
+                        <input type="text" x-model="formData.title" name="title" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="（例）防除１回目">
                         {{-- バリデーションメッセージ --}}
                         <span
                             x-text="getError('title')"
@@ -90,12 +103,10 @@
                     <div class="bg-white mb-1 px-1 py-2">
                         <label for="work_date" class="form-label block font-semibold text-lg">作業日</label>
                         {{-- <div class="sm:col-start-1"> --}}
-                        <input type="date" x-model="formData.work_date" name="work_date" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg max-w-40"
-                            {{-- value="{{ date('Y-m-d') }}"> --}}
-                            >
+                        <input type="date" x-model="formData.work_date" name="work_date" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg max-w-40">
                         <div class="inline-block">
                             {{-- 完了した作業を登録する場合は予定日のチェックオフ、今後の予定を登録する場合はチェックオン、投稿が下書きになった場合は上書きしてチェックオフ、現在より過去か未来かで自動的に値を決定する？>>するつもりだった作業を登録する場合を考慮する？ --}}
-                            <input type="checkbox" x-model="formData.status" name="status" value="plan" id="status" class="ms-2" >
+                            <input type="checkbox" x-model="formData.status" name="status" id="status" class="ms-2" >
                             <label for="status" class="form-label font-semibold text-lg sub-checkbox">予定</label>
                         </div>
                         {{-- バリデーションメッセージ --}}
@@ -279,7 +290,9 @@
                     <div class="submit-button grid grid-cols-3 gap-2  sm:max-w-1/2 ">
                         <button type="submit" class="px-4 py-1 rounded-md bg-blue-500 text-bold text-white">保存</button>
                         <div class="grid place-content-center rounded-md text-bold ">キャンセル</div>
+
                         <div class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書き保存</div>
+                        {{-- <div x-show="isDraft" class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書きをやめて新しい記録として保存</div> --}}
                     </div>
 
 
@@ -298,27 +311,40 @@
                     created_by: 1,
                     performed_by: '',
                     work_date: '',
-                    status: '',
+                    status: false,
                     title: '',
                     content: '',
                     updated_by: '',
-                    material_logs: config.oldmaterial_logs,
+                    material_logs: [],
                 },
 
                 allMaterials: config.initialMaterials,
                 types: config.initialTypes,
+                allCropSeasons: config.initialCropSeasons,
+                allCrops: config.initialCrops,
                 selectedType: '',
                 selectedMaterialId: '',
 
+                selectedDraftId: '',
+                isDraft: false,
+
+
                 // バリデーションエラーメッセージ配列を受け取る
-                // errors: config.serverErrors || {},
                 errors: {},
 
                 init() {
-                    this.formData.work_date = this.getToday();
+                    this.formData.work_date = this.getToday;
                 },
 
-                getToday() {
+                // 登録対象の作物を選択、データベースから作物名+年次
+                get showCropSeason() {
+                    return  this.allCropSeasons.map((season, index) => ({
+                                id: index + 1,
+                                name: season.crops.name + season.year,
+                            }));
+                },
+
+                get getToday() {
                     const today = new Date();
 
                     const yyyy = today.getFullYear();
@@ -395,19 +421,16 @@
                 // },
 
                 /////
-                // ネットワークオフライン時の下書き機能
-                // isOnline: navigator.onLine,
-                // isOnline: false,
+                // fetch()送信
+                //  下書き機能実装のため
                 draft_work_log: JSON.parse(localStorage.getItem('draft_work_log') || '[]'),
 
                 // post送信時に呼び出される
                 // @submit.preventで呼び出し
                 submitForm() {
-                    // if (this.isOnline) {
-                    // if (window.navigator.onLine) {
-                    if (false) {
+                    if (window.navigator.onLine) {
+                    // if (false) {
                         // オンライン時の処理、fetch()でJSONを送信
-                        // fetch('{{ route('store') }}', {
                         fetch('{{ route('store') }}', {
                             method: 'POST',
                             headers: {
@@ -431,13 +454,18 @@
                                 }
 
                                 // 保存成功
+                                // 下書きだったとき
+                                if (this.isDraft) {
+                                    this.draft_work_log.splice(this.selectedDraftId, 1);
+                                    localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
+                                    this.isDraft = false;
+                                }
                                 alert(data.message);
                                 // コントローラから帰ってきたURLへリダイレクト
                                 window.location.href = data.redirect_url;
                             })
                         })
                         .catch(error => {
-                            // console.error('通信に失敗しました', error);
                             console.error('通信自体に失敗しました', error);
                         });
                     } else {
@@ -447,9 +475,9 @@
 
                         this.formData = {
                             crop_season_id: '',
-                            created_by: '',
+                            created_by: 0,
                             performed_by: '',
-                            work_date: '',
+                            work_date: this.getToday,
                             status: '',
                             title: '',
                             content: '',
@@ -459,44 +487,30 @@
                     }
                 },
 
-                testLSvalue: [],
-                testLS() {
-                    this.testLSvalue.push({name: ''});
-                    console.log(this.testLSvalue);
-                    return 'test ok';
+                // 下書き機能
+                get hasDraft() {
+                    // console.log(this.allCropSeasons[0]['year']);
+                    // return 'もち';
+                    if(!this.draft_work_log[0]) return false;
+                    const remapDraft = this.draft_work_log.map((log, index) => ({
+                        work_date: log.work_date,
+                        crop: this.allCropSeasons[log.crop_season_id - 1].crops.name,
+                        title: log.title,
+                        formData: log,
+                    }));
+                    return remapDraft;
                 },
-                getDraft: [],
-                chkLocalstrage() {
-                    // const oneHistory = this.draft_work_log[0];
-                    // const hist = '';
-                    // oneHistory.forEach(value => {
 
-                    //     hist = $value;
-                    // })
-                    // return hist;
-                    // if (true) {
-                    //     const allDraft = { ...this.draft_work_log };
-                    this.getDraft.push({...this.draft_work_log[0]});
-
-                    console.log('this.draft_work_log[0] : ');
-                    console.log(this.draft_work_log[0]);
-                    console.log('this.draft_work_log : ');
-                    console.log(this.draft_work_log);
-                    console.log('this.getDraft : ');
-                    console.log(this.getDraft);
-                    console.log('this.formData : ');
-                    console.log(this.formData);
-                    console.log('this.getDraft[0].work_date : ' + this.getDraft[0].work_date);
-                    this.formData = this.draft_work_log[0];
-                    console.log('this.formData : ');
-                    console.log(this.formData);
-                    // this.formData =
-                    return 'chkLocalstrage()実行されました';
-                    //     this.formData = '';
-                    //     this.formData = { ...this.draft_work_log };
-                    //     return allDraft;
-                    // }
+                // 選択した下書きformDataを現在のフォームに流し込む
+                fillWithDraft() {
+                    this.formData = this.hasDraft[this.selectedDraftId].formData;
+                    this.isDraft = true;
                 },
+
+                // 下書きの途中で新規の作業入力に切り替えてしまったとき
+                skipDraft() {
+                    this.isDraft = false;
+                }
             }));
         });
 

@@ -12,7 +12,7 @@ class Crop extends Model
         'name',
     ];
 
-    public function crop_seasons (): BelongsTo
+    public function cropSeasons (): BelongsTo
     {
         return $this->belongsTo(CropSeason::class);
     }

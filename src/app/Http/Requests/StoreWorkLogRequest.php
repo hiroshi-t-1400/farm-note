@@ -33,7 +33,7 @@ class StoreWorkLogRequest extends FormRequest
             'performed_by' => ['required', 'numeric', 'exists:users,id'],
             'work_date' => ['required', 'date'],
             // 'status' => ['sometimes', 'in:plan,completed,draft'],
-            'status' => ['required', 'boolean', 'nullable'],
+            'status' => ['required', 'boolean'],
             'title' => ['required', 'string', 'max:50'],
             'content' => ['nullable', 'string', 'max:200'],
             'updated_by' => ['nullable', 'date'],

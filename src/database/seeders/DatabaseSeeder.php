@@ -47,6 +47,7 @@ class DatabaseSeeder extends Seeder
             initUserSeeder::class,
             initWorkLogSeeder::class,
             initMaterialWorkLogSeeder::class,
+            initPerformedByWorkLogSeeder::class,
         ]);
 
         // 外部キー制約を有効に戻す

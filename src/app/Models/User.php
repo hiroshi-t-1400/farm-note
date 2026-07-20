@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class User extends Authenticatable
 {
@@ -49,8 +51,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function work_logs (): BelongsTo
+    public function workLogs (): hasMany
     {
-        return $this->belongsTo(WorkLog::class);
+        return $this->hasMany(WorkLog::class);
     }
 }

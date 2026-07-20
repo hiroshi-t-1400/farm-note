@@ -17,7 +17,7 @@ class initWorkLogSeeder extends Seeder
         DB::table('work_logs')->insert([
             'crop_season_id' => '1',
             'created_by' => '1',
-            'performed_by' => '1',
+            // 'performed_by' => '1',
             'work_date' => now(),
             'status' => 'completed',
             'title' => '草刈り',
