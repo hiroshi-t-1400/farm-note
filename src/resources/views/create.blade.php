@@ -36,6 +36,8 @@
             >
                 @csrf
 
+                <span x-text="testCrops"></span>
+
                 <div class="block text-sm font-medium text-gray-700 mb-2" >
                     作業登録者：　{{ $users[0]->name }}
                     <input type="hidden" x-model="formData.created_by">
@@ -81,10 +83,13 @@
                         {{-- バリデーションメッセージ --}}
                         <span x-show="getError('crop_season_id')"
                             x-text="getError('crop_season_id')"
-                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
+                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
+                            role="alert">
                         </span>
 
                     </div>
+
+                    <div x-text="getError('crop_season_id')"></div>
 
                     {{-- 作業名称 --}}
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
@@ -188,7 +193,7 @@
                             </button>
 
                             {{-- 動的フォーム --}}
-                            <template x-for="(material_log, index) in formData.material_logs" :key="index">
+                            <template x-for="(material_log, index) in formData.material_logs" :key="material_log.uuid">
                                 <div class="grid sm:grid-cols-2 rounded-md border border-gray-200 text-sm">
                                     <div class="">
                                         <span class="" x-text="'資材' + (index + 1)"></span>
@@ -227,8 +232,8 @@
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：10本 300L"
                                         >
-                                        <span x-show="getError('quantity', index)"
-                                            x-text="getError('quantity', index)"
+                                        <span x-show="getError('quantity', material_log.uuid)"
+                                            x-text="getError('quantity', material_log.uuid)"
                                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                                             role="alert"
                                         ></span>
@@ -299,6 +304,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('postForm', (config) => ({
                 formData: {
+                    uuid: crypto.randomUUID(),
                     crop_season_id: '',
                     created_by: 1,
                     performed_by: '',
@@ -317,16 +323,57 @@
                 selectedType: '',
                 selectedMaterialId: '',
 
-                isOnline: window.navigator.onLine,
+                // isOnline: window.navigator.onLine,
+                isOnline: false,
 
                 selectedDraftId: '',
                 isDraft: false,
 
                 errors: {},
+                mappedErrors: {},
 
                 init() {
                     this.formData.work_date = this.getToday;
+
                 },
+
+                insertUuidToErrors(rawErrors) {
+                    this.mappedErrors = {};
+
+                    Object.keys(rawErrors).forEach(key => {
+                        // 動的フォーム配列material_logsを持つキーからindex数字とフィールド名を抽出
+                        const match = key.match(/^material_logs\.(\d+)\.(.+)$/);
+                        if (match) {
+
+                            const index = parseInt(match[1]); // マッチグループ2行目
+                            const fieldName = match[2];
+
+                            if (this.formData.material_logs && this.formData.material_logs[index]) {
+                                const rowId = this.formData.material_logs[index].uuid;
+
+                                if (!this.mappedErrors[rowId]) {
+                                    this.mappedErrors[rowId] = {};
+                                }
+                                // UUIDに対応してエラーメッセージを管理
+                                this.mappedErrors[rowId][fieldName] = rawErrors[key][0];
+                            }
+                        } else {
+                            // material_logs以外の通常属性のエラーもそのまま保持
+                            this.mappedErrors[key] = rawErrors[key][0];
+                        }
+                    });
+                },
+
+                // バリデーションエラーメッセージを返す: null or String
+                // getError(field, index = null) {
+                getError(field, rowId = null) {
+                    if (rowId === null) {
+                        return this.mappedErrors?.[field] || null;
+                    } else {
+                        return this.mappedErrors[rowId]?.[field] || null;
+                    }
+                },
+
 
                 // 登録対象の作物を選択、データベースから作物名+年次
                 get showCropSeason() {
@@ -364,12 +411,14 @@
                     if (this.selectedMaterialId === '') return;
                     if (this.selectedMaterial) {
                         this.formData.material_logs.push({
-                                                    type_label: '',
-                                                    material_id: '',
-                                                    name: '',
-                                                    manufacturer: '',
-                                                    dilution_rate: '',
-                                                });
+                            // id: 'uuid' + Date.now() + '-' + Math.random().toString(36),substr(2,9)
+                            uuid: crypto.randomUUID(),
+                            type_label: '',
+                            material_id: '',
+                            name: '',
+                            manufacturer: '',
+                            dilution_rate: '',
+                        });
                     }
 
                     const index = this.formData.material_logs.length - 1;
@@ -389,19 +438,16 @@
 
                 // 資材フォームの削除ロジック
                 removeMaterial_log(index) {
-                    this.formData.material_logs.splice(index, 1);
-                },
+                    // 削除対象の行を取得
+                    const targetMaterialLogs = this.material_logs[index];
 
-                // バリデーションエラーメッセージを返す: null or String
-                getError(field, index = null) {
-                    if (index === null) {
-                        field = `${field}`;
-                    } else if(false) {
-                        field = `material_logs.${index}.${field}`;
-                    } else {
-                        return;
+                    // 該当の動的フォームの行を削除
+                    this.formData.material_logs.splice(index, 1);
+
+                    // 削除された行のUUIDに紐づくエラーを削除する
+                    if (targetMaterialLogs && this.mappedErrors[targetMaterialLogs.uuid]) {
+                        delete this.mappedErrors[targetMaterialLogs.uuid];
                     }
-                    return this.errors[field] ? this.errors[field][0] : null;
                 },
 
                 // 登録資材重複の確認
@@ -424,7 +470,8 @@
                 // @submit.preventで呼び出し
                 async submitForm() {
                     const saveToLocalStorage = () => {
-                        this.draft_work_log.push(JSON.parse(JSON.stringify(this.formData)));
+                        // this.draft_work_log.push(JSON.parse(JSON.stringify(this.formData)));
+                        this.draft_work_log.push(this.formData);
                         localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
                         alert('オフラインのためブラウザに一時保存しました。(localStorage)');
 
@@ -464,27 +511,35 @@
 
                         clearTimeout(timeoutId); // 通信成功したらタイマーを解除
 
-                        // responseのJSONを解析
-                        const data = await response.json();
 
-                        ////
-                        // 保存失敗処理
-                        // 422 バリデーションエラーを想定してアラートとメッセージを表示
+                        // ----------------------------------------------------
+                        // 1. バリデーションエラー (422) のハンドリング
+                        // ----------------------------------------------------
                         if (response.status === 422) {
-                            this.errors = data.errors || {};
+                            const data = await response.json();
+                            if (data.errors) {
+                                this.insertUuidToErrors(data.errors);
+                            }
+                            // this.errors = data.errors || {};
+
                             alert('保存に失敗しました： ' + (data.message || '入力内容を確認してください。'));
                             return;
                         }
-
-                        // その他のエラー
+                        // ----------------------------------------------------
+                        // 2. その他のサーバーエラー (500系や404など
+                        // ----------------------------------------------------
                         if (!response.ok) {
-                            console.error('サーバーエラー', data);
-                            alert('保存に失敗しました： ' + (data.message || 'エラーが発生しました。'));
-                            return;
+                            console.error('サーバーエラーが発生しました。Status:', response.status);
+                            alert('サーバーエラーが発生しました。（Status: ' + response.status + '）');
+
+                            throw new Error('Server Error: ' + response.status);
                         }
 
-                        ////
-                        // 保存成功
+                        // ----------------------------------------------------
+                        // 2. その他のサーバーエラー (500系や404など
+                        // ----------------------------------------------------
+                        const data = await response.json(); // 成功レスポンスのJSONを解析
+
                         // 下書きだったとき
                         if (this.isDraft) {
                             this.draft_work_log.splice(this.selectedDraftId, 1);
@@ -497,22 +552,69 @@
                         // コントローラから帰ってきたURLへリダイレクト
                         window.location.href = data.redirect_url;
                     } catch (error) {
-                        console.error('通信に失敗たため、ローカル保存にフォールバックします。', error);
+                        clearTimeout(timeoutId); // 念のためにタイマーを解除
 
+                        // デバッグ用にエラーの詳細を出力
+                        if (error.name === 'AbortError') {
+                            console.error('通信エラー：　タイムアウト（５秒）が発生しました。', error);
+                        } else {
+                            console.error('通信に失敗たため、ローカル保存にフォールバックします。', error);
+                        }
+
+                        // 通信エラー、タイムアウトなど通信によるエラーの場合はLocalStorageに退避
                         saveToLocalStorage();
                     }
                 },
 
+                testCrops() {
+                    const item = {name: ''};
+                    console.log('item');
+                    if (item['name'] == null) {
+                        console.log('if(==null)');
+                    } else {
+                        console.log('else');
+                    }
+
+
+                    console.log(this.allCropSeasons);
+                    console.log(this.allCropSeasons.crops);
+                    console.log(this.allCropSeasons[0].crops);
+                    console.log('this.draft_work_log');
+                    console.log(this.draft_work_log);
+                    console.log(this.draft_work_log[0] ?? 'ぬる？');
+                    console.log('this.draft_work_log[0].crop_season_id');
+                    console.log(this.draft_work_log[0].crop_season_id);
+                    console.log('Number(draft_work_log[0].crop_season_id)');
+                    console.log(Number(''));
+                    console.log(Number(this.draft_work_log[0].crop_season_id));
+                    console.log(this.draft_work_log[0]['crop_season_id']);
+
+                    // console.log('this.allCropSeasons[this.draft_work_log[0].crop_season_id].crops.name');
+                    // console.log(this.allCropSeasons[Number(this.draft_work_log[0].crop_season_id) - 1].crops.nema);
+                    // console.log(this.allCropSeasons[Number(this.draft_work_log[0].crop_season_id)]['crops']['name']);
+                    // console.log(this.allCropSeasons[this.draft_work_log[0].crop_season_id]['crops']['name']);
+
+
+                    console.log('さいごまでいったよ');
+                    return this.allCropSeasons[0].crops.name;
+                },
+
                 // 下書き機能
                 get hasDraft() {
+                    const rawDraft = this.draft_work_log;
+                    // // if((!this.draft_work_log[0]) && false) return false;
+                    // if(Object.keys(rawDraft) === 0) return false;
+                    // const remapDraft = Object.keys(rawDraft).map(key => {
+
+                    // });
                     // if((!this.draft_work_log[0]) && false) return false;
-                    if(!this.draft_work_log[0]) return false;
-                    const remapDraft = this.draft_work_log.map((log, index) => ({
-                        work_date: log.work_date,
-                        crop: this.allCropSeasons[log.crop_season_id - 1].crops.name,
-                        title: log.title,
-                        formData: log,
+                    if(!rawDraft || rawDraft.length === 0) return false;
+                    const remapDraft = rawDraft.map((log) => ({
+                        ...log,
+                        crops: this.allCropSeasons?.[log.crop_season_id - 1]?.crops?.name,
+                        test: log.crop_season_id,
                     }));
+                    console.log(remapDraft);
                     return remapDraft;
                 },
 
