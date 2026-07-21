@@ -36,7 +36,6 @@
             >
                 @csrf
 
-
                 <div class="block text-sm font-medium text-gray-700 mb-2" >
                     作業登録者：　{{ $users[0]->name }}
                     <input type="hidden" x-model="formData.created_by">
@@ -67,8 +66,6 @@
 
                 </div>
 
-                {{-- @dd($crop_seasons) --}}
-
                 <div class="input-form-inner ">
                     {{-- 作物選択 --}}
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2" >
@@ -82,7 +79,7 @@
                         {{-- 作付マスターに遷移 --}}
                         <a href="" class="mx-5 text-bold">＋作付けを新規に追加する</a>
                         {{-- バリデーションメッセージ --}}
-                        <span
+                        <span x-show="getError('crop_season_id')"
                             x-text="getError('crop_season_id')"
                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
                         </span>
@@ -172,8 +169,8 @@
                                         class="w-full border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- 資材を選択してください（<span x-text="filteredMaterials.length"></span>件該当） --</option>
                                     <template x-for="material in filteredMaterials" :key="material.id">
-                                        {{-- <option :value="material.id" x-text="isDuplicated(material.id) + material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') "></option> --}}
-                                        <option :value="material.id" x-text="material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') "></option>
+                                        <option :value="material.id" x-text="isDuplicated(material.id) + material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') ">
+                                        </option>
                                     </template>
                                 </select>
 
@@ -190,14 +187,14 @@
                                 資材を追加する
                             </button>
 
+                            {{-- 動的フォーム --}}
                             <template x-for="(material_log, index) in formData.material_logs" :key="index">
                                 <div class="grid sm:grid-cols-2 rounded-md border border-gray-200 text-sm">
-                                    {{-- <div class="col-span-2"> --}}
                                     <div class="">
                                         <span class="" x-text="'資材' + (index + 1)"></span>
                                         <button
                                             type="button"
-                                            @click="removeMaterial_log()"
+                                            @click="removeMaterial_log(index)"
                                             x-show="formData.material_logs.length > 1"
                                             class="px-1 py-1 text-red-600 hover:bg-red-50 rounded-md transition"
                                         >
@@ -210,34 +207,28 @@
                                     <div class="sm:col-span-2">
                                         <span class="text-xs text-gray-600">種別：</span>
                                         <span class="font-medium text-gray-900" x-text="material_log.type_label"></span>
-                                        {{-- <input type="hidden" :name="`material_logs[${index}][type_label]`" x-model="material_log.type_label"> --}}
-                                        {{-- <input type="hidden" x-model="material_log.type_label"> --}}
                                     </div>
 
                                     <div>
                                         <span class="text-xs text-gray-600">名称：</span>
                                         <span class="font-medium text-gray-900" x-text="material_log.name"></span>
-                                        {{-- <input type="hidden" :name="`material_logs[${index}][name]`" x-model="material_log.name"> --}}
-                                        {{-- <input type="hidden" x-model="material_log.name"> --}}
                                     </div>
 
                                     <div>
                                         <span class="text-xs text-gray-600">メーカー名：</span>
                                         <span class="font-medium text-gray-900" x-text="material_log.manufacturer"></span>
-                                        {{-- <input type="hidden" :name="`material_logs[${index}][manufacturer]`" x-model="material_log.manufacturer"> --}}
-                                        {{-- <input type="hidden" x-model="material_log.manufacturer"> --}}
                                     </div>
 
                                     <div class="grid sm:grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                        <label for="`formData.material_logs[${index}][quantity]`" >使用量</label>
+                                        <label :for="`formData.material_logs[${index}][quantity]`" >使用量</label>
                                         <input type="text"
                                             :name="`formData.material_logs[${index}][quantity]`"
                                             x-model="material_log.quantity"
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：10本 300L"
                                         >
-                                        <span x-show="getError(index, 'quantity')"
-                                            x-text="getError(index, 'quantity')"
+                                        <span x-show="getError('quantity', index)"
+                                            x-text="getError('quantity', index)"
                                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                                             role="alert"
                                         ></span>
@@ -246,7 +237,7 @@
                                     <div
                                         x-show="material_log.type_id == 1 || material_log.type_id == 2"
                                         class="grid sm:grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                                        <label for="`formData.material_logs[${index}][dilution_rate]`" >希釈倍率</label>
+                                        <label :for="`formData.material_logs[${index}][dilution_rate]`" >希釈倍率</label>
                                         <input
                                             type="text"
                                             :name="`formData.material_logs[${index}][dilution_rate]`"
@@ -254,8 +245,8 @@
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
                                         >
-                                        <span x-show="getError(index, 'dilution_rate')"
-                                            x-text="getError(index, 'dilution_rate')"
+                                        <span x-show="getError('dilution_rate', index)"
+                                            x-text="getError('dilution_rate', index)"
                                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                                             role="alert"
                                         ></span>
@@ -264,7 +255,7 @@
                                     <div
                                         x-show="material_log.type_id == 1 || material_log.type_id == 2"
                                         class="grid sm:grid-cols-[auto_1fr] sm:col-start-2 gap-x-4 px-2 m-0.5 ">
-                                        <label for="`formData.material_logs[${index}][material_amount]`" >原液量</label>
+                                        <label :for="`formData.material_logs[${index}][material_amount]`" >原液量</label>
                                         <input
                                             type="text"
                                             :name="`formData.material_logs[${index}][material_amount]`"
@@ -272,8 +263,8 @@
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
                                         >
-                                        <span x-show="getError(index, 'material_amount')"
-                                            x-text="getError(index, 'material_amount')"
+                                        <span x-show="getError('material_amount', index)"
+                                            x-text="getError('material_amount', index)"
                                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                                             role="alert"
                                         ></span>
@@ -331,8 +322,6 @@
                 selectedDraftId: '',
                 isDraft: false,
 
-
-                // バリデーションエラーメッセージ配列を受け取る
                 errors: {},
 
                 init() {
@@ -403,26 +392,26 @@
                     this.formData.material_logs.splice(index, 1);
                 },
 
-                // バリデーションエラーの有無を判定
+                // バリデーションエラーメッセージを返す: null or String
                 getError(field, index = null) {
-
-                    if (!index) {
-                        const errorKey = `${field}`;
-                        return this.errors[errorKey] ? this.errors[errorKey][0] : null;
+                    if (index === null) {
+                        field = `${field}`;
+                    } else if(false) {
+                        field = `material_logs.${index}.${field}`;
                     } else {
-                        const errorKey = `formData.material_logs.${index}.${field}`;
-                        return this.errors[errorKey] ? this.errors[errorKey][0] : null;
+                        return;
                     }
+                    return this.errors[field] ? this.errors[field][0] : null;
                 },
 
                 // 登録資材重複の確認
-                // isDuplicated(materialId) {
-                //     if (this.formData.material_logs.some(material => material.id == materialId)) {
-                //         return '登録済み：';
-                //     } else {
-                //         return '';
-                //     };
-                // },
+                isDuplicated(materialId) {
+                    if (this.formData.material_logs.some(material => material.material_id == materialId)) {
+                        return '** 登録済み **';
+                    } else {
+                        return '';
+                    };
+                },
 
                 /////
                 // fetch()送信
@@ -476,7 +465,6 @@
                         clearTimeout(timeoutId); // 通信成功したらタイマーを解除
 
                         // responseのJSONを解析
-
                         const data = await response.json();
 
                         ////
@@ -484,7 +472,6 @@
                         // 422 バリデーションエラーを想定してアラートとメッセージを表示
                         if (response.status === 422) {
                             this.errors = data.errors || {};
-                            console.log(this.errors);
                             alert('保存に失敗しました： ' + (data.message || '入力内容を確認してください。'));
                             return;
                         }
