@@ -44,7 +44,8 @@
 
                 <div x-show="hasDraft" class="mb-2">
                     <label  for="draft_select" class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2">
-                        保存されていない下書きがあります。
+                        <p>保存されていない下書きがあります。</p>
+                        <p x-show="!isOnline">ネットワークがある場所で送信と保存を完了させてください。</p>
 
                     </label>
                     <select x-model="selectedDraftId"
@@ -325,6 +326,8 @@
                 selectedType: '',
                 selectedMaterialId: '',
 
+                isOnline: window.navigator.onLine,
+
                 selectedDraftId: '',
                 isDraft: false,
 
@@ -402,6 +405,7 @@
 
                 // バリデーションエラーの有無を判定
                 getError(field, index = null) {
+
                     if (!index) {
                         const errorKey = `${field}`;
                         return this.errors[errorKey] ? this.errors[errorKey][0] : null;
@@ -422,53 +426,15 @@
 
                 /////
                 // fetch()送信
-                //  下書き機能実装のため
+                //  主に下書き機能実装のため
+
+                // localStorageに下書きが保存されている場合は取得 or []で初期化
                 draft_work_log: JSON.parse(localStorage.getItem('draft_work_log') || '[]'),
 
                 // post送信時に呼び出される
                 // @submit.preventで呼び出し
-                submitForm() {
-                    if (window.navigator.onLine) {
-                    // if (false) {
-                        // オンライン時の処理、fetch()でJSONを送信
-                        fetch('{{ route('store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            },
-                            body: JSON.stringify(this.formData),
-                        })
-                        .then(response => {
-                            return response.json().then(data => {
-                                if (response.status === 422) {
-                                    // 422 バリデーションエラーを想定してアラートとメッセージを表示
-                                    this.errors = data.errors;
-                                    alert('保存に失敗しました： ' + (data.message || 'エラーが発生しました。'));
-                                    return;
-                                } else if (!response.ok) {
-                                    console.error('サーバーエラー', data);
-                                    alert('保存に失敗しました： ' + (data.message || 'エラーが発生しました。'));
-                                    return;
-                                }
-
-                                // 保存成功
-                                // 下書きだったとき
-                                if (this.isDraft) {
-                                    this.draft_work_log.splice(this.selectedDraftId, 1);
-                                    localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
-                                    this.isDraft = false;
-                                }
-                                alert(data.message);
-                                // コントローラから帰ってきたURLへリダイレクト
-                                window.location.href = data.redirect_url;
-                            })
-                        })
-                        .catch(error => {
-                            console.error('通信自体に失敗しました', error);
-                        });
-                    } else {
+                async submitForm() {
+                    const saveToLocalStorage = () => {
                         this.draft_work_log.push(JSON.parse(JSON.stringify(this.formData)));
                         localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
                         alert('オフラインのためブラウザに一時保存しました。(localStorage)');
@@ -484,13 +450,75 @@
                             updated_by: '',
                             material_logs: config.oldmaterial_logs,
                         };
+                    };
+
+                    if (!this.isOnline) {
+                        saveToLocalStorage();
+                        return;
+                    }
+
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5000ms to timeout
+
+                        // オンライン時の処理、fetch()でJSONを送信
+                        const response = await fetch('{{ route('store') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify(this.formData),
+                            signal: controller.signal // controle timeout
+                        });
+
+                        clearTimeout(timeoutId); // 通信成功したらタイマーを解除
+
+                        // responseのJSONを解析
+
+                        const data = await response.json();
+
+                        ////
+                        // 保存失敗処理
+                        // 422 バリデーションエラーを想定してアラートとメッセージを表示
+                        if (response.status === 422) {
+                            this.errors = data.errors || {};
+                            console.log(this.errors);
+                            alert('保存に失敗しました： ' + (data.message || '入力内容を確認してください。'));
+                            return;
+                        }
+
+                        // その他のエラー
+                        if (!response.ok) {
+                            console.error('サーバーエラー', data);
+                            alert('保存に失敗しました： ' + (data.message || 'エラーが発生しました。'));
+                            return;
+                        }
+
+                        ////
+                        // 保存成功
+                        // 下書きだったとき
+                        if (this.isDraft) {
+                            this.draft_work_log.splice(this.selectedDraftId, 1);
+                            localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
+                            this.isDraft = false;
+                        }
+
+                        alert(data.message || '保存しました。');
+
+                        // コントローラから帰ってきたURLへリダイレクト
+                        window.location.href = data.redirect_url;
+                    } catch (error) {
+                        console.error('通信に失敗たため、ローカル保存にフォールバックします。', error);
+
+                        saveToLocalStorage();
                     }
                 },
 
                 // 下書き機能
                 get hasDraft() {
-                    // console.log(this.allCropSeasons[0]['year']);
-                    // return 'もち';
+                    // if((!this.draft_work_log[0]) && false) return false;
                     if(!this.draft_work_log[0]) return false;
                     const remapDraft = this.draft_work_log.map((log, index) => ({
                         work_date: log.work_date,

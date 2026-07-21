@@ -80,7 +80,7 @@ class WorkController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => '日誌を保存しました。',
-            'redirect_url' => route('create', $workLog)
+            'redirect_url' => route('create')
         ]);
     }
 
