@@ -36,8 +36,6 @@
             >
                 @csrf
 
-                <span x-text="testCrops"></span>
-
                 <div class="block text-sm font-medium text-gray-700 mb-2" >
                     作業登録者：　{{ $users[0]->name }}
                     <input type="hidden" x-model="formData.created_by">
@@ -49,12 +47,12 @@
                         <p x-show="!isOnline">ネットワークがある場所で送信と保存を完了させてください。</p>
 
                     </label>
-                    <select x-model="selectedDraftId"
+                    <select x-model="selectedDraftUuid"
                             name="draft_select"
                             class="w-full border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">-- 選択して下書きを確認してください。（<span x-text="hasDraft.length"></span>件） --</option>
-                        <template x-for="(draft, index) in hasDraft" :key="index">
-                            <option :value="index" x-text="draft.work_date + ' | ' + draft.crop + ' | ' + draft.title"></option>
+                        <template x-for="(draft, index) in hasDraft" :key="draft.uuid">
+                            <option :value="draft.uuid" x-text="`作業日: ${draft.work_date} | 作物名: ${draft.crop_name} | 作業名: ${draft.title || '未記入'}`"></option>
                         </template>
                     </select>
                     <button
@@ -65,8 +63,8 @@
                         下書きを読み込む
                     </button>
                     <span class="text-sm font-medium text-black">入力欄に下書きが再入力されます</span>
-
                 </div>
+
 
                 <div class="input-form-inner ">
                     {{-- 作物選択 --}}
@@ -100,6 +98,7 @@
                             x-text="getError('title')"
                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
                         </span>
+                        <span x-text="`${formData.title}`"></span>
                     </div>
 
                     {{-- 作業日 --}}
@@ -131,9 +130,11 @@
                         </select>
                         {{-- ユーザ登録に遷移 --}}
                         <a href="" class="mx-5 text-bold">＋作業者を新規に追加する</a>
-                        @error('performed_by')
-                            <span class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">{{ $message }}</span>
-                        @enderror
+                        {{-- バリデーションメッセージ --}}
+                        <span
+                            x-text="getError('performed_by')"
+                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
+                        </span>
                     </div>
 
                     {{-- 作業内容 --}}
@@ -142,17 +143,18 @@
                         <textarea type="text" x-model="formData.content" name="content" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="作業した内容を記入してください。">防除１１回目　ストロビーフロアブル
                         </textarea>
                         {{-- 内容のテンプレートを作成する？ --}}
-                        @error('content')
-                            <span class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">{{ $message }}</span>
-                        @enderror
+                        {{-- バリデーションメッセージ --}}
+                        <span x-show="getError('content')"
+                            x-text="getError('content')"
+                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
+                        </span>
                     </div>
 
                     {{-- 使用資材記録 --}}
                     <div class="grid grid-cols-1 bg-white mb-1 px-1 py-2">
                         <div class="form-label mb-1 font-semibold text-lg">資材の記録</div>
 
-                        {{--  --}}
-                        <div>
+                        <div class="material_logs_inner">
                             <div class="mb-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">種別で絞り込み</label>
                                 <div class="flex flex-wrap gap-3">
@@ -183,7 +185,6 @@
                                 type="button"
                                 :disabled="selectedMaterialId === ''"
                                 @click="addMaterial_log()"
-                                {{-- @change="getMaterialProperty(selectedMaterialId)" --}}
                                 class="mt-1 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -250,8 +251,8 @@
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
                                         >
-                                        <span x-show="getError('dilution_rate', index)"
-                                            x-text="getError('dilution_rate', index)"
+                                        <span x-show="getError('dilution_rate', material_log.uuid)"
+                                            x-text="getError('dilution_rate', material_log.uuid)"
                                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                                             role="alert"
                                         ></span>
@@ -268,8 +269,8 @@
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
                                         >
-                                        <span x-show="getError('material_amount', index)"
-                                            x-text="getError('material_amount', index)"
+                                        <span x-show="getError('material_amount', material_log.uuid)"
+                                            x-text="getError('material_amount', material_log.uuid)"
                                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                                             role="alert"
                                         ></span>
@@ -305,6 +306,7 @@
             Alpine.data('postForm', (config) => ({
                 formData: {
                     uuid: crypto.randomUUID(),
+                    draft_uuid: '',
                     crop_season_id: '',
                     created_by: 1,
                     performed_by: '',
@@ -326,8 +328,7 @@
                 // isOnline: window.navigator.onLine,
                 isOnline: false,
 
-                selectedDraftId: '',
-                isDraft: false,
+                selectedDraftUuid: '',
 
                 errors: {},
                 mappedErrors: {},
@@ -335,43 +336,6 @@
                 init() {
                     this.formData.work_date = this.getToday;
 
-                },
-
-                insertUuidToErrors(rawErrors) {
-                    this.mappedErrors = {};
-
-                    Object.keys(rawErrors).forEach(key => {
-                        // 動的フォーム配列material_logsを持つキーからindex数字とフィールド名を抽出
-                        const match = key.match(/^material_logs\.(\d+)\.(.+)$/);
-                        if (match) {
-
-                            const index = parseInt(match[1]); // マッチグループ2行目
-                            const fieldName = match[2];
-
-                            if (this.formData.material_logs && this.formData.material_logs[index]) {
-                                const rowId = this.formData.material_logs[index].uuid;
-
-                                if (!this.mappedErrors[rowId]) {
-                                    this.mappedErrors[rowId] = {};
-                                }
-                                // UUIDに対応してエラーメッセージを管理
-                                this.mappedErrors[rowId][fieldName] = rawErrors[key][0];
-                            }
-                        } else {
-                            // material_logs以外の通常属性のエラーもそのまま保持
-                            this.mappedErrors[key] = rawErrors[key][0];
-                        }
-                    });
-                },
-
-                // バリデーションエラーメッセージを返す: null or String
-                // getError(field, index = null) {
-                getError(field, rowId = null) {
-                    if (rowId === null) {
-                        return this.mappedErrors?.[field] || null;
-                    } else {
-                        return this.mappedErrors[rowId]?.[field] || null;
-                    }
                 },
 
 
@@ -452,11 +416,20 @@
 
                 // 登録資材重複の確認
                 isDuplicated(materialId) {
-                    if (this.formData.material_logs.some(material => material.material_id == materialId)) {
-                        return '** 登録済み **';
-                    } else {
+                    // エラーチェック
+                    if (this.formData.material_logs?.length == 0) {
+                        console.info(`[in isDuplicated()] 資材の入力が０件です(no issue)`, { materialId, material_logs: this.formData.material_logs });
                         return '';
-                    };
+                    } else if (!Array.isArray(this.formData.material_logs)) {
+                        console.error(`[in isDuplicated()] this.formData.material_logsの参照に失敗しました。`, { materialId, material_logs: this.formData.material_logs });
+                        return '';
+                    }
+
+                    // メインロジック 重複の確認
+                    if (this.formData.material_logs?.some(material => material.material_id == materialId)) {
+                        return '** 登録済みです **';
+                    }
+                    return '';
                 },
 
                 /////
@@ -469,27 +442,9 @@
                 // post送信時に呼び出される
                 // @submit.preventで呼び出し
                 async submitForm() {
-                    const saveToLocalStorage = () => {
-                        // this.draft_work_log.push(JSON.parse(JSON.stringify(this.formData)));
-                        this.draft_work_log.push(this.formData);
-                        localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
-                        alert('オフラインのためブラウザに一時保存しました。(localStorage)');
-
-                        this.formData = {
-                            crop_season_id: '',
-                            created_by: 0,
-                            performed_by: '',
-                            work_date: this.getToday,
-                            status: '',
-                            title: '',
-                            content: '',
-                            updated_by: '',
-                            material_logs: config.oldmaterial_logs,
-                        };
-                    };
 
                     if (!this.isOnline) {
-                        saveToLocalStorage();
+                        this.saveToLocalStorage();
                         return;
                     }
 
@@ -511,16 +466,15 @@
 
                         clearTimeout(timeoutId); // 通信成功したらタイマーを解除
 
-
                         // ----------------------------------------------------
                         // 1. バリデーションエラー (422) のハンドリング
                         // ----------------------------------------------------
                         if (response.status === 422) {
                             const data = await response.json();
+                            // エラーを受け取りUUIDを付与
                             if (data.errors) {
                                 this.insertUuidToErrors(data.errors);
                             }
-                            // this.errors = data.errors || {};
 
                             alert('保存に失敗しました： ' + (data.message || '入力内容を確認してください。'));
                             return;
@@ -536,18 +490,14 @@
                         }
 
                         // ----------------------------------------------------
-                        // 2. その他のサーバーエラー (500系や404など
+                        // 3. 保存成功処理 (200 OK系)
                         // ----------------------------------------------------
                         const data = await response.json(); // 成功レスポンスのJSONを解析
 
-                        // 下書きだったとき
-                        if (this.isDraft) {
-                            this.draft_work_log.splice(this.selectedDraftId, 1);
-                            localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
-                            this.isDraft = false;
-                        }
-
                         alert(data.message || '保存しました。');
+
+                        // 下書きの続きならlocalstorageの該当の記録を削除
+                        this.removeDraftRow();
 
                         // コントローラから帰ってきたURLへリダイレクト
                         window.location.href = data.redirect_url;
@@ -562,72 +512,147 @@
                         }
 
                         // 通信エラー、タイムアウトなど通信によるエラーの場合はLocalStorageに退避
-                        saveToLocalStorage();
+                        this.saveToLocalStorage();
                     }
                 },
 
-                testCrops() {
-                    const item = {name: ''};
-                    console.log('item');
-                    if (item['name'] == null) {
-                        console.log('if(==null)');
+                insertUuidToErrors(rawErrors) {
+                    this.mappedErrors = {};
+
+                    Object.keys(rawErrors).forEach(key => {
+                        // 動的フォーム配列material_logsを持つキーからindex数字とフィールド名を抽出
+                        const match = key.match(/^material_logs\.(\d+)\.(.+)$/);
+                        if (match) {
+
+                            const index = parseInt(match[1]); // マッチグループ2行目
+                            const fieldName = match[2];
+
+                            if (this.formData.material_logs && this.formData.material_logs[index]) {
+                                const rowId = this.formData.material_logs[index].uuid;
+
+                                if (!this.mappedErrors[rowId]) {
+                                    this.mappedErrors[rowId] = {};
+                                }
+                                // UUIDに対応してエラーメッセージを管理
+                                this.mappedErrors[rowId][fieldName] = rawErrors[key][0];
+                            }
+                        } else {
+                            // material_logs以外の通常属性のエラーもそのまま保持
+                            this.mappedErrors[key] = rawErrors[key][0];
+                        }
+                    });
+                },
+
+                // バリデーションエラーメッセージを返す: null or String
+                getError(field, rowId = null) {
+                    if (rowId === null) {
+                        return this.mappedErrors?.[field] || null;
                     } else {
-                        console.log('else');
+                        return this.mappedErrors?.[rowId]?.[field] || null;
                     }
-
-
-                    console.log(this.allCropSeasons);
-                    console.log(this.allCropSeasons.crops);
-                    console.log(this.allCropSeasons[0].crops);
-                    console.log('this.draft_work_log');
-                    console.log(this.draft_work_log);
-                    console.log(this.draft_work_log[0] ?? 'ぬる？');
-                    console.log('this.draft_work_log[0].crop_season_id');
-                    console.log(this.draft_work_log[0].crop_season_id);
-                    console.log('Number(draft_work_log[0].crop_season_id)');
-                    console.log(Number(''));
-                    console.log(Number(this.draft_work_log[0].crop_season_id));
-                    console.log(this.draft_work_log[0]['crop_season_id']);
-
-                    // console.log('this.allCropSeasons[this.draft_work_log[0].crop_season_id].crops.name');
-                    // console.log(this.allCropSeasons[Number(this.draft_work_log[0].crop_season_id) - 1].crops.nema);
-                    // console.log(this.allCropSeasons[Number(this.draft_work_log[0].crop_season_id)]['crops']['name']);
-                    // console.log(this.allCropSeasons[this.draft_work_log[0].crop_season_id]['crops']['name']);
-
-
-                    console.log('さいごまでいったよ');
-                    return this.allCropSeasons[0].crops.name;
                 },
 
+                ////////
+                // ----------------------------------------------------
                 // 下書き機能
+                // ----------------------------------------------------
                 get hasDraft() {
                     const rawDraft = this.draft_work_log;
-                    // // if((!this.draft_work_log[0]) && false) return false;
-                    // if(Object.keys(rawDraft) === 0) return false;
-                    // const remapDraft = Object.keys(rawDraft).map(key => {
+                    if(!rawDraft || rawDraft.length === 0) {
+                        return false;
+                    }
 
-                    // });
-                    // if((!this.draft_work_log[0]) && false) return false;
-                    if(!rawDraft || rawDraft.length === 0) return false;
                     const remapDraft = rawDraft.map((log) => ({
                         ...log,
-                        crops: this.allCropSeasons?.[log.crop_season_id - 1]?.crops?.name,
-                        test: log.crop_season_id,
+                        // bladeの下書きリストように作物名を取得
+                        crop_name: (() => {
+                            if (!Array.isArray(this.allCropSeasons)) {
+                                console.error(`this.allCropSeasonsの参照に失敗しました。`, { crop_season_id: log.crop_season_id - 1, allCropSeasons: this.allCropSeasons });
+                                return '（不明）';
+                            }
+                            if (!this.allCropSeasons?.[log.crop_season_id - 1]?.crops.name) {
+                                console.warn(`[in hasDraft] log.crop_season_id - 1 の値が不正です。未選択が代入されます。`, { value: log.crop_season_id - 1, allCropSeasons: this.allCropSeasons });
+                            }
+                            return this.allCropSeasons?.[log.crop_season_id - 1]?.crops.name || '未選択';
+                        })(),
                     }));
-                    console.log(remapDraft);
                     return remapDraft;
                 },
 
-                // 選択した下書きformDataを現在のフォームに流し込む
-                fillWithDraft() {
-                    this.formData = this.hasDraft[this.selectedDraftId].formData;
-                    this.isDraft = true;
+                // mytest() {
+                //     let myFav =[
+                //         {name: 'リンゴ'},
+                //         {name: 'バス'},
+                //         {name: 'ライオン'},
+                //     ];
+                //     console.log(myFav);
+                //     console.log(myFav[0].name);
+                //     myFav = myFav.filter(item => item.name !== 'バス');
+                //     console.log(myFav);
+                // },
+
+                // // Localstorage保存ロジック
+                saveToLocalStorage() {
+                    this.draft_work_log.push(JSON.parse(JSON.stringify(this.formData)));
+                    localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
+                    alert('オフラインのためブラウザに一時保存しました。(localStorage)');
+
+                    this.formData = {
+                        uuid: '',
+                        draft_uuid: '',
+                        crop_season_id: '',
+                        created_by: 0,
+                        performed_by: '',
+                        work_date: this.getToday,
+                        status: '',
+                        title: '',
+                        content: '',
+                        updated_by: '',
+                        material_logs: [],
+                    };
                 },
 
-                // 下書きの途中で新規の作業入力に切り替えてしまったとき
-                skipDraft() {
-                    this.isDraft = false;
-                }
+                // 下書きLocalstorageの削除
+                removeDraftRow(targetDraftUuid = this.formData?.draft_uuid) {
+                    // post送信するformDataが下書きの続きだったかどうか
+                    if (!!targetDraftUuid) {
+                        console.error(`下書きのつづきではないか(no issue)、this.formData.draft_uuidの取得に失敗しました。`, { draft_uuid: targetDraftUuid });
+                        return;
+                    }
+                    // 削除ロジック
+                    const filteredDrafts = this.draft_work_log.filter(log => log.uuid !== targetDraftUuid);
+                    // filter結果の例外処理:主にuuidの全件不一致
+                    if (!filteredDrafts) {
+                        console.error(`this.draft_work_log.filter()の処理に失敗しました`, { targetDraftUuid: this.formData.draft_uuid, draft_work_log: log });
+                        return;
+                    }
+                    localStorage.setItem('draft_work_log', JSON.stringify(filteredDrafts));
+                },
+                removeDraftAll() {
+                    localStorage.setItem('draft_work_log');
+                    alert('オフライン下書きをすべて削除しました。');
+                },
+
+
+                // 選択した下書きformDataを現在のフォームに流し込む
+                fillWithDraft() {
+                    if (!Array.isArray(this.hasDraft)) {
+                        console.error(`this.hasDraftの参照に失敗しました。`, { selectedDraftUuid: this.selectedDraftUuid, hasDraft: this.hasDraft });
+                        return '';
+                    }
+                    // メインロジック レンダに使われているformDataに下書きを流し込む
+                    this.formData = {
+                        ...this.hasDraft.find(draft => draft.uuid === this.selectedDraftUuid),
+                        draft_uuid: this.selectedDraftUuid,
+                    };
+                },
+
+
+
+                // // 下書きの途中で新規の作業入力に切り替えてしまったとき
+                // skipDraft() {
+                //     this.isDraft = false;
+                // }
             }));
         });
 
