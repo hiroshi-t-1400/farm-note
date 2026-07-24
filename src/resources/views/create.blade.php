@@ -36,12 +36,14 @@
             >
                 @csrf
 
+                <span x-text="mytest()"></span>
+
                 <div class="block text-sm font-medium text-gray-700 mb-2" >
                     作業登録者：　{{ $users[0]->name }}
                     <input type="hidden" x-model="formData.created_by">
                 </div>
 
-                <div x-show="hasDraft" class="mb-2">
+                {{-- <div x-show="hasDraft" class="mb-2">
                     <label  for="draft_select" class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2">
                         <p>保存されていない下書きがあります。</p>
                         <p x-show="!isOnline">ネットワークがある場所で送信と保存を完了させてください。</p>
@@ -62,9 +64,16 @@
                         >
                         下書きを読み込む
                     </button>
-                    <span class="text-sm font-medium text-black">入力欄に下書きが再入力されます</span>
-                </div>
-
+                    <button
+                        type="button"
+                        @click="deleteSelectedDraft()"
+                        :disabled="!selectedDraftUuid"
+                        :class="{ 'opacity-50 cursor-not-allowed': !selectedDraftUuid }"
+                        class="my-1 px-2 py-1 rounded-md border border-gray-500 bg-red-300 items-center text-sm font-medium text-white"
+                        >
+                        選択した下書きを削除する
+                    </button>
+                </div> --}}
 
                 <div class="input-form-inner ">
                     {{-- 作物選択 --}}
@@ -72,8 +81,8 @@
                         <label for="crop_season_id" class="form-label sm:col-span-2 font-semibold text-lg">作業した作物</label>
                         <select x-model="formData.crop_season_id" name="crop_season_id" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="crop_season_id">
                             <option value="">作物を選択</option>
-                            <template x-for="cropSeason in showCropSeason" :key="cropSeason.id">
-                                <option :value="cropSeason.id" x-text="cropSeason.name"></option>
+                            <template x-for="cropSeason in allCropSeasons" :key="cropSeason.id">
+                                <option :value="cropSeason.id" x-text="cropSeason.crop_name + cropSeason.year"></option>
                             </template>
                         </select>
                         {{-- 作付マスターに遷移 --}}
@@ -84,10 +93,7 @@
                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                             role="alert">
                         </span>
-
                     </div>
-
-                    <div x-text="getError('crop_season_id')"></div>
 
                     {{-- 作業名称 --}}
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
@@ -98,7 +104,6 @@
                             x-text="getError('title')"
                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
                         </span>
-                        <span x-text="`${formData.title}`"></span>
                     </div>
 
                     {{-- 作業日 --}}
@@ -184,7 +189,7 @@
                             <button
                                 type="button"
                                 :disabled="selectedMaterialId === ''"
-                                @click="addMaterial_log()"
+                                @click="addMaterialLogs()"
                                 class="mt-1 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -194,13 +199,13 @@
                             </button>
 
                             {{-- 動的フォーム --}}
-                            <template x-for="(material_log, index) in formData.material_logs" :key="material_log.uuid">
+                            <template x-for="(material_log, index) in formData.material_logs" :key="material_log.addForm_uuid">
                                 <div class="grid sm:grid-cols-2 rounded-md border border-gray-200 text-sm">
                                     <div class="">
                                         <span class="" x-text="'資材' + (index + 1)"></span>
                                         <button
                                             type="button"
-                                            @click="removeMaterial_log(index)"
+                                            @click="removeMaterial_log(addForm_uuid)"
                                             x-show="formData.material_logs.length > 1"
                                             class="px-1 py-1 text-red-600 hover:bg-red-50 rounded-md transition"
                                         >
@@ -303,357 +308,501 @@
 
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('postForm', (config) => ({
-                formData: {
-                    uuid: crypto.randomUUID(),
-                    draft_uuid: '',
-                    crop_season_id: '',
-                    created_by: 1,
-                    performed_by: '',
-                    work_date: '',
-                    status: false,
-                    title: '',
-                    content: '',
-                    updated_by: '',
-                    material_logs: [],
-                },
+            Alpine.data('postForm', (config) => {
 
-                allMaterials: config.initialMaterials,
-                types: config.initialTypes,
-                allCropSeasons: config.initialCropSeasons,
-                allCrops: config.initialCrops,
-                selectedType: '',
-                selectedMaterialId: '',
+                // 警告のIDやメッセージを記録する集合
+                /**
+                 * updateメソッドの呼び出し
+                 * １，ユーザーが画面上で操作を行ったとき（イベントハンドラ）
+                 * ２，API通信で新しいデータを取得・送信した直後
+                 * ３，Alpine.data内の初期化処理
+                 */
+                let lastVersion = null;
+                const warnedKeys = new Set();
+                // let isDraft = false;
 
-                // isOnline: window.navigator.onLine,
-                isOnline: false,
-
-                selectedDraftUuid: '',
-
-                errors: {},
-                mappedErrors: {},
-
-                init() {
-                    this.formData.work_date = this.getToday;
-
-                },
+                // if (lastVersion !== this.version) {
+                //     warnedKeys.clear();
+                //     lastVersion = this.version;
+                // }
 
 
-                // 登録対象の作物を選択、データベースから作物名+年次
-                get showCropSeason() {
-                    return  this.allCropSeasons.map((season, index) => ({
-                                id: index + 1,
-                                name: season.crops.name + season.year,
-                            }));
-                },
+                const DRAFT_LOG = 'farm-note:work-logs:draft-work-log';
 
-                get getToday() {
-                    const today = new Date();
+                return {
+                    // 状態変化カウント
+                    version: 1,
 
-                    const yyyy = today.getFullYear();
-                    const mm = String(today.getMonth() + 1).padStart(2, '0');
-                    const dd = String(today.getDate()).padStart(2, '0');
-                    return `${yyyy}-${mm}-${dd}`;
-                },
+                    formData: {},
 
-                // 選択された種別から資材選択を助ける
-                get filteredMaterials() {
-                    return this.allMaterials.filter(material => {
-                        const matchType = this.selectedType === '' || material.type_id == this.selectedType;
 
-                        return matchType;
-                    });
-                },
 
-                // 選択された資材の情報を取得する
-                get selectedMaterial() {
-                    return this.allMaterials.find(material => material.id == this.selectedMaterialId) || null;
-                },
+                    allMaterials: config.initialMaterials,
+                    types: config.initialTypes,
+                    allCropSeasons: config.initialCropSeasons,
+                    allCrops: config.initialCrops,
+                    selectedType: '',
+                    selectedMaterialId: '',
 
-                // 材料の追加ロジック
-                addMaterial_log() {
-                    if (this.selectedMaterialId === '') return;
-                    if (this.selectedMaterial) {
-                        this.formData.material_logs.push({
-                            // id: 'uuid' + Date.now() + '-' + Math.random().toString(36),substr(2,9)
-                            uuid: crypto.randomUUID(),
-                            type_label: '',
-                            material_id: '',
-                            name: '',
-                            manufacturer: '',
-                            dilution_rate: '',
+                    isOnline: window.navigator.onLine,
+                    // isOnline: false,
+
+                    allDrafts: '',
+                    selectedDraftUuid: '',
+
+                    errors: {},
+                    mappedErrors: {},
+
+                    // localStorageに下書きが保存されている場合は取得 or []で初期化
+                    // draft_work_log: JSON.parse(localStorage.getItem('draft_work_log') || '[]'),
+                    draftWorkLog: '[]',
+
+                    init() {
+                        this.formData.work_date = this.getToday;
+                        this.resetFormData();
+                        this.remapCropSeasons();
+                    },
+
+                    getDefaultFormData() {
+                        return {
+                            formData_uuid: crypto.randomUUID(),
+                            draft_uuid: '',
+                            crop_season_id: '',
+                            created_by: 1,
+                            performed_by: '',
+                            work_date: this.getToday,
+                            status: false,
+                            title: '',
+                            content: '',
+                            updated_by: '',
+                            material_logs: [],
+                            };
+                    },
+
+                    resetFormData() {
+                        this.formData = this.getDefaultFormData();
+                    },
+
+                    // versoin更新メソッド
+                    /**
+                     * @return null
+                     *
+                     * key:更新されるオブジェクト名（key）
+                     * value:処理によって更新されたプロパティ値
+                     */
+
+                    updateData(key, value) {
+                        this[key] = value;
+                        this.version++;
+                    },
+
+                    get getToday() {
+                        const today = new Date();
+
+                        const yyyy = today.getFullYear();
+                        const mm = String(today.getMonth() + 1).padStart(2, '0');
+                        const dd = String(today.getDate()).padStart(2, '0');
+                        return `${yyyy}-${mm}-${dd}`;
+                    },
+
+                    // init():作物の名称をオブジェクトの上の階層に挿入して配列を使いやすくする
+                    remapCropSeasons() {
+                        const remapArray = this.allCropSeasons.map((season, index) => ({
+                            ...season,
+                            id: index + 1,
+                            crop_name: season.crops.name,
+                        }));
+                        // console.log(remapArray);
+                        this.updateData('allCropSeasons', remapArray);
+                    },
+
+                    // ----------------------------------------------------
+                    // ここまで初期化
+                    // ----------------------------------------------------
+
+                    // crop_season_idから作物名を取得する
+                    getCropNameByCropSeasonId(targetId) {
+                        targetId = parseInt(targetId) || '';
+                        if (!targetId || targetId <= 0 ) {
+                            console.error('[getCropsName] targetIdが不正な値です。', { targetId: targetId })
+                            return null;
+                        }
+                        const foundObject = this.allCropSeasons.find(({ id }) => id == targetId);
+                        return foundObject;
+                    },
+
+                    // 選択された種別から資材選択を助ける
+                    get filteredMaterials() {
+                        return this.allMaterials.filter(material => {
+                            const matchType = this.selectedType === '' || material.type_id == this.selectedType;
+
+                            return matchType;
                         });
-                    }
+                    },
 
-                    const index = this.formData.material_logs.length - 1;
-                    const matId = this.selectedMaterialId - 1;
-                    this.formData.material_logs[index].type_label = this.allMaterials[matId].type_label;
-                    this.formData.material_logs[index].type_id = this.allMaterials[matId].type_id;
-                    this.formData.material_logs[index].material_id = this.allMaterials[matId].id;
-                    this.formData.material_logs[index].name = this.allMaterials[matId].name;
-                    this.formData.material_logs[index].manufacturer = this.allMaterials[matId].manufacturer;
-                    this.formData.material_logs[index].quantity = '';
-                    this.formData.material_logs[index].dilution_rate = this.allMaterials[matId].default_dilution_rate;
-                    this.formData.material_logs[index].material_amount = '';
+                    // 選択された資材の情報を取得する
+                    get selectedMaterial() {
+                        return this.allMaterials.find(m => m.id == this.selectedMaterialId) || null;
+                    },
 
-                    // 追加したら選択欄をリセット
-                    this.selectedMaterialId = '';
-                },
+                    // 材料の追加ロジック
+                    addMaterialLogs() {
+                        if (!this.selectedMaterial) return;
+                        // 追加フォームの初期化
+                        const newMaterialLog = this.initAddForm(this.selectedMaterial);
 
-                // 資材フォームの削除ロジック
-                removeMaterial_log(index) {
-                    // 削除対象の行を取得
-                    const targetMaterialLogs = this.material_logs[index];
+                        this.formData.material_logs.push(newMaterialLog);
+                        console.warn('pushのあと', {material_logs: this.formData.material_logs, selectMaterial: this.selectedMaterial});
+                        // 追加したら選択欄をリセット
+                        this.selectedMaterialId = '';
+                    },
 
-                    // 該当の動的フォームの行を削除
-                    this.formData.material_logs.splice(index, 1);
+                    // 資材追加フォームの初期化メソッド
+                    initAddForm(master) {
+                        return {
+                            addForm_uuid: crypto.randomUUID(),
+                            type_label: master.material_categories.label,
 
-                    // 削除された行のUUIDに紐づくエラーを削除する
-                    if (targetMaterialLogs && this.mappedErrors[targetMaterialLogs.uuid]) {
-                        delete this.mappedErrors[targetMaterialLogs.uuid];
-                    }
-                },
+                            material_id: master.id,
+                            name: master.name,
+                            type_id: master.type_id,
+                            dilution_rate: master.default_dilution_rate,
+                            quantity: master.standard_spray_volume,
+                            material_amount: '',
+                            manufacturer: master.manufacturer,
+                        };
+                    },
 
-                // 登録資材重複の確認
-                isDuplicated(materialId) {
-                    // エラーチェック
-                    if (this.formData.material_logs?.length == 0) {
-                        console.info(`[in isDuplicated()] 資材の入力が０件です(no issue)`, { materialId, material_logs: this.formData.material_logs });
-                        return '';
-                    } else if (!Array.isArray(this.formData.material_logs)) {
-                        console.error(`[in isDuplicated()] this.formData.material_logsの参照に失敗しました。`, { materialId, material_logs: this.formData.material_logs });
-                        return '';
-                    }
+                    // 資材フォームの削除ロジック
+                    removeMaterial_log(uuid) {
+                        this.formData.material_logs = this.formData.material_logs.filter(
+                            log => log.addForm_uuid !== uuid
+                        );
 
-                    // メインロジック 重複の確認
-                    if (this.formData.material_logs?.some(material => material.material_id == materialId)) {
-                        return '** 登録済みです **';
-                    }
-                    return '';
-                },
+                        // 対応するエラー・メッセージを持っていたら削除
+                        if (!mappedErrors[uuid]) {
+                            delete this.mappedErrors[uuid];
+                        }
+                    },
 
-                /////
-                // fetch()送信
-                //  主に下書き機能実装のため
-
-                // localStorageに下書きが保存されている場合は取得 or []で初期化
-                draft_work_log: JSON.parse(localStorage.getItem('draft_work_log') || '[]'),
-
-                // post送信時に呼び出される
-                // @submit.preventで呼び出し
-                async submitForm() {
-
-                    if (!this.isOnline) {
-                        this.saveToLocalStorage();
-                        return;
-                    }
-
-                    try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5000ms to timeout
-
-                        // オンライン時の処理、fetch()でJSONを送信
-                        const response = await fetch('{{ route('store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            },
-                            body: JSON.stringify(this.formData),
-                            signal: controller.signal // controle timeout
-                        });
-
-                        clearTimeout(timeoutId); // 通信成功したらタイマーを解除
-
-                        // ----------------------------------------------------
-                        // 1. バリデーションエラー (422) のハンドリング
-                        // ----------------------------------------------------
-                        if (response.status === 422) {
-                            const data = await response.json();
-                            // エラーを受け取りUUIDを付与
-                            if (data.errors) {
-                                this.insertUuidToErrors(data.errors);
+                    // 登録資材重複の確認
+                    isDuplicated(materialId) {
+                        // エラーチェック
+                        if (this.formData.material_logs?.length == 0) {
+                            if (!warnedKeys.has('isDuplicated_no_material_warn')) {
+                                console.info(`[in isDuplicated()] 資材の入力が０件です(no issue)`, { materialId, material_logs: this.formData.material_logs });
+                                warnedKeys.add('isDuplicated_no_material_warn');
                             }
+                            return '';
+                        } else if (!Array.isArray(this.formData.material_logs)) {
+                            if (!warnedKeys.has('isDuplicated_reference_isArray_error')) {
+                                console.error(`[in isDuplicated()] this.formData.material_logsの参照に失敗しました。`, { materialId, material_logs: this.formData.material_logs });
+                                warnedKeys.add('isDuplicated_reference_isArray_error');
+                            }
+                            return '';
+                        }
 
-                            alert('保存に失敗しました： ' + (data.message || '入力内容を確認してください。'));
+                        // メインロジック 重複の確認
+                        if (this.formData.material_logs?.some(material => material.material_id == materialId)) {
+                            return '** 登録済みです **';
+                        }
+                        return '';
+                    },
+
+                    /////
+                    // fetch()送信
+                    //  主に下書き機能実装のため
+
+                    // post送信時に呼び出される
+                    // @submit.preventで呼び出し
+                    async submitForm() {
+
+                        if (!this.isOnline) {
+                            this.saveToLocalStorage();
                             return;
                         }
-                        // ----------------------------------------------------
-                        // 2. その他のサーバーエラー (500系や404など
-                        // ----------------------------------------------------
-                        if (!response.ok) {
-                            console.error('サーバーエラーが発生しました。Status:', response.status);
-                            alert('サーバーエラーが発生しました。（Status: ' + response.status + '）');
 
-                            throw new Error('Server Error: ' + response.status);
-                        }
+                        try {
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5000ms to timeout
 
-                        // ----------------------------------------------------
-                        // 3. 保存成功処理 (200 OK系)
-                        // ----------------------------------------------------
-                        const data = await response.json(); // 成功レスポンスのJSONを解析
+                            // オンライン時の処理、fetch()でJSONを送信
+                            const response = await fetch('{{ route('store') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                },
+                                body: JSON.stringify(this.formData),
+                                signal: controller.signal // controle timeout
+                            });
 
-                        alert(data.message || '保存しました。');
+                            clearTimeout(timeoutId); // 通信成功したらタイマーを解除
 
-                        // 下書きの続きならlocalstorageの該当の記録を削除
-                        this.removeDraftRow();
-
-                        // コントローラから帰ってきたURLへリダイレクト
-                        window.location.href = data.redirect_url;
-                    } catch (error) {
-                        clearTimeout(timeoutId); // 念のためにタイマーを解除
-
-                        // デバッグ用にエラーの詳細を出力
-                        if (error.name === 'AbortError') {
-                            console.error('通信エラー：　タイムアウト（５秒）が発生しました。', error);
-                        } else {
-                            console.error('通信に失敗たため、ローカル保存にフォールバックします。', error);
-                        }
-
-                        // 通信エラー、タイムアウトなど通信によるエラーの場合はLocalStorageに退避
-                        this.saveToLocalStorage();
-                    }
-                },
-
-                insertUuidToErrors(rawErrors) {
-                    this.mappedErrors = {};
-
-                    Object.keys(rawErrors).forEach(key => {
-                        // 動的フォーム配列material_logsを持つキーからindex数字とフィールド名を抽出
-                        const match = key.match(/^material_logs\.(\d+)\.(.+)$/);
-                        if (match) {
-
-                            const index = parseInt(match[1]); // マッチグループ2行目
-                            const fieldName = match[2];
-
-                            if (this.formData.material_logs && this.formData.material_logs[index]) {
-                                const rowId = this.formData.material_logs[index].uuid;
-
-                                if (!this.mappedErrors[rowId]) {
-                                    this.mappedErrors[rowId] = {};
+                            // ----------------------------------------------------
+                            // 1. バリデーションエラー (422) のハンドリング
+                            // ----------------------------------------------------
+                            if (response.status === 422) {
+                                const data = await response.json();
+                                // エラーを受け取りUUIDを付与
+                                if (data.errors) {
+                                    this.insertUuidToErrors(data.errors);
                                 }
-                                // UUIDに対応してエラーメッセージを管理
-                                this.mappedErrors[rowId][fieldName] = rawErrors[key][0];
+
+                                alert('保存に失敗しました： ' + (data.message || '入力内容を確認してください。'));
+                                return;
                             }
-                        } else {
-                            // material_logs以外の通常属性のエラーもそのまま保持
-                            this.mappedErrors[key] = rawErrors[key][0];
+                            // ----------------------------------------------------
+                            // 2. その他のサーバーエラー (500系や404など
+                            // ----------------------------------------------------
+                            if (!response.ok) {
+                                console.error('サーバーエラーが発生しました。Status:', response.status);
+                                alert('サーバーエラーが発生しました。（Status: ' + response.status + '）');
+
+                                throw new Error('Server Error: ' + response.status);
+                            }
+
+                            // ----------------------------------------------------
+                            // 3. 保存成功処理 (200 OK系)
+                            // ----------------------------------------------------
+                            const data = await response.json(); // 成功レスポンスのJSONを解析
+
+                            this.resetFormData();
+                            alert(data.message || '保存しました。');
+
+                            // 下書きの続きならlocalstorageの該当の記録を削除
+                            this.clearSubmittedDraft();
+
+                            // コントローラから帰ってきたURLへリダイレクト
+                            window.location.href = data.redirect_url;
+                        } catch (error) {
+                            clearTimeout(timeoutId); // 念のためにタイマーを解除
+
+                            // デバッグ用にエラーの詳細を出力
+                            if (error.name === 'AbortError') {
+                                console.error('通信エラー：　タイムアウト（５秒）が発生しました。', error);
+                            } else {
+                                console.error('通信に失敗たため、ローカル保存にフォールバックします。', error);
+                            }
+
+                            // 通信エラー、タイムアウトなど通信によるエラーの場合はLocalStorageに退避
+                            this.saveToLocalStorage();
                         }
-                    });
-                },
+                    },
 
-                // バリデーションエラーメッセージを返す: null or String
-                getError(field, rowId = null) {
-                    if (rowId === null) {
-                        return this.mappedErrors?.[field] || null;
-                    } else {
-                        return this.mappedErrors?.[rowId]?.[field] || null;
-                    }
-                },
+                    insertUuidToErrors(rawErrors) {
+                        this.mappedErrors = {};
 
-                ////////
-                // ----------------------------------------------------
-                // 下書き機能
-                // ----------------------------------------------------
-                get hasDraft() {
-                    const rawDraft = this.draft_work_log;
-                    if(!rawDraft || rawDraft.length === 0) {
-                        return false;
-                    }
+                        Object.keys(rawErrors).forEach(key => {
+                            // 動的フォーム配列material_logsを持つキーからindex数字とフィールド名を抽出
+                            const match = key.match(/^material_logs\.(\d+)\.(.+)$/);
+                            // material_logsに関するエラーがあるか
+                            if (match) {
 
-                    const remapDraft = rawDraft.map((log) => ({
-                        ...log,
-                        // bladeの下書きリストように作物名を取得
-                        crop_name: (() => {
-                            if (!Array.isArray(this.allCropSeasons)) {
-                                console.error(`this.allCropSeasonsの参照に失敗しました。`, { crop_season_id: log.crop_season_id - 1, allCropSeasons: this.allCropSeasons });
-                                return '（不明）';
+                                const index = parseInt(match[1]); // マッチグループ2行目
+                                const fieldName = match[2];
+
+                                if (this.formData.material_logs && this.formData.material_logs[index]) {
+                                    const rowId = this.formData.material_logs[index].addForm_uuid;
+
+                                    // 初期化
+                                    if (!this.mappedErrors[rowId]) {
+                                        this.mappedErrors[rowId] = {};
+                                    }
+                                    // UUIDに対応してエラーメッセージを管理
+                                    this.mappedErrors[rowId][fieldName] = rawErrors[key][0];
+                                }
+                            } else {
+                                // material_logs以外の通常属性のエラーもそのまま保持
+                                this.mappedErrors[key] = rawErrors[key][0];
                             }
-                            if (!this.allCropSeasons?.[log.crop_season_id - 1]?.crops.name) {
-                                console.warn(`[in hasDraft] log.crop_season_id - 1 の値が不正です。未選択が代入されます。`, { value: log.crop_season_id - 1, allCropSeasons: this.allCropSeasons });
-                            }
-                            return this.allCropSeasons?.[log.crop_season_id - 1]?.crops.name || '未選択';
-                        })(),
-                    }));
-                    return remapDraft;
-                },
+                        });
+                    },
 
-                // mytest() {
-                //     let myFav =[
-                //         {name: 'リンゴ'},
-                //         {name: 'バス'},
-                //         {name: 'ライオン'},
-                //     ];
-                //     console.log(myFav);
-                //     console.log(myFav[0].name);
-                //     myFav = myFav.filter(item => item.name !== 'バス');
-                //     console.log(myFav);
-                // },
+                    // バリデーションエラーメッセージを返す: null or String
+                    getError(field, rowId = null) {
+                        if (rowId === null) {
+                            return this.mappedErrors?.[field] || null;
+                        } else {
+                            return this.mappedErrors?.[rowId]?.[field] || null;
+                        }
+                    },
 
-                // // Localstorage保存ロジック
-                saveToLocalStorage() {
-                    this.draft_work_log.push(JSON.parse(JSON.stringify(this.formData)));
-                    localStorage.setItem('draft_work_log', JSON.stringify(this.draft_work_log));
-                    alert('オフラインのためブラウザに一時保存しました。(localStorage)');
-
-                    this.formData = {
-                        uuid: '',
-                        draft_uuid: '',
-                        crop_season_id: '',
-                        created_by: 0,
-                        performed_by: '',
-                        work_date: this.getToday,
-                        status: '',
-                        title: '',
-                        content: '',
-                        updated_by: '',
-                        material_logs: [],
-                    };
-                },
-
-                // 下書きLocalstorageの削除
-                removeDraftRow(targetDraftUuid = this.formData?.draft_uuid) {
-                    // post送信するformDataが下書きの続きだったかどうか
-                    if (!!targetDraftUuid) {
-                        console.error(`下書きのつづきではないか(no issue)、this.formData.draft_uuidの取得に失敗しました。`, { draft_uuid: targetDraftUuid });
-                        return;
-                    }
-                    // 削除ロジック
-                    const filteredDrafts = this.draft_work_log.filter(log => log.uuid !== targetDraftUuid);
-                    // filter結果の例外処理:主にuuidの全件不一致
-                    if (!filteredDrafts) {
-                        console.error(`this.draft_work_log.filter()の処理に失敗しました`, { targetDraftUuid: this.formData.draft_uuid, draft_work_log: log });
-                        return;
-                    }
-                    localStorage.setItem('draft_work_log', JSON.stringify(filteredDrafts));
-                },
-                removeDraftAll() {
-                    localStorage.setItem('draft_work_log');
-                    alert('オフライン下書きをすべて削除しました。');
-                },
+                    ////////
+                    // ----------------------------------------------------
+                    // 下書き機能
+                    // ----------------------------------------------------
+                        // if (lastVersion !== this.version) {
+                        //     warnedKeys.clear();
+                        //     lastVersion = this.version;
+                        // }
 
 
-                // 選択した下書きformDataを現在のフォームに流し込む
-                fillWithDraft() {
-                    if (!Array.isArray(this.hasDraft)) {
-                        console.error(`this.hasDraftの参照に失敗しました。`, { selectedDraftUuid: this.selectedDraftUuid, hasDraft: this.hasDraft });
-                        return '';
-                    }
-                    // メインロジック レンダに使われているformDataに下書きを流し込む
-                    this.formData = {
-                        ...this.hasDraft.find(draft => draft.uuid === this.selectedDraftUuid),
-                        draft_uuid: this.selectedDraftUuid,
-                    };
-                },
+                    get _remapAllDraftsFromLocalStorage() {
+                        if (lastVersion !== this.version) {
+                            warnedKeys.clear();
+                            lastVersion = this.version;
+                        }
 
+                        const rawDraft = _getAllDraftsFromLocalStorage();
+
+                        const remapDraft = rawDraft.map((log) => ({
+                            ...log,
+                            draft_uuid: log.draft_uuid || crypto.randomUUID(),
+                            // bladeの下書きリストように作物名を取得
+                            crop_name: (() => {
+                                // if (!Array.isArray(this.allCropSeasons)) {
+                                //     if (!warnedKeys.has('hasDraft_call_crop_name__isArray_error')) {
+                                //         console.error(`this.allCropSeasonsの参照に失敗しました。`, { crop_season_id: log.crop_season_id - 1, allCropSeasons: this.allCropSeasons });
+                                //         warnedKeys.add('hasDraft_call_crop_name__isArray_error');
+                                //     }
+                                //     return '（不明）';
+                                // }
+                                if (!this.allCropSeasons?.[log.crop_season_id - 1]?.crops.name) {
+                                        console.error(`index:log.crop_season_id - 1 の値が不正です。未選択が代入されます。`, { value: log.crop_season_id - 1, allCropSeasons: this.allCropSeasons });
+                                }
+
+                                return this.allCropSeasons?.[log.crop_season_id - 1]?.crops.name || '未選択';
+                            })(),
+                        }));
+                        return remapDraft;
+
+                        // 下書きデータ配列にUUID確認処理をしたlocalStorageの下書きデータを格納し バージョン更新
+                        // this.updateData('draftWorkLog', newAllDrafts);
+                    },
+
+                    // mytest() {
+                    //     const myFav = [
+                    //         {name: 'リンゴ', type: 'fruits', country: 'Japan'},
+                    //         {name: 'バス', type: 'moblie', country: 'America'},
+                    //         {name: 'トラ', type: 'animal', country: 'Nepal'},
+                    //         ];
+
+                    //         myFav[0].name = 'ぴっぴ';
+                    //         console.log(myFav[0].name);
+
+                    //         const newFav = myFav.map(fav => ({
+
+                    //             ...fav,
+                    //             name: 'ぴっぴ',
+                    //         }));
+                    //         console.log(newFav || 'newFavなんかねえよ');
+                    //         console.log(myFav);
+                    // },
+
+                    // 全件の下書きデータを配列で返す [{object}]
+                    get _getAllDraftsFromLocalStorage() {
+                        const getAllDrafts = JSON.parse(localStorage.getItem('DRAFT_LOG') || null);
+                        // localStorageに下書きデータが存在しなかった
+                        if (!getAllDrafts) return null;
+
+                        return getAllDrafts;
+                    },
+
+
+
+                    _addDraftUuidToFormData() {
+                        this.formData.draft_uuid = crypto.randomUUID();
+                    },
+
+                    // Localstorage保存ロジック
+                    saveToLocalStorage() {
+                        this._addDraftUuidToFormData()
+
+                        this.draftWorkLog.push(JSON.parse(JSON.stringify(this.formData)));
+                        localStorage.setItem('DRAFT_LOG', JSON.stringify(this.draftWorkLog));
+                        alert('オフラインのためブラウザに一時保存しました。(localStorage)');
+
+                        this.resetFormData();
+                    },
+
+                    // ----------------------------------------------------
+                    // 下書きの削除
+                    // ----------------------------------------------------
+                    // 選択中の１件をそのまま削除ボタン
+                    // ----------------------------------------------------
+                    deleteSelectedDraft() {
+                        if (!this.selectedDraftUuid) return;
+
+                        if (confirm('選択した下書きを削除してもよろしいですか？')) {
+                            // コア削除処理を呼び出す
+                            this._deleteDraftByUuid(this.selectedDraftUuid);
+
+                            // selectedDraftUuid を初期かしバージョン更新
+                            this.updateData('selectedDraftUuid', '');
+                        }
+                    },
+
+                    // ----------------------------------------------------
+                    // 読み込んだ下書きのポストが成功した際に該当の下書きを１件削除
+                    // ----------------------------------------------------
+                    clearSubmittedDraft() {
+                        // formDataが下書きである場合にのみ実行
+                        if (this.formData.draft_uuid) {
+                            // コア削除処理を呼び出す
+                            this._deleteDraftByUuid(this.formData.draft_uuid);
+
+                            // 現在のformDataが持っている下書きフラグ用UUID を初期化しバージョン更新
+                            this.updateData('formData.draft_uuid', null);
+                        }
+                    },
+
+                    // ----------------------------------------------------
+                    // コア関数 UUIDを受け取り localStorage/配列から削除するだけ
+                    // ----------------------------------------------------
+                    _deleteDraftByUuid(uuid) {
+                        this.draftWorkLog = this.draftWorkLog.filter(log => log.uuid !== uuid);
+                        localStorage.setItem('DRAFT_LOG', JSON.stringify(this.draftWorkLog));
+
+                        // 取得していた一時下書きデータを初期化 バージョンの更新
+                        this.updateData('draftWorkLog', '');
+                    },
+
+                    // localStorageの下書きを全件削除
+                    removeDraftAll() {
+                        localStorage.removeItem('DRAFT_LOG');
+
+                        // コンポーネントデータ側の下書きデータを初期化 update version
+                        this.updateData('draftWorkLog', '');
+                        isDraft = false;
+
+                        alert('オフライン下書きをすべて削除しました。');
+                    },
+
+                    // // 選択した下書きformDataを現在のフォームに流し込む
+                    // fillWithDraft() {
+                    //     if (!Array.isArray(this.hasDraft)) {
+                    //         console.error(`this.hasDraftの参照に失敗しました。`, { selectedDraftUuid: this.selectedDraftUuid, hasDraft: this.hasDraft });
+                    //         return '';
+                    //     }
+                    //     // 選択した下書きデータ１件を取得
+                    //     const selectedDraft = this.hasDraft.find(draft => draft.uuid === this.selectedDraftUuid);
+                    //     if (!selectedDraft) {
+                    //         console.error(`[fillWithDraft] UUIDが見つかりません。`, {selectedDraftUuid: this.selectedDraftUuid});
+                    //         return '';
+                    //     }
+                    //     // 下書きロジック用のUUIDを付与
+                    //     const newFormData = {
+                    //         ...selectedDraft,
+                    //         draft_uuid: this.selectedDraftUuid,
+                    //     };
+                    //     // updateDataメソッドに最終的な代入とバージョン管理を投げる
+                    //     this.updateData('formData', newFormData);
+                    //     isDraft = true;
+                    // },
+
+                    // 下書きの上書き例外処理
+                    //
+                    // isOnline: false かつ
 
 
                 // // 下書きの途中で新規の作業入力に切り替えてしまったとき
                 // skipDraft() {
                 //     this.isDraft = false;
                 // }
-            }));
+                };
+            });
         });
 
     </script>
