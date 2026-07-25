@@ -43,6 +43,13 @@
                     <input type="hidden" x-model="formData.created_by">
                 </div>
 
+                <div x-show="hasDraft" class="mb-2">
+                    <label  for="draft_select" class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2">
+                        <p>保存されていない下書きがあります。</p>
+                        <p x-show="!isOnline">ネットワークがある場所で送信と保存を完了させてください。</p>
+                    </label>
+                </div>
+
                 {{-- <div x-show="hasDraft" class="mb-2">
                     <label  for="draft_select" class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2">
                         <p>保存されていない下書きがあります。</p>
@@ -52,9 +59,9 @@
                     <select x-model="selectedDraftUuid"
                             name="draft_select"
                             class="w-full border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">-- 選択して下書きを確認してください。（<span x-text="hasDraft.length"></span>件） --</option>
-                        <template x-for="(draft, index) in hasDraft" :key="draft.uuid">
-                            <option :value="draft.uuid" x-text="`作業日: ${draft.work_date} | 作物名: ${draft.crop_name} | 作業名: ${draft.title || '未記入'}`"></option>
+                        <option value="">-- 選択して下書きを確認してください。（<span x-text="draftWorkLog.length"></span>件） --</option>
+                        <template x-for="(draft, index) in draftWorkLog" :key="draft.draft_uuid">
+                            <option :value="draft.draft_uuid" x-text="`作業日: ${draft.formData.work_date} | 作物名: ${draft.formData.crop_name || '未選択'} | 作業名: ${draft.formData.title || '未記入'}`"></option>
                         </template>
                     </select>
                     <button
@@ -79,10 +86,10 @@
                     {{-- 作物選択 --}}
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2" >
                         <label for="crop_season_id" class="form-label sm:col-span-2 font-semibold text-lg">作業した作物</label>
-                        <select x-model="formData.crop_season_id" @change="changeTest(cropSeason.id)" name="crop_season_id" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="crop_season_id">
+                        <select x-model="formData.crop_season_id" @change="changeCropSeasons()" name="crop_season_id" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="crop_season_id">
                             <option value="">作物を選択</option>
                             <template x-for="cropSeason in allCropSeasons" :key="cropSeason.id">
-                                <option :value="cropSeason.id" x-text="cropSeason.crop_name + cropSeason.year"></option>
+                                <option :value="cropSeason.id" x-text="cropSeason.crop_season_nameYear"></option>
                             </template>
                         </select>
                         {{-- 作付マスターに遷移 --}}
@@ -127,7 +134,12 @@
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
                         <label for="performed_by" class="form-label sm:col-span-2 font-semibold text-lg">作業実施者</label>
                         <select x-model="formData.performed_by" name="performed_by" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="performed_by">
+
                             <option value="">作業実施者</option>
+
+                            {{-- <template>
+
+                            </template> --}}
                             @foreach ($users as $user)
                                 <option value="{{ $user->id }}">{{ $user->name }}</option>
                             @endforeach
@@ -335,8 +347,6 @@
 
                     formData: {},
 
-
-
                     allMaterials: config.initialMaterials,
                     types: config.initialTypes,
                     allCropSeasons: config.initialCropSeasons,
@@ -347,6 +357,7 @@
                     isOnline: window.navigator.onLine,
                     // isOnline: false,
 
+                    // packedWorkLog:
                     allDrafts: '',
                     selectedDraftUuid: '',
 
@@ -367,10 +378,10 @@
                         return {
                             formData_uuid: crypto.randomUUID(),
                             draft_uuid: '',
-                            crop_name: '',
-                            crop_season_nameYear: '',
+                            crop_name: '不明',
 
                             crop_season_id: '',
+                            crop_season_nameYear: '不明',
                             created_by: 1,
                             performed_by: '',
                             work_date: this.getToday,
@@ -383,7 +394,10 @@
                     },
 
                     resetFormData() {
-                        this.formData = this.getDefaultFormData();
+                        const newFormData = this.getDefaultFormData();
+
+                        // formDataを上書き、バージョンの更新
+                        this.updateData('formData', newFormData);
                     },
 
                     // versoin更新メソッド
@@ -424,13 +438,21 @@
                     // ここまで初期化
                     // ----------------------------------------------------
 
+                    // 作物表示用metaデータの生成と格納
+                    changeCropSeasons() {
+                        const targetId = this.formData.crop_season_id;
 
-                    changeCropSeasons(targetId) {
-                        const newCrop = this.getCropSeasonByCropSeasonId(targetId);
-                        const getName = newCrop.name;
-                        const getNameYear = getName;
+                        const newCropSeason = this.getCropSeasonByCropSeasonId(targetId);
+                        if (!newCropSeason) {
+                            console.trace('[changeCropSeasons] 取得したオブジェクトが不正です。', { newCropSeason: newCropSeason, 'targetId':targetId })
+                            return;
+                        }
 
-                        // this.updateData('formData.crop_name', )
+                        const getName = newCropSeason.crop_name;
+                        const getNameYear = newCropSeason.crop_season_nameYear;
+
+                        this.updateData('formData.crop_name', getName);
+                        this.updateData('formData.crop_season_nameYear', getNameYear);
                     },
 
                     // crop_season_idから作物名を取得する
@@ -540,9 +562,11 @@
                     // post送信時に呼び出される
                     // @submit.preventで呼び出し
                     async submitForm() {
+                        // post送信および下書き保存用にパッケージされたformDataを取得
+                        const buildWorkLog = this.buildWorkLogPayload();
 
                         if (!this.isOnline) {
-                            this.saveToLocalStorage();
+                            this.saveToLocalStorage(buildWorkLog);
                             return;
                         }
 
@@ -558,6 +582,7 @@
                                     'Accept': 'application/json',
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                 },
+                                // body: JSON.stringify(this.formData),
                                 body: JSON.stringify(this.formData),
                                 signal: controller.signal // controle timeout
                             });
@@ -611,7 +636,7 @@
                             }
 
                             // 通信エラー、タイムアウトなど通信によるエラーの場合はLocalStorageに退避
-                            this.saveToLocalStorage();
+                            this.saveToLocalStorage(packedWorkLog);
                         }
                     },
 
@@ -662,108 +687,139 @@
                         //     lastVersion = this.version;
                         // }
 
+                    /**
+                     *
+                     * 下書きデータがあるか
+                     * @returns {Object | ''}
+                     */
                     hasDraft() {
-
+                        return this.draftWorkLog || '';
                     },
 
-                    //
-                    _mapGetDraft_fromLocalStorage() {
-                        const newRawDrafts = _getAllDraftsFromLocalStorage();
+                    /**
+                     * localStorageの下書きを読み込み、変形、変数へ出力する
+                     *
+                     * @function
+                     * @param {void}
+                     * @returns {?void} this.draftWorkLog
+                     *
+                     */
+                    loadDrafts() {
+                        // LocalStorageから生データ呼び出し
+                        const rawDrafts = this._getAllDraftsFromLocalStorage();
+                        if (!rawDrafts) {
+                            console.warn('[loadDrafts] 下書きの取得に失敗しました。', { rawDrafts: rawDrafts });
+                            return;
+                        }
+                        const parsedRawDraft = _parseRawDrafts(rawDrafts);
+                        if (!parsedRawDraft.draft_uuid) {
+                            console.error('[loadDrafts] 下書きデータが異常です。', { parsedRawDraft: parsedRawDraft, draft_uuid: parsedRawDraft.draft_uuid });
+                            return;
+                        }
 
+                        updateData('draftWorkLog', parsedRawDraft);
                     },
 
-                    // 全件の下書きデータを配列で返す [{object}]
+                    /**
+                     *
+                     * @function
+                     * @param {Object} rawDrafts = getAllDrafts
+                     * @returns {Object} parsedRawDraft
+                     *
+                     */
+                    _parseRawDrafts({ draft_uuid, saved_at, meta, formData }) {
+                        return {
+                            saved_at: saved_at,
+                            draft_uuid: draft_uuid,
+
+                            formData: {
+                                ...formData,
+                                draft_uuid: draft_uuid,
+                                crop_name: meta?.crop_name,
+                            },
+                        }
+                    },
+
+                    /**
+                     *
+                     * @function
+                     * @param void
+                     * @returns {Object} getAllDrafts
+                     *
+                     */
+                    // 全件の下書きデータを配列で返す {object}
                     get _getAllDraftsFromLocalStorage() {
                         const getAllDrafts = JSON.parse(localStorage.getItem('DRAFT_LOG') || null);
                         // localStorageに下書きデータが存在しなかった
-                        if (!getAllDrafts) return null;
-
+                        if (!getAllDrafts) {
+                            console.info('[_getAllDraftsFromLocalStorage] LocalStorageにDRAFT_LOGがありませんでした。(no issue)', { getAllDrafts: getAllDrafts });
+                            return null;
+                        }
                         return getAllDrafts;
                     },
 
-                    get allDrafts() {
-
-                    },
-
-                    mapSaveDraft() {
-
-                    },
-
-                    get _remapAllDraftsFromLocalStorage() {
-                        if (lastVersion !== this.version) {
-                            warnedKeys.clear();
-                            lastVersion = this.version;
-                        }
-
-                        const rawDraft = _getAllDraftsFromLocalStorage();
-
-                        const remapDraft = rawDraft.map((log) => ({
-                            ...log,
-                            draft_uuid: log.draft_uuid || crypto.randomUUID(),
-                            // bladeの下書きリストように作物名を取得
-                            crop_name: (() => {
-                                // if (!Array.isArray(this.allCropSeasons)) {
-                                //     if (!warnedKeys.has('hasDraft_call_crop_name__isArray_error')) {
-                                //         console.error(`this.allCropSeasonsの参照に失敗しました。`, { crop_season_id: log.crop_season_id - 1, allCropSeasons: this.allCropSeasons });
-                                //         warnedKeys.add('hasDraft_call_crop_name__isArray_error');
-                                //     }
-                                //     return '（不明）';
-                                // }
-                                if (!this.allCropSeasons?.[log.crop_season_id - 1]?.crops.name) {
-                                        console.error(`index:log.crop_season_id - 1 の値が不正です。未選択が代入されます。`, { value: log.crop_season_id - 1, allCropSeasons: this.allCropSeasons });
-                                }
-
-                                return this.allCropSeasons?.[log.crop_season_id - 1]?.crops.name || '未選択';
-                            })(),
-                        }));
-                        return remapDraft;
-
-                        // 下書きデータ配列にUUID確認処理をしたlocalStorageの下書きデータを格納し バージョン更新
-                        // this.updateData('draftWorkLog', newAllDrafts);
-                    },
-
-                    changeTest() {
-                        console.log('changeTestうごいたよ');
-                    },
-
                     mytest() {
-                        const myFav = [
-                            {name: 'リンゴ', type: 'fruits', country: 'Japan'},
-                            {name: 'バス', type: 'moblie', country: 'America'},
-                            {name: 'トラ', type: 'animal', country: 'Nepal'},
-                            ];
-
-                        const first = {name: 'リンゴ', type: 'fruits', country: 'Japan'};
-                        const {name: change, ...rest} = first;
-
-                            console.log('nameです', {name: name});
-                            console.log('changeです', {change: change});
-                            console.log('restだよ', {rest: rest});
+                        return '';
                     },
+                    //     const myFav = [
+                    //         {name: 'リンゴ', type: 'fruits', country: 'Japan'},
+                    //         {name: 'バス', type: 'moblie', country: 'America'},
+                    //         {name: 'トラ', type: 'animal', country: 'Nepal'},
+                    //         ];
+                    //     const obj = {
+                    //         a:'トラ',
+                    //         b:'いぬ',
+                    //         c:'ねこ',
+                    //         fruits: {
+                    //             d0: 'すいか',
+                    //             d1: 'バナナ'
+                    //         },
+                    //         mobile: {
+                    //             e0: 'バス',
+                    //             e1: 'パトカー',
+                    //         }
+                    //     };
 
-                    packWorkLog() {
-                        // 構造分解でformDataを分解する
-                        const { formData_uuid, draft_uuid, crop_name, crop_season_nameYear, ...payload } = formData;
 
+                    //     // const newObject = {a,b,c,Fruit:fruits.d1,mobile} = obj;
+                    //     // const printObject = (b, ...rest) = newObject;
+                    //     const newObject = {{a,b,c:hoge ,mobile} = obj};
+                    //     // const printObject = (b, ...rest);
+                    //     // console.log('printObject出力するよ', { printObject:printObject  });
+                    //     console.log('newObject出力するよ', { printObject:newObject });
+                    //     console.log('hoge', { printObject:hoge });
+                    //     console.log('hoge', { printObject:a });
+
+
+                    //     const first = {name: 'リンゴ', type: 'fruits', country: 'Japan'};
+                    //     const {name: change, ...rest} = first;
+
+                    //         console.log('nameです', {name: name});
+                    //         console.log('changeです', {change: change});
+                    //         console.log('restだよ', {rest: rest});
+                    // },
+
+                    // 保存用にpayloadとmetaデータなどに構造分解する
+                    buildWorkLogPayload() {
+                        const { formData_uuid, draft_uuid, crop_name, ...payload } = formData;
                         return {
                             draft_uuid: this.formData.draft_uuid = crypto.randomUUID(),
                             saved_at: new Data().toISOString(),
                             meta:{
-                                display_crop_season_nameYear: crop_season_nameYear,
                                 crop_name: crop_name,
                             },
-                            formData: { ...payload },
-                        }
+                            formData: { ...payload , crop_name},
+                        };
                     },
 
                     // Localstorage保存ロジック
-                    saveToLocalStorage() {
-                        this._addDraftUuidToFormData()
+                    saveToLocalStorage(getPackge) {
 
-                        this.draftWorkLog.push(JSON.parse(JSON.stringify(this.formData)));
+                        this.draftWorkLog.push(JSON.parse(JSON.stringify(this.getPackge)));
                         localStorage.setItem('DRAFT_LOG', JSON.stringify(this.draftWorkLog));
                         alert('オフラインのためブラウザに一時保存しました。(localStorage)');
 
+                        // バージョン更新はresetメソッドで行われる
                         this.resetFormData();
                     },
 
@@ -811,13 +867,15 @@
 
                     // localStorageの下書きを全件削除
                     removeDraftAll() {
+                        if (confirm('＊＊全件削除＊＊ 全ての下書きを削除してもよろしいですか？')){
+
                         localStorage.removeItem('DRAFT_LOG');
 
                         // コンポーネントデータ側の下書きデータを初期化 update version
                         this.updateData('draftWorkLog', '');
-                        isDraft = false;
 
                         alert('オフライン下書きをすべて削除しました。');
+                    }
                     },
 
                     // // 選択した下書きformDataを現在のフォームに流し込む
