@@ -34,7 +34,16 @@
                 action="{{ route('store') }}"
                 method="post"
             >
+
                 @csrf
+
+                <div class="grid grid-cols-3">
+                    <div class="col-start-3 border border-md border-blue-800">
+                        <span>現在のネットワーク：</span><span x-text="showOnlineStatus"></span>
+                        <button type="button" @click="toggleOnline()" class="rounded-md border border-md bg-gray-600 text-white block">切り替え</button>
+                    </div>
+                </div>
+
 
                 <span x-text="mytest()"></span>
 
@@ -44,13 +53,6 @@
                 </div>
 
                 <div x-show="hasDraft" class="mb-2">
-                    <label  for="draft_select" class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2">
-                        <p>保存されていない下書きがあります。</p>
-                        <p x-show="!isOnline">ネットワークがある場所で送信と保存を完了させてください。</p>
-                    </label>
-                </div>
-
-                {{-- <div x-show="hasDraft" class="mb-2">
                     <label  for="draft_select" class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2">
                         <p>保存されていない下書きがあります。</p>
                         <p x-show="!isOnline">ネットワークがある場所で送信と保存を完了させてください。</p>
@@ -64,13 +66,13 @@
                             <option :value="draft.draft_uuid" x-text="`作業日: ${draft.formData.work_date} | 作物名: ${draft.formData.crop_name || '未選択'} | 作業名: ${draft.formData.title || '未記入'}`"></option>
                         </template>
                     </select>
-                    <button
+                    {{-- <button
                         type="button"
                         @click="fillWithDraft()"
                         class="my-1 px-2 py-1 rounded-md border border-gray-500 bg-blue-300 items-center text-sm font-medium text-white"
                         >
                         下書きを読み込む
-                    </button>
+                    </button> --}}
                     <button
                         type="button"
                         @click="deleteSelectedDraft()"
@@ -80,7 +82,7 @@
                         >
                         選択した下書きを削除する
                     </button>
-                </div> --}}
+                </div>
 
                 <div class="input-form-inner ">
                     {{-- 作物選択 --}}
@@ -354,8 +356,9 @@
                     selectedType: '',
                     selectedMaterialId: '',
 
-                    isOnline: window.navigator.onLine,
+                    // isOnline: window.navigator.onLine,
                     // isOnline: false,
+                    isOnline: '',
 
                     // packedWorkLog:
                     allDrafts: '',
@@ -372,6 +375,10 @@
                         this.formData.work_date = this.getToday;
                         this.resetFormData();
                         this.remapCropSeasons();
+                        this.loadDrafts();
+
+                        //debug
+                        this.getOnlineStatus;
                     },
 
                     getDefaultFormData() {
@@ -439,6 +446,7 @@
                     // ----------------------------------------------------
 
                     // 作物表示用metaデータの生成と格納
+                    // !!!!! なおす updateDataに渡すformData.crop_nameがオブジェクトを参照してくれない
                     changeCropSeasons() {
                         const targetId = this.formData.crop_season_id;
 
@@ -690,14 +698,15 @@
                     /**
                      *
                      * 下書きデータがあるか
-                     * @returns {Object | ''}
+                     * @returns {Array | ''}
                      */
                     hasDraft() {
-                        return this.draftWorkLog || '';
+                        return this.draftWorkLog.length || null;
                     },
 
                     /**
                      * localStorageの下書きを読み込み、変形、変数へ出力する
+                     * 初期化作業
                      *
                      * @function
                      * @param {void}
@@ -705,57 +714,58 @@
                      *
                      */
                     loadDrafts() {
+                        this.resetDraftWorkLog();
                         // LocalStorageから生データ呼び出し
                         const rawDrafts = this._getAllDraftsFromLocalStorage();
                         if (!rawDrafts) {
                             console.warn('[loadDrafts] 下書きの取得に失敗しました。', { rawDrafts: rawDrafts });
-                            return;
-                        }
-                        const parsedRawDraft = _parseRawDrafts(rawDrafts);
-                        if (!parsedRawDraft.draft_uuid) {
-                            console.error('[loadDrafts] 下書きデータが異常です。', { parsedRawDraft: parsedRawDraft, draft_uuid: parsedRawDraft.draft_uuid });
+
+                            this.updateData('draftWorkLog', []);
                             return;
                         }
 
-                        updateData('draftWorkLog', parsedRawDraft);
                     },
 
                     /**
                      *
                      * @function
-                     * @param {Object} rawDrafts = getAllDrafts
-                     * @returns {Object} parsedRawDraft
+                     * @param {Array} rawDrafts
+                     * @returns {Array} parsedRawDrafts
                      *
                      */
-                    _parseRawDrafts({ draft_uuid, saved_at, meta, formData }) {
-                        return {
+                    _parseRawDrafts(rawDrafts) {
+                        const newParsedDrafs = rawDrafts.map(({ draft_uuid, saved_at, meta, formData }) => ({
                             saved_at: saved_at,
                             draft_uuid: draft_uuid,
 
                             formData: {
                                 ...formData,
                                 draft_uuid: draft_uuid,
-                                crop_name: meta?.crop_name,
+                                crop_name: meta?.crop_name || '未選択',
                             },
-                        }
+                        }));
+
+                        console.log('newPparseRawDrafts', { newParsedDrafs: newParsedDrafs });
+                        return newParsedDrafs;
                     },
 
                     /**
                      *
                      * @function
                      * @param void
-                     * @returns {Object} getAllDrafts
+                     * @returns {Array | null} rawData
                      *
                      */
                     // 全件の下書きデータを配列で返す {object}
                     get _getAllDraftsFromLocalStorage() {
-                        const getAllDrafts = JSON.parse(localStorage.getItem('DRAFT_LOG') || null);
-                        // localStorageに下書きデータが存在しなかった
-                        if (!getAllDrafts) {
-                            console.info('[_getAllDraftsFromLocalStorage] LocalStorageにDRAFT_LOGがありませんでした。(no issue)', { getAllDrafts: getAllDrafts });
+                        const rawData = localStorage.getItem('DRAFT_LOG'); // キーが無くてもreturn null
+                        if (!rawData) {
+                            console.info('[_getAllDraftsFromLocalStorage] LocalStorageにDRAFT_LOGがありませんでした。(no issue)',
+                            { rawData: rawData });
                             return null;
                         }
-                        return getAllDrafts;
+                        console.log('下書き生データ', JSON.parse(rawData));
+                        return JSON.parse(rawData);
                     },
 
                     mytest() {
@@ -803,8 +813,8 @@
                     buildWorkLogPayload() {
                         const { formData_uuid, draft_uuid, crop_name, ...payload } = formData;
                         return {
-                            draft_uuid: this.formData.draft_uuid = crypto.randomUUID(),
-                            saved_at: new Data().toISOString(),
+                            draft_uuid: this.formData.draft_uuid || crypto.randomUUID(),
+                            saved_at: new Date().toISOString(),
                             meta:{
                                 crop_name: crop_name,
                             },
@@ -821,6 +831,10 @@
 
                         // バージョン更新はresetメソッドで行われる
                         this.resetFormData();
+                    },
+
+                    resetDraftWorkLog() {
+                        this.updateData('draftWorkLog', []);
                     },
 
                     // ----------------------------------------------------
@@ -909,6 +923,40 @@
                 // skipDraft() {
                 //     this.isDraft = false;
                 // }
+
+
+
+                // debug
+                    toggleOnline() {
+                        if (this.isOnline) {
+                            this.isOnline = false;
+                            return this.saveOnlineFlag();
+                        }
+                        this.isOnline = true;
+                        return this.saveOnlineFlag();
+                    },
+
+                    saveOnlineFlag() {
+                        let flag = this.isOnline;
+                        localStorage.setItem('ONLINE_FLAG', JSON.stringify(flag));
+                    },
+
+                    get getOnlineStatus() {
+                        const savedFlag = JSON.parse(localStorage.getItem('ONLINE_FLAG'));
+                        console.warn('[getOnlineStatus] savedFlag', {savedFlag:savedFlag});
+                        if (savedFlag === null) {
+                        console.warn('[getOnlineStatus] savedFlag===null', {savedFlag:savedFlag});
+
+                            return this.isOnline = window.navigator.onLine;
+                        }
+                        return this.isOnline = savedFlag;
+
+                    },
+
+                    get showOnlineStatus() {
+                        if (this.isOnline) return 'オン';
+                        return 'オフ';
+                    },
                 };
             });
         });

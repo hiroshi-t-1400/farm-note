@@ -1,0 +1,40 @@
+{
+    "name": "Laravel & Vite Dev Environment",
+    
+    // ルートにある docker-compose.yml を参照
+    "dockerComposeFile": "../docker-compose.yml",
+    
+    // VS Codeがメインで接続するサービス名（質問にあった 'src' を指定）
+    "service": "src",
+    
+    // コンテナ内の作業ディレクトリ（環境に合わせて変更してください）
+    // "workspaceFolder": "/var/www/html",
+    "workspaceFolder": "/var/www/src",
+    
+    // VS Code起動（コンテナ接続）時に自動実行するコマンド
+    "postAttachCommand": "npm run dev",
+
+    // コンテナに接続した際、自動的にコンテナ側（リモート拡張ホスト）へインストールされる
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "adrianwilczynski.alpine-js-intellisense",
+                "EditorConfig.EditorConfig",
+                "dbaeumer.vscode-eslint",
+                "eamodio.gitlens",
+                "oderwat.indent-rainbow",
+                "shufo.vscode-blade-formatter",
+                "onecentlin.laravel-blade",
+                "IHunte.laravel-blade-wrapper",
+                "amiralizadeh9480.laravel-extra-intellisense",
+                "codingyu.laravel-goto-view",
+                "porifa.laravel-intelephense",
+                "naoray.laravel-goto-components",
+                "xdebug.php-debug",
+                "neilbrayfield.php-docblocker",
+                "MS-CEINTL.vscode-language-pack-ja"
+            ]
+        }
+    }
+}
