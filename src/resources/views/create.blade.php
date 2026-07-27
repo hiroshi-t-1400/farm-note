@@ -357,7 +357,6 @@
                     // isOnline: false,
                     isOnline: '',
 
-                    // packedWorkLog:
                     allDrafts: '',
                     selectedDraftUuid: '',
 
@@ -399,18 +398,9 @@
                         const newFormData = this.getDefaultFormData();
 
                         this.formData = newFormData;
-                        // this.updateData('formData', newFormData);
                     },
 
-                    // versoin更新メソッド
-                    /**
-                     * @return null
-                     *
-                     * key:更新されるオブジェクト名（key）
-                     * value:処理によって更新されたプロパティ値
-                     */
-
-                    // 楽観ロックによるバージョン管理、不要そうになったのでボツ
+                    // 楽観ロックによるバージョン管理、不要そうになったので保留
                     // updateData(key, value) {
                     //     this[key] = value;
                     //     this.version++;
@@ -433,9 +423,7 @@
                             crop_name: season.crops.name,
                             crop_season_nameYear: season.crops.name + season.year,
                         }));
-                        // console.log(remapArray);
                         this.allCropSeasons = remapArray;
-                        // this.updateData('allCropSeasons', remapArray);
                     },
 
                     // ----------------------------------------------------
@@ -561,9 +549,7 @@
 
                     /////
                     // fetch()送信
-                    //  主に下書き機能実装のため
 
-                    // post送信時に呼び出される
                     // @submit.preventで呼び出し
                     async submitForm() {
                         // post送信および下書き保存用にパッケージされたformDataを取得
@@ -686,16 +672,6 @@
                     // ----------------------------------------------------
                     // 下書き機能
                     // ----------------------------------------------------
-                        // if (lastVersion !== this.version) {
-                        //     warnedKeys.clear();
-                        //     lastVersion = this.version;
-                        // }
-
-                    /**
-                     *
-                     * 下書きデータがあるか
-                     * @returns {Array | ''}
-                     */
                     hasDraft() {
                         console.log('changeCrop 配列の数', { 'draftWorkLog.length': this.draftWorkLog.length });
 
@@ -719,7 +695,6 @@
                             return;
                         }
 
-                        // _parse**()内部でエラーにアラートをださせる？まずは動作確認
                         const parsedRawDrafts = this._parseRawDrafts(rawDrafts);
 
                         this.draftWorkLog = [ ...parsedRawDrafts ];
@@ -727,8 +702,6 @@
 
                     /**
                      *
-                     * @param {Array}
-                     * @returns {Array} newConstructDrafts
                      */
                     _parseRawDrafts(rawDrafts) {
                         const newConstructDrafts = [];
@@ -737,16 +710,6 @@
                             const newParsedDrafts = JSON.parse(rawDrafts);
 
                             for (const { draft_uuid, saved_at, meta, formData } of newParsedDrafts ) {
-
-                                // forが無限ループしていた時のデバッグ用カウンター、おそらく不要、動作に問題が無ければ次々回コミットまでに削除
-                                // if (this.version > 7) {
-                                //     console.log('loadDrafts()が繰り返し実行されました。', { 'this.draftWorkLog': this.draftWorkLog });
-                                //     throw new Error('FatalError for...tryが繰り返し実行されています。')
-                                // } else {
-                                //     this.version++;
-                                // }
-                                // // debugEnd
-
                                 // draft_uuidが存在しない場合は即座に例外を発生させて処理を打ち切る
                                 if (!draft_uuid) {
                                     // throw new Error('UUIDが存在しない要素が含まれています');
@@ -760,19 +723,21 @@
                                     formData: {
                                         ...formData,
                                         draft_uuid: draft_uuid,
-                                        crop_name: meta?.crop_name || '未選択'
+                                        crop_name: meta?.crop_name || '未選択',
+                                        crop_season_nameYear: meta?.crop_season_nameYear
                                     }
                                 });
                             }
                         } catch (e) {
                             // ほぼ確実にLocalStorageの下書きが破損しているため、LocalStorageの下書きを削除
                             // これはリリース前のデバッグ用、キャンセルでLocalStorageの内容を取得するため
-                            if (confirm('下書きデータをすべて削除します。＊＊キャンセルを選択しても下書きデータの読み込みはできません＊＊')) {
+                            if (confirm('エラー：ブラウザの下書きデータが破損しています。下書きデータをすべて削除して初期化しますか？。\n※削除しても連続してエラーが発生する場合は管理者に連絡してください。\n＊＊＊＊\nキャンセルを選択しても下書きデータの読み込みはできません。\n削除するまで下書きデータの保存はできません。\n＊＊＊＊')) {
                                 this.removeDraftAll();
                             }
                             // これが本番用、
                             // this.removeDraftAll();
                             // alert('下書きデータが破損しています。下書きデータを削除しました。');
+                            // alert('エラー：ブラウザの下書きデータが破損しています。\n＊＊＊＊\nキャンセルを選択しても下書きデータの読み込みはできません。\n削除するまで下書きデータの保存はできません。\n※削除しても連続してエラーが発生する場合は管理者に連絡してください。＊＊＊＊');
 
                             if (e instanceof SyntaxError) {
                                 console.error(`'[_parseRawDrafts JSON.parse(rawDrafts)] Exist broken Draft. SyntaxError ${e.message}'`, { rawDrafts: rawDrafts });
@@ -803,16 +768,30 @@
                     },
 
                     // Localstorage保存ロジック
-                    saveToLocalStorage(getPackge) {
+                    saveToLocalStorage(getPayload) {
+                        try {
+                            let tempPayloads = this.draftWorkLog || [];
 
-                        this.draftWorkLog.push(JSON.parse(JSON.stringify(this.getPackge)));
-                        localStorage.setItem('DRAFT_LOG', JSON.stringify(this.draftWorkLog));
+                            // push予定の持つdraft_uuidと同じdraft_uuidをstateに持つコンポーネント上の下書きデータストックから排除する
+                            if (tempPayloads.length > 0) {
+                                tempPayloads = tempPayloads.filter(p => p.draft_uuid !== getPayload.draft_uuid);
+                            }
+                            tempPayloads.push(JSON.parse(JSON.stringify(getPayload)));
+                            localStorage.setItem('DRAFT_LOG', JSON.stringify(tempPayloads));
+                        } catch(e) {
+                            console.group('[saveToLocalStorage] 下書きの保存に失敗しました。');
+                                console.info('実行メソッド: JSON.stringify(getPayload)');
+                                console.error(`'${e.name}: ${e.message}\n保存予定のデータ'`, { getPayload: getPayload });
+                            console.groupEnd();
+                            // ユーザにリトライさせてなお失敗するのであればLocalStrageの下書きを削除して
+                            alert('エラー：下書きに失敗しました。ブラウザを閉じてからやり直してください。\n※連続してエラーが発生する場合は管理者に連絡してください。');
+                            return;
+                        }
+
                         alert('オフラインのためブラウザに一時保存しました。(localStorage)');
 
-                        // バージョン更新はresetメソッドで行われる
                         this.resetFormData();
                     },
-
 
                     // 保存用にpayloadとmetaデータなどに構造分解する
                     buildWorkLogPayload() {
@@ -822,6 +801,7 @@
                             saved_at: new Date().toISOString(),
                             meta:{
                                 crop_name: crop_name,
+                                crop_season_nameYear: crop_season_nameYear
                             },
                             formData: { ...payload , crop_name}
                         };
@@ -866,7 +846,6 @@
                         this.draftWorkLog = this.draftWorkLog.filter(log => log.draft_uuid !== uuid);
                         localStorage.setItem('DRAFT_LOG', JSON.stringify(this.draftWorkLog));
 
-                        // this.updateData('draftWorkLog', '');
                         this.initDraftWorkLog();
                     },
 
@@ -881,12 +860,7 @@
                     },
 
                     /**
-                     * 選択した下書きformDataを現在のフォームに流し込む
                      * 読み込むボタンから呼び出し
-                     *
-                     * @param {void} refer:selectedDraftId
-                     *
-                     *
                      */
                     fillWithDraft() {
                         // hasDraftがfalseならボタンも表示されないのであり得ないアクセス
@@ -905,7 +879,6 @@
                         }
 
                         this.formData = draftFormData;
-                        // this.updateData('formData', newFormData);
                     },
 
 
