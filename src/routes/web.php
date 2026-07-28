@@ -12,8 +12,8 @@ Route::get('/', function () {
 });
 
 
-Route::get('/create', [WorkController::class, 'create'])->name('create');
-Route::post('/create', [WorkController::class, 'store'])->name('store');
+Route::get('/work-logs/create', [WorkController::class, 'create'])->name('create');
+Route::post('/work-logs/create', [WorkController::class, 'store'])->name('store');
 // Route::post('/create', function (Request $request) {
 //     dd($request);
 // })->name('store');

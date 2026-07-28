@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\CropSeason;
+use App\Models\Crop\CropSeason;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

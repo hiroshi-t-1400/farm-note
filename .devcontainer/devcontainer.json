@@ -5,14 +5,15 @@
     "dockerComposeFile": "../docker-compose.yml",
     
     // VS Codeがメインで接続するサービス名（質問にあった 'src' を指定）
+    // "service": "src",
     "service": "src",
     
     // コンテナ内の作業ディレクトリ（環境に合わせて変更してください）
     // "workspaceFolder": "/var/www/html",
-    "workspaceFolder": "/var/www/src",
+    "workspaceFolder": "/var/www",
     
     // VS Code起動（コンテナ接続）時に自動実行するコマンド
-    "postAttachCommand": "npm run dev",
+    // "postAttachCommand": "npm run dev",
 
     // コンテナに接続した際、自動的にコンテナ側（リモート拡張ホスト）へインストールされる
     "customizations": {
@@ -34,7 +35,12 @@
                 "xdebug.php-debug",
                 "neilbrayfield.php-docblocker",
                 "MS-CEINTL.vscode-language-pack-ja"
-            ]
+            ],
+            "settings": {
+                "terminal.integrated.cwd": "/var/www/src",
+                "php.suggest.basic": false
+            }
         }
-    }
+    },
+    "postAttachCommand": "cd /var/www/src && npm run dev"
 }

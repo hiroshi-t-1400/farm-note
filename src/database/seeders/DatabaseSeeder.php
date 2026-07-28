@@ -2,13 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\Crop;
-use App\Models\CropSeason;
+
+use App\Models\Crop\Crop;
+use App\Models\Crop\CropSeason;
 use App\Models\Field;
-use App\Models\Material;
-use App\Models\MaterialCategory;
+use App\Models\Material\Material;
+use App\Models\Material\MaterialCategory;
 use App\Models\User;
-use App\Models\WorkLog;
+use App\Models\WorkLog\WorkLog;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;

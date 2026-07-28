@@ -22,9 +22,7 @@ services:
     working_dir: /var/www/src
     # ホストの現在のディレクトリ（Laravelプロジェクトルートsrc/）をコンテナ内の/var/html/srcにマウント
     volumes:
-      - ./src:/var/www/src
-      - .:/var/www/
-      # - ./sec_src:/var/www/src
+      - .:/var/www
     # 使用するWEBサーバーコンテナを指定
     # ファイル下部のネットワーク定義が必須
     networks:

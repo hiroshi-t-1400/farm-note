@@ -5,13 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreWorkLogRequest;
 use Illuminate\Http\Request;
 
-use App\Models\Crop;
-use App\Models\CropSeason;
+use App\Models\Crop\CropSeason;
 use App\Models\User;
-use App\Models\Material;
-use App\Models\MaterialCategory;
+use App\Models\Material\Material;
+use App\Models\Material\MaterialCategory;
 use App\Models\WorkLog;
-use App\Models\MaterialWorkLog;
 
 use Illuminate\Http\JsonResponse;
 
@@ -36,13 +34,13 @@ class WorkController extends Controller
 
         $types = MaterialCategory::all();
 
-        return response()->view('create', compact('crop_seasons', 'users', 'materials', 'types'));
+        return response()->view('/work-logs/create', compact('crop_seasons', 'users', 'materials', 'types'));
     }
 
     /**
      * 作業記録の登録
      *
-     * @param Request $request
+     * @param StoreWorkLogRequest $request
      * @return JsonResponse
      *
      */
