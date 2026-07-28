@@ -1,7 +1,11 @@
 <?php
 
-namespace App\Models;
 
+namespace App\Models;
+namespace App\Models\WorkLog;
+
+use App\Models\Material\Material;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;

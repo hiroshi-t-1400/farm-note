@@ -231,9 +231,12 @@ export default (config) => {
                     return;
                 }
 
+                // オンライン時処理
+                let timeoutId = null;
+
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5000ms to timeout
+                    timeoutId = setTimeout(() => controller.abort(), 5000); // 5000ms to timeout
 
                     // オンライン時の処理、fetch()でJSONを送信
                     const response = await fetch('/work-logs/create', {
@@ -269,7 +272,8 @@ export default (config) => {
                         console.error('サーバーエラーが発生しました。Status:', response.status);
                         alert('サーバーエラーが発生しました。（Status: ' + response.status + '）');
 
-                        throw new Error('Server Error: ' + response.status);
+                        // throw new Error('Server Error: ' + response.status);
+                        return;
                     }
 
                     // ----------------------------------------------------
@@ -286,7 +290,8 @@ export default (config) => {
                     // コントローラから帰ってきたURLへリダイレクト
                     window.location.href = data.redirect_url;
                 } catch (error) {
-                    clearTimeout(timeoutId); // 念のためにタイマーを解除
+
+                    if (timeoutId) clearTimeout(timeoutId); // 念のためにタイマーを解除
 
                     // デバッグ用にエラーの詳細を出力
                     if (error.name === 'AbortError') {
@@ -330,11 +335,11 @@ export default (config) => {
             },
 
             // バリデーションエラーメッセージを返す: null or String
-            getError(field, rowId = null) {
-                if (rowId === null) {
+            getError(field, uuid = null) {
+                if (uuid === null) {
                     return this.mappedErrors?.[field] || null;
                 } else {
-                    return this.mappedErrors?.[rowId]?.[field] || null;
+                    return this.mappedErrors?.[uuid]?.[field] || null;
                 }
             },
 

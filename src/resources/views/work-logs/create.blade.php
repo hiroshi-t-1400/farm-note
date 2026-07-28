@@ -256,8 +256,8 @@
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：10本 300L"
                                         >
-                                        <span x-show="getError('quantity', material_log.uuid)"
-                                            x-text="getError('quantity', material_log.uuid)"
+                                        <span x-show="getError('quantity', addForm_uuid)"
+                                            x-text="getError('quantity', addForm_uuid)"
                                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                                             role="alert"
                                         ></span>
@@ -274,8 +274,8 @@
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
                                         >
-                                        <span x-show="getError('dilution_rate', material_log.uuid)"
-                                            x-text="getError('dilution_rate', material_log.uuid)"
+                                        <span x-show="getError('dilution_rate', addForm_uuid)"
+                                            x-text="getError('dilution_rate', addForm_uuid)"
                                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                                             role="alert"
                                         ></span>
@@ -292,8 +292,8 @@
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
                                         >
-                                        <span x-show="getError('material_amount', material_log.uuid)"
-                                            x-text="getError('material_amount', material_log.uuid)"
+                                        <span x-show="getError('material_amount', addForm_uuid)"
+                                            x-text="getError('material_amount', addForm_uuid)"
                                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
                                             role="alert"
                                         ></span>

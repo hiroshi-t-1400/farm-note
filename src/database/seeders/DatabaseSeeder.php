@@ -5,10 +5,10 @@ namespace Database\Seeders;
 
 use App\Models\Crop\Crop;
 use App\Models\Crop\CropSeason;
-use App\Models\Field;
 use App\Models\Material\Material;
 use App\Models\Material\MaterialCategory;
 use App\Models\User;
+use App\Models\WorkLog\Field;
 use App\Models\WorkLog\WorkLog;
 
 use Illuminate\Database\Seeder;
