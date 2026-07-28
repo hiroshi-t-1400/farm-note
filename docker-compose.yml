@@ -41,8 +41,8 @@ services:
       - "8080:80"
     volumes:
       # srcのlaravelのコードをnginxにもマウント
-        - ./src:/var/www/src
-        # - .:/var/www/src
+        # - ./src:/var/www/src
+        - .:/var/www/src
       # Nginxの設定ファイルをコンテナ何にバインドマウント
         - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf
     networks:

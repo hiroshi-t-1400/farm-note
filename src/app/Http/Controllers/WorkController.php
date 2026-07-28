@@ -9,7 +9,7 @@ use App\Models\Crop\CropSeason;
 use App\Models\User;
 use App\Models\Material\Material;
 use App\Models\Material\MaterialCategory;
-use App\Models\WorkLog;
+use App\Models\WorkLog\WorkLog;
 
 use Illuminate\Http\JsonResponse;
 

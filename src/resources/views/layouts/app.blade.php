@@ -21,11 +21,14 @@
 
 </head>
 <body>
+    <div class="isorate grid grid-cols-[minmax(auto,_200px)_auto] grid-rows-1">
 
-    <div class="main-part">
-        @yield('content')
+
+        <div class="main-part">
+            @yield('content')
+
+        </div>
 
     </div>
-
 </body>
 </html>
