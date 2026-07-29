@@ -21,9 +21,12 @@
 
 </head>
 <body>
+    <x-slot name="content">
+
+
 
         <div class="main-part">
-            @yield('content')
+            {{ $content }}
 
         </div>
 </body>
