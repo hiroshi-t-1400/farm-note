@@ -577,16 +577,12 @@ export default (config) => {
                 this.formData = draftFormData;
             },
 
+            // 下書きの途中で新規の作業入力に切り替えてしまったとき
+            skipDraft() {
+                this.formData.draft_uuid = '';
 
-            // 下書きの上書き例外処理
-            //
-            // isOnline: false かつ
-
-
-            // // 下書きの途中で新規の作業入力に切り替えてしまったとき
-            // skipDraft() {
-            //     this.isDraft = false;
-            // }
+                this.saveToLocalStorage();
+            },
 
 
 

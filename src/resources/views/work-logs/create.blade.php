@@ -1,5 +1,9 @@
 <x-work-logs.application.create>
 
+<x-slot:buttons>
+
+</x-slot:buttons>
+
 
     <x-slot:title>
         <div class="title-wrapper py-5 my-5 text-center">
@@ -46,10 +50,18 @@
                 <x-slot:bottom>
                     {{-- 下部ボタンエリア --}}
                     <div class="submit-button grid grid-cols-3 gap-2  sm:max-w-1/2 ">
-                        <button type="submit" class="px-4 py-1 rounded-md bg-blue-500 text-bold text-white">保存</button>
-                        <div class="grid place-content-center rounded-md text-bold ">キャンセル</div>
-
-                        <div class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書き保存</div>
+                        <x-ui.button type="submit" variant="primary" >
+                            保存
+                        </x-ui.button>
+                        <x-ui.button href="/work-logs/create" variant="secondary">キャンセル</x-ui.button>
+                        {{-- <div class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書き保存</div> --}}
+                        <x-ui.button
+                            type="button"
+                            x-show="hasDraft"
+                            
+                        >
+                            下書きをやめて新しい記録として保存
+                        </x-ui.button>
                         {{-- <div x-show="isDraft" class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書きをやめて新しい記録として保存</div> --}}
                     </div>
                 </x-slot>

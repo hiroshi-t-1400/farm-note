@@ -14,20 +14,21 @@
             <option :value="draft.draft_uuid" x-text="`作業日: ${draft.formData.work_date} | 作物名: ${draft.formData.crop_name || '未選択'} | 作業名: ${draft.formData.title || '未記入'}`"></option>
         </template>
     </select>
-    <button
+
+    <x-ui.button
+        variant="primary-ghost"
         type="button"
         @click="fillWithDraft()"
-        class="my-1 px-2 py-1 rounded-md border border-gray-500 bg-blue-300 items-center text-sm font-medium text-white"
+        {{-- class="my-1 px-2 py-1 rounded-md border border-gray-500 bg-blue-300 items-center text-sm font-medium text-white" --}}
         >
         下書きを読み込む
-    </button>
-    <button
+    </x-ui.button>
+
+    <x-ui.button
+        variant="alert-ghost"
         type="button"
         @click="deleteSelectedDraft()"
-        :disabled="!selectedDraftUuid"
-        :class="{ 'opacity-50 cursor-not-allowed': !selectedDraftUuid }"
-        class="my-1 px-2 py-1 rounded-md border border-gray-500 bg-red-300 items-center text-sm font-medium text-white"
-        >
-        選択した下書きを削除する
-    </button>
-</div>
+        ::disabled="!selectedDraftUuid"
+    >
+            選択した下書きを削除する
+    </x-ui.button>
