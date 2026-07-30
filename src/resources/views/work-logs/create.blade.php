@@ -1,15 +1,13 @@
 <x-work-logs.application.create>
 
-
-    @slot('title')
+    <x-slot:title>
         <div class="title-wrapper py-5 my-5 text-center">
             <h2 class="font-bold text-3xl">作業登録</h2>
         </div>
-    @endslot
+    </x-slot>
 
 
-
-    @slot('form')
+    <x-slot:form>
         <div class="input-form-wrapper">
 
             <form
@@ -17,6 +15,7 @@
                     initialMaterials: @js($materials),
                     initialTypes: @js($types),
                     initialCropSeasons: @js($crop_seasons),
+                    initialUsers: @js($users)
                 })"
                 @submit.prevent="submitForm"
                 action="{{ route('store') }}"
@@ -25,12 +24,14 @@
 
                 @csrf
 
+                {{-- デバッグ用のネットワーク状態インジケータ --}}
                 <div class="grid grid-cols-3">
                     <div class="col-start-3 border border-md border-blue-800">
                         <span>現在のネットワーク：</span><span x-text="showOnlineStatus"></span>
                         <button type="button" @click="toggleOnline()" class="rounded-md border border-md bg-gray-600 text-white block">切り替え</button>
                     </div>
                 </div>
+
 
                 <div class="block text-sm font-medium text-gray-700 mb-2" >
                     作業登録者：　{{ $users[0]->name }}
@@ -117,20 +118,20 @@
                         </span>
                     </div>
 
+
+
+
                     {{-- 作業実施者 --}}
                     <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
                         <label for="performed_by" class="form-label sm:col-span-2 font-semibold text-lg">作業実施者</label>
-                        <select x-model="formData.performed_by" name="performed_by" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="performed_by">
 
+                        <select x-model="formData.performed_by" name="performed_by" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="performed_by">
                             <option value="">作業実施者</option>
 
-                            {{-- <template>
+                            <template x-for="user in allUsers">
+                                <option :value="user.id" x-text="user.name"></option>
 
-                            </template> --}}
-                            @foreach ($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                            @endforeach
-                            {{-- 登録者作業者のidをデフォルトで選択させる --}}
+                            </template>
                         </select>
                         {{-- ユーザ登録に遷移 --}}
                         <a href="" class="mx-5 text-bold">＋作業者を新規に追加する</a>
@@ -139,7 +140,10 @@
                             x-text="getError('performed_by')"
                             class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
                         </span>
+                    <x-common.form.error field="performed_by" add_uuid=''>
+                    </x-common.form.error>
                     </div>
+
 
                     {{-- 作業内容 --}}
                     <div class="grid grid-cols-1 bg-white mb-1 px-1 py-2">
@@ -301,6 +305,6 @@
                 </div>
             </form>
         </div>
-    @endslot
+    </x-slot>
 
 </x-application.work-logs.create>

@@ -11,6 +11,7 @@ export default (config) => {
             types: config.initialTypes,
             allCropSeasons: config.initialCropSeasons,
             allCrops: config.initialCrops,
+            allUsers: config.initialUsers,
             selectedType: '',
             selectedMaterialId: '',
 
@@ -31,7 +32,6 @@ export default (config) => {
                 this.resetFormData();
                 this.remapCropSeasons();
                 this.initDraftWorkLog();
-
                 //debug
                 this.getOnlineStatus;
             },
@@ -335,8 +335,8 @@ export default (config) => {
             },
 
             // バリデーションエラーメッセージを返す: null or String
-            getError(field, uuid = null) {
-                if (uuid === null) {
+            getError(field, uuid = '') {
+                if (uuid === '') {
                     return this.mappedErrors?.[field] || null;
                 } else {
                     return this.mappedErrors?.[uuid]?.[field] || null;
