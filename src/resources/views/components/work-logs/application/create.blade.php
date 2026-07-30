@@ -8,14 +8,17 @@
 
         {{ $formHead }}
 
-        {{ $draftUi }}
+        {{ $header }}
+
+        <x-work-logs.draft-ui />
 
 
         <div class="input-form-inner ">
 
             <x-work-logs.basic-form-section />
 
-            {{ $materials }}
+            <x-work-logs.material-logs />
+
 
         </div>
 
