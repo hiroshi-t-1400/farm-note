@@ -21,13 +21,12 @@
 
 </head>
 <body>
-    <x-slot name="content">
-
 
 
         <div class="main-part">
             {{ $content }}
 
         </div>
+        
 </body>
 </html>

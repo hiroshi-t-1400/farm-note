@@ -1,5 +1,6 @@
 <x-work-logs.application.create>
 
+
     <x-slot:title>
         <div class="title-wrapper py-5 my-5 text-center">
             <h2 class="font-bold text-3xl">作業登録</h2>
@@ -7,7 +8,7 @@
     </x-slot>
 
 
-    <x-slot:form>
+    <x-slot:formHead>
         <div class="input-form-wrapper">
 
             <form
@@ -23,10 +24,12 @@
             >
 
                 @csrf
-
+    </x-slot>
+    <x-slot:draftUi>
                 {{-- デバッグ用のネットワーク状態インジケータ --}}
                 <div class="grid grid-cols-3">
                     <div class="col-start-3 border border-md border-blue-800">
+                        <p>デバッグツール</p>
                         <span>現在のネットワーク：</span><span x-text="showOnlineStatus"></span>
                         <button type="button" @click="toggleOnline()" class="rounded-md border border-md bg-gray-600 text-white block">切り替え</button>
                     </div>
@@ -70,94 +73,13 @@
                     </button>
                 </div>
 
-                <div class="input-form-inner ">
-                    {{-- 作物選択 --}}
-                    <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2" >
-                        <label for="crop_season_id" class="form-label sm:col-span-2 font-semibold text-lg">作業した作物</label>
-                        <select x-model="formData.crop_season_id" @change="changeCropSeasons()" name="crop_season_id" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="crop_season_id">
-                            <option value="">作物を選択</option>
-                            <template x-for="cropSeason in allCropSeasons" :key="cropSeason.id">
-                                <option :value="cropSeason.id" x-text="cropSeason.crop_season_nameYear"></option>
-                            </template>
-                        </select>
-                        {{-- 作付マスターに遷移 --}}
-                        <a href="" class="mx-5 text-bold">＋作付けを新規に追加する</a>
-                        {{-- バリデーションメッセージ --}}
-                        <span x-show="getError('crop_season_id')"
-                            x-text="getError('crop_season_id')"
-                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
-                            role="alert">
-                        </span>
-                    </div>
-
-                    {{-- 作業名称 --}}
-                    <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
-                        <label for="title" class="form-label sm:col-span-2 font-semibold text-lg">作業名称</label>
-                        <input type="text" x-model="formData.title" name="title" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="（例）防除１回目">
-                        {{-- バリデーションメッセージ --}}
-                        <span
-                            x-text="getError('title')"
-                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
-                        </span>
-                    </div>
-
-                    {{-- 作業日 --}}
-                    <div class="bg-white mb-1 px-1 py-2">
-                        <label for="work_date" class="form-label block font-semibold text-lg">作業日</label>
-                        {{-- <div class="sm:col-start-1"> --}}
-                        <input type="date" x-model="formData.work_date" name="work_date" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg max-w-40">
-                        <div class="inline-block">
-                            {{-- 完了した作業を登録する場合は予定日のチェックオフ、今後の予定を登録する場合はチェックオン、投稿が下書きになった場合は上書きしてチェックオフ、現在より過去か未来かで自動的に値を決定する？>>するつもりだった作業を登録する場合を考慮する？ --}}
-                            <input type="checkbox" x-model="formData.status" name="status" id="status" class="ms-2" >
-                            <label for="status" class="form-label font-semibold text-lg sub-checkbox">予定</label>
-                        </div>
-                        {{-- バリデーションメッセージ --}}
-                        <span
-                            x-text="getError('work_date')"
-                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
-                        </span>
-                    </div>
+    </x-slot>
 
 
 
 
-                    {{-- 作業実施者 --}}
-                    <div class="grid sm:grid-cols-2 grid-cols-1 bg-white mb-1 px-1 py-2">
-                        <label for="performed_by" class="form-label sm:col-span-2 font-semibold text-lg">作業実施者</label>
 
-                        <select x-model="formData.performed_by" name="performed_by" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" id="performed_by">
-                            <option value="">作業実施者</option>
-
-                            <template x-for="user in allUsers">
-                                <option :value="user.id" x-text="user.name"></option>
-
-                            </template>
-                        </select>
-                        {{-- ユーザ登録に遷移 --}}
-                        <a href="" class="mx-5 text-bold">＋作業者を新規に追加する</a>
-                        {{-- バリデーションメッセージ --}}
-                        <span
-                            x-text="getError('performed_by')"
-                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
-                        </span>
-                    <x-common.form.error field="performed_by" add_uuid=''>
-                    </x-common.form.error>
-                    </div>
-
-
-                    {{-- 作業内容 --}}
-                    <div class="grid grid-cols-1 bg-white mb-1 px-1 py-2">
-                        <label for="content" class="form-label font-semibold text-lg">作業内容</label>
-                        <textarea type="text" x-model="formData.content" name="content" class="rounded-md outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="作業した内容を記入してください。">防除１１回目　ストロビーフロアブル
-                        </textarea>
-                        {{-- 内容のテンプレートを作成する？ --}}
-                        {{-- バリデーションメッセージ --}}
-                        <span x-show="getError('content')"
-                            x-text="getError('content')"
-                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2" role="alert">
-                        </span>
-                    </div>
-
+    <x-slot:materials>
                     {{-- 使用資材記録 --}}
                     <div class="grid grid-cols-1 bg-white mb-1 px-1 py-2">
                         <div class="form-label mb-1 font-semibold text-lg">資材の記録</div>
@@ -235,53 +157,56 @@
 
                                     <div class="grid sm:grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
                                         <label :for="`formData.material_logs[${index}][quantity]`" >使用量</label>
-                                        <input type="text"
+                                        <div class="form-parts-block  sm:col-span-2">
+                                            <input type="text"
                                             :name="`formData.material_logs[${index}][quantity]`"
                                             x-model="material_log.quantity"
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：10本 300L"
-                                        >
-                                        <span x-show="getError('quantity', addForm_uuid)"
-                                            x-text="getError('quantity', addForm_uuid)"
-                                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
-                                            role="alert"
-                                        ></span>
+                                            >
+                                        </div>
+                                        <div class="form-parts-block  sm:col-span-2">
+                                            <x-common.form.error field='quantity' addUuid='material_log.addForm_uuid' />
+                                        </div>
                                     </div>
 
                                     <div
                                         x-show="material_log.type_id == 1 || material_log.type_id == 2"
                                         class="grid sm:grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
                                         <label :for="`formData.material_logs[${index}][dilution_rate]`" >希釈倍率</label>
-                                        <input
+                                        <div class="form-parts-block  sm:col-span-2">
+
+                                            <input
                                             type="text"
                                             :name="`formData.material_logs[${index}][dilution_rate]`"
                                             x-model="material_log.dilution_rate"
-                                            class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
+                                            class="rounded-md outline outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
-                                        >
-                                        <span x-show="getError('dilution_rate', addForm_uuid)"
-                                            x-text="getError('dilution_rate', addForm_uuid)"
-                                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
-                                            role="alert"
-                                        ></span>
+                                            >
+                                        </div>
+                                        <div class="form-parts-block  sm:col-span-2">
+                                            <x-common.form.error field='dilution_rate' addUuid='material_log.addForm_uuid' />
+                                        </div>
                                     </div>
 
                                     <div
                                         x-show="material_log.type_id == 1 || material_log.type_id == 2"
                                         class="grid sm:grid-cols-[auto_1fr] sm:col-start-2 gap-x-4 px-2 m-0.5 ">
                                         <label :for="`formData.material_logs[${index}][material_amount]`" >原液量</label>
-                                        <input
+                                        <div class="form-parts-block  sm:col-span-2">
+
+                                            <input
                                             type="text"
                                             :name="`formData.material_logs[${index}][material_amount]`"
                                             x-model="material_log.material_amount"
                                             class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
                                             placeholder="例：150"
-                                        >
-                                        <span x-show="getError('material_amount', addForm_uuid)"
-                                            x-text="getError('material_amount', addForm_uuid)"
-                                            class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
-                                            role="alert"
-                                        ></span>
+                                            >
+                                        </div>
+                                        <div class="form-parts-block  sm:col-span-2">
+                                            <x-common.form.error field='material_amount' addUuid='material_log.addForm_uuid' />
+
+                                        </div>
                                     </div>
                                 </div>
                             </template>
@@ -290,8 +215,9 @@
 
                     </div>
 
+                </x-slot>
 
-
+                <x-slot:bottom>
                     {{-- 下部ボタンエリア --}}
                     <div class="submit-button grid grid-cols-3 gap-2  sm:max-w-1/2 ">
                         <button type="submit" class="px-4 py-1 rounded-md bg-blue-500 text-bold text-white">保存</button>
@@ -300,11 +226,7 @@
                         <div class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書き保存</div>
                         {{-- <div x-show="isDraft" class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書きをやめて新しい記録として保存</div> --}}
                     </div>
-
-
-                </div>
-            </form>
-        </div>
-    </x-slot>
+                </x-slot>
+            </div>
 
 </x-application.work-logs.create>

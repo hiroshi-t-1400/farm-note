@@ -30,7 +30,7 @@ class initMaterialSeeder extends Seeder
             ],
             [
                 'name' => 'ストロビーフロアブル',
-                'type_id' => '1',
+                'type_id' => 1,
                 'default_dilution_rate' => 3000,
                 'standard_spray_volume' => 150,
                 'unit' => 'ml',
@@ -81,3 +81,22 @@ class initMaterialSeeder extends Seeder
         // ]);
     }
 }
+
+
+'materials.*.amount' => Rule::forEach(function ($value, $attribute) {
+                // $attribute は 'materials.0.amount' のような文字列になるため、
+                // インデックス部分を抜き出して対応する type_id を取得する
+                // 例: 'materials.0.amount' -> 'materials.0.type_id'
+                preg_match('/materials\.(\d+)\.amount/', $attribute, $matches);
+                $index = $matches[1] ?? null;
+
+                $typeId = $this->input("materials.{$index}.type_id");
+
+                // type_id が 6, 7, 8 のいずれかである場合
+                if (in_array($typeId, [6, 7, 8], true)) {
+                    return ['required', 'numeric', 'max:10000'];
+                }
+
+                // それ以外の場合
+                return ['nullable', 'numeric', 'max:10000'];
+            }),

@@ -1,7 +1,9 @@
 {{-- バリデーションメッセージ --}}
-@props(['field', 'add_uuid'])
+@props(['field', 'addUuid' => ''])
 
-<span x-text="getError(`{{ $field }}`, `{{ $add_uuid }}`)"
+<span x-show="getError(`{{ $field }}`, {{ $addUuid }})"
+    x-text="getError(`{{ $field }}`, {{ $addUuid }})"
+    {{-- {{ $attributes->merge(['class' => 'alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2']) }} --}}
     class="alert alert-danger sm:col-span-2 text-sm text-red-500 font-semibold px-2"
     role="alert">
 </span>

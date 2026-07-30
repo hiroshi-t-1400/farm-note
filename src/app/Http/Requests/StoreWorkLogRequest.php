@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Override;
 
 class StoreWorkLogRequest extends FormRequest
@@ -38,13 +39,22 @@ class StoreWorkLogRequest extends FormRequest
             'content' => ['nullable', 'string', 'max:200'],
             'updated_by' => ['nullable', 'date'],
 
-            // 使用した資材がある場合のみmaterial_on_workを受け取るので条件付きでバリデーションを行う
             'material_logs' => ['sometimes', 'array'],
 
-            'material_logs.*.material_id' => ['required_with:material_on_work', 'numeric', 'exists:materials,id'],
-            'material_logs.*.quantity' => ['required_with:material_on_work', 'string', 'max:10000'],
-            'material_logs.*.dilution_rate' => ['present_with:material_on_work', 'nullable', 'numeric', 'max:10000'],
+            'material_logs.*.material_id' => ['required_with:material_logs', 'numeric', 'exists:materials,id'],
+            'material_logs.*.quantity' => ['required_with:material_logs', 'string', 'max:10000'],
             'material_logs.*.material_amount' => ['present_with:material_on_work', 'nullable', 'string', 'max:10000'],
+            'material_logs.*.dilution_rate' => Rule::forEach(function ($value, $attribute) {
+                // 
+                preg_match('/material_logs\.(\d+)\.dilution_rate/', $attribute, $matches);
+                $index = $matches[1] ?? null;
+
+                $typeId = $this->input("material_logs.{$index}.type_id");
+                if (in_array($typeId, [1], true)) {
+                    return ['required', 'numeric', 'max:10000'];
+                }
+                return ['nullable', 'numeric', 'max:10000'];
+            }),
         ];
     }
 
