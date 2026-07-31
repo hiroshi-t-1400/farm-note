@@ -1,7 +1,7 @@
 {{-- 使用資材記録 --}}
 
     {{-- ヘッダー --}}
-    <div class="grid grid-cols-1 bg-white mb-1 px-1 py-2">
+<x-ui.form-group>
         <div class="form-label mb-1 font-semibold text-lg">資材の記録</div>
         {{-- 資材タイプフィルター --}}
         <div class="material_logs_inner">
@@ -46,9 +46,9 @@
 
             {{-- 追加フォームボディ --}}
             <template x-for="(material_log, index) in formData.material_logs" :key="material_log.addForm_uuid">
-                <div class="grid sm:grid-cols-2 rounded-md border border-gray-200 text-sm">
-                    <div class="">
-                        <span class="" x-text="'資材' + (index + 1)"></span>
+                <div class="grid grid-cols-1 bg-white rounded-sm border border-gray-200 p-1" >
+                    <div class="flex">
+                        <span class="text-sm font-bold self-center" x-text="'資材' + (index + 1)"></span>
                         <button
                             type="button"
                             @click="removeMaterial_log(addForm_uuid)"
@@ -62,76 +62,59 @@
                     </div>
 
                     {{-- 資材情報表示 --}}
-                    <div class="sm:col-span-2">
-                        <span class="text-xs text-gray-600">種別：</span>
-                        <span class="font-medium text-gray-900" x-text="material_log.type_label"></span>
-                    </div>
-                    <div>
-                        <span class="text-xs text-gray-600">名称：</span>
-                        <span class="font-medium text-gray-900" x-text="material_log.name"></span>
-                    </div>
-                    <div>
-                        <span class="text-xs text-gray-600">メーカー名：</span>
-                        <span class="font-medium text-gray-900" x-text="material_log.manufacturer"></span>
+                    <div class="grid sm:grid-cols-2 grid-cols-1" >
+                        <div class="">
+                            <span class="text-xs text-gray-600">種別：</span>
+                            <span class="font-medium text-sm text-gray-800" x-text="material_log.type_label"></span>
+                        </div>
+                        <div class="col-start-1">
+                            <span class="text-xs text-gray-600">名称：</span>
+                            <span class="font-medium text-sm text-gray-800" x-text="material_log.name"></span>
+                        </div>
+                        <div class="">
+                            <span class="text-xs text-gray-600">メーカー名：</span>
+                            <span class="font-medium text-sm text-gray-800" x-text="material_log.manufacturer"></span>
+                        </div>
                     </div>
 
                     {{-- ユーザ入力エリア --}}
-                    <div class="grid sm:grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                        <label :for="`formData.material_logs[${index}][quantity]`" >使用量</label>
-                        <div class="form-parts-block  sm:col-span-2">
-                            <input type="text"
-                            :name="`formData.material_logs[${index}][quantity]`"
+                    <div class="grid sm:grid-cols-2 grid-cols-1">
+                        <x-ui.form-group label="使用量" name="`formData.material_logs[${index}][quantity]`" class="flex self-start px-1" >
+                            <x-ui.input
+                            type="text"
+                            name="`formData.material_logs[${index}][quantity]`"
                             x-model="material_log.quantity"
-                            class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
+                            class="max-w-2xs"
                             placeholder="例：10本 300L"
-                            >
-                        </div>
-                        <div class="form-parts-block  sm:col-span-2">
-                            <x-common.form.error field='quantity' addUuid='material_log.addForm_uuid' />
-                        </div>
-                    </div>
+                            />
+                        </x-ui.form-group>
 
-                    <div
+                        <div
                         x-show="material_log.type_id == 1 || material_log.type_id == 2"
-                        class="grid sm:grid-cols-[auto_1fr] gap-x-4 px-2 m-0.5 ">
-                        <label :for="`formData.material_logs[${index}][dilution_rate]`" >希釈倍率</label>
-                        <div class="form-parts-block  sm:col-span-2">
-
-                            <input
-                            type="text"
-                            :name="`formData.material_logs[${index}][dilution_rate]`"
-                            x-model="material_log.dilution_rate"
-                            class="rounded-md outline outline-2 outline-gray-600 px-2 m-0.5"
-                            placeholder="例：150"
-                            >
-                        </div>
-                        <div class="form-parts-block  sm:col-span-2">
-                            <x-common.form.error field='dilution_rate' addUuid='material_log.addForm_uuid' />
-                        </div>
-                    </div>
-
-                    <div
-                        x-show="material_log.type_id == 1 || material_log.type_id == 2"
-                        class="grid sm:grid-cols-[auto_1fr] sm:col-start-2 gap-x-4 px-2 m-0.5 ">
-                        <label :for="`formData.material_logs[${index}][material_amount]`" >原液量</label>
-                        <div class="form-parts-block  sm:col-span-2">
-
-                            <input
-                            type="text"
-                            :name="`formData.material_logs[${index}][material_amount]`"
-                            x-model="material_log.material_amount"
-                            class="rounded-md outline-2 outline-gray-600 px-2 m-0.5"
-                            placeholder="例：150"
-                            >
-                        </div>
-                        <div class="form-parts-block  sm:col-span-2">
-                            <x-common.form.error field='material_amount' addUuid='material_log.addForm_uuid' />
-
+                        class="grid grid-cols-1"
+                        >
+                            <x-ui.form-group label="希釈倍率" name="`formData.material_logs[${index}][dilution_rate]`" >
+                                <x-ui.input
+                                type="number"
+                                name="`formData.material_logs[${index}][dilution_rate]`"
+                                x-model="material_log.dilution_rate"
+                                class="max-w-2xs"
+                                placeholder="例：150"
+                                />
+                            </x-ui.form-group>
+                            <x-ui.form-group label="原液量" name="`formData.material_logs[${index}][material_amount]`" >
+                                <x-ui.input
+                                type="text"
+                                name="`formData.material_logs[${index}][material_amount]`"
+                                x-model="material_log.material_amount"
+                                class="max-w-2xs"
+                                placeholder="例：150ml"
+                                />
+                            </x-ui.form-group>
                         </div>
                     </div>
                 </div>
             </template>
 
         </div>
-
-    </div>
+</x-ui.form-group>

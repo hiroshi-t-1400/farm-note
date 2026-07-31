@@ -58,7 +58,7 @@
                         <x-ui.button
                             type="button"
                             x-show="hasDraft"
-                            
+
                         >
                             下書きを中止して、新しい記録として保存
                         </x-ui.button>

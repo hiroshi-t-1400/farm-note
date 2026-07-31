@@ -3,7 +3,7 @@
 ])
 
 @php
-    $baseClasses = 'block font-semibold text-base text-gray-700';
+    $baseClasses = 'block font-semibold text-sm text-gray-700';
 @endphp
 
 <label {{ $attributes->merge(['class' => $baseClasses]) }}>

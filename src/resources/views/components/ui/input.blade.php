@@ -16,7 +16,7 @@
         $classes = 'bg-gray-50 border border-gray-200 rounded-sm px-2 sm:py-1 py-2 shadow-sm text-base text-gray-700 cursor-default select-none';
     } else {
         $selectedVariant = $variants[$variant] ?? $variants['default'];
-        $baseClasses = 'text-base rounded-sm px-2 sm:py-1 py-2 shadow-sm transition';
+        $baseClasses = 'text-base rounded-sm px-2 sm:py-0 py-2 shadow-sm transition';
         $classes = "{$baseClasses} {$selectedVariant}";
     }
 
@@ -29,7 +29,7 @@
     @endphp
     <input
         type="text"
-        name={{ $name }}
+        :name={{ $name }}
         id={{ $name }}
         inputmode="numeric"
         x-on:input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '')"
