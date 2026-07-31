@@ -60,7 +60,7 @@
                             x-show="hasDraft"
                             
                         >
-                            下書きをやめて新しい記録として保存
+                            下書きを中止して、新しい記録として保存
                         </x-ui.button>
                         {{-- <div x-show="isDraft" class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書きをやめて新しい記録として保存</div> --}}
                     </div>
