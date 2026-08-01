@@ -13,20 +13,19 @@ return new class extends Migration
     {
         Schema::create('work_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('crop_season_id')->constrained()->onDelete('cascade');
-            $table->foreignId('created_by')->constrained(
-                table: 'users', column: 'id'
-            )->onDelete('cascade');
-            $table->foreignId('performed_by')->constrained(
-                table: 'users', column: 'id'
-            )->onDelete('cascade');
+            $table->foreignId('crop_season_id')->constrained();
+            $table->foreignId('created_by')
+                // ->constrained(table: 'users', column: 'id');
+                ->constrained('users');
+            // $table->foreignId('performed_by')
+            //     ->constrained(table: 'users', column: 'id');
             $table->timestamp('work_date');
             $table->string('status');
             $table->string('title');
             $table->string('content')->nullable();
-            $table->foreignId('updated_by')->constrained(
-                table: 'users', column: 'id'
-            )->onDelete('cascade');
+            $table->foreignId('updated_by')->nullable()
+                // ->constrained(table: 'users', column: 'id');
+                ->constrained('users');
             $table->timestamps();
         });
     }

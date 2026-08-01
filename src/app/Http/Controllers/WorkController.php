@@ -1,0 +1,116 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreWorkLogRequest;
+use Illuminate\Http\Request;
+
+use App\Models\Crop\CropSeason;
+use App\Models\User;
+use App\Models\Material\Material;
+use App\Models\Material\MaterialCategory;
+use App\Models\WorkLog\WorkLog;
+
+use Illuminate\Http\JsonResponse;
+
+class WorkController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * 作業登録画面を呼び出す
+     */
+    public function create()
+    {
+        $crop_seasons = CropSeason::with('crops')->get();
+        $users = User::all();
+        $materials = Material::with('materialCategories')->get();
+
+        $types = MaterialCategory::all();
+
+        return response()->view('/work-logs/create', compact('crop_seasons', 'users', 'materials', 'types'));
+    }
+
+    /**
+     * 作業記録の登録
+     *
+     * @param StoreWorkLogRequest $request
+     * @return JsonResponse
+     *
+     */
+    public function store(StoreWorkLogRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        // 登録する作業が予定plan、完了completed、下書きdraftで分岐
+        $status = $validated['status'] ?? 'completed';
+
+        $workLog = WorkLog::create([
+            'crop_season_id' => $validated['crop_season_id'],
+            'created_by' => $validated['created_by'],
+            'work_date' => $validated['work_date'],
+            'status' => $status,
+            'title' => $validated['title'],
+            'content' => $validated['content'],
+            'updated_by' => null,
+        ]);
+
+        $workLog->performedBy()->sync($validated['performed_by']);
+
+        // 登録された作業記録のなかで使用資材が記録されていれば登録を行う
+        // 資材が複数あればすべて中間テーブルに登録する
+        if (!empty($validated['material_logs'])) {
+            foreach ($validated['material_logs'] as $material) {
+                $workLog->materials()->attach($material["material_id"], [
+                    'quantity' => $material["quantity"],
+                    'dilution_rate' => $material["dilution_rate"],
+                    'material_amount' => $material["material_amount"] ?? null,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '日誌を保存しました。',
+            'redirect_url' => route('create')
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+}

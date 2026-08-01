@@ -13,12 +13,8 @@ return new class extends Migration
     {
         Schema::create('crop_seasons', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('crop_id')->constrained()->onDelete('cascade');
-            $table->foreignId('field_id')->constrained()->onDelete('cascade');
-            // $table->integer('crop_id');
-            // $table->foreign('crop_id')->references('id')->on('crops');
-            // $table->integer('field_id');
-            // $table->foreign('field_id')->references('id')->on('fields');
+            $table->foreignId('crop_id')->constrained();
+            $table->foreignId('field_id')->constrained();
             $table->string('variety')->nullable();
             $table->string('supplier')->nullable();
             $table->double('planted_area')->nullable();

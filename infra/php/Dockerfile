@@ -8,6 +8,7 @@ ARG UID=1000
 
 # システムパッケージの更新と、必要な依存関係のインストール
 RUN apk update && apk add --no-cache \
+    openssh-client \
     git \
     curl \
     # Laravelに必要な拡張機能をビルドするための依存パッケージ

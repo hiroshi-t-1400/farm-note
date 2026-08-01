@@ -22,10 +22,9 @@
 </head>
 <body>
 
-    <div class="main-part">
-        @yield('content')
+        <div class="main-part">
+            @yield('content')
 
-    </div>
-
+        </div>
 </body>
 </html>
