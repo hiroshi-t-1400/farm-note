@@ -1,20 +1,11 @@
-<x-work-logs.application.create>
-
-<x-slot:buttons>
-
-</x-slot:buttons>
-
-
-    <x-slot:title>
-        <div class="title-wrapper py-5 my-5 text-center">
-            <h2 class="font-bold text-3xl">作業登録</h2>
-        </div>
+<x-layouts.layout title="日誌記録画面 - 農作業日誌">
+    <x-slot:header>
+        日誌記録
     </x-slot>
 
+    <x-work-logs.application.create>
 
-    <x-slot:formHead>
         <div class="input-form-wrapper">
-
             <form
                 x-data="postForm({
                     initialMaterials: @js($materials),
@@ -26,10 +17,7 @@
                 action="{{ route('store') }}"
                 method="post"
             >
-
                 @csrf
-    </x-slot>
-    <x-slot:header>
 
                 {{-- デバッグ用のネットワーク状態インジケータ --}}
                 <div class="grid grid-cols-3">
@@ -40,14 +28,21 @@
                     </div>
                 </div>
 
-
                 <div class="block text-sm font-medium text-gray-700 mb-2" >
                     作業登録者：　<span x-text="allUsers[0].name"></span>
                 </div>
 
-    </x-slot>
+                <x-work-logs.draft-ui />
 
-                <x-slot:bottom>
+
+                <div class="input-form-inner ">
+
+                <x-work-logs.basic-form-section />
+
+                <x-work-logs.material-logs />
+
+            </div>
+
                     {{-- 下部ボタンエリア --}}
                     <div class="submit-button grid grid-cols-3 gap-2  sm:max-w-1/2 ">
                         <x-ui.button type="submit" variant="primary" >
@@ -65,7 +60,9 @@
                         </x-ui.button>
                         {{-- <div x-show="isDraft" class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書きをやめて新しい記録として保存</div> --}}
                     </div>
-                </x-slot>
-            </div>
+            </form>
 
-</x-application.work-logs.create>
+        </div>
+
+    </x-work-logs.application.create>
+</x-layouts.layout>
