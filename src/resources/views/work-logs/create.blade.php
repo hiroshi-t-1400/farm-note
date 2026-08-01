@@ -57,10 +57,11 @@
                         {{-- <div class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書き保存</div> --}}
                         <x-ui.button
                             type="button"
-                            x-show="hasDraft"
+                            x-show="formData.draft_uuid"
+                            variant="alert-ghost"
 
                         >
-                            下書きを中止して、新しい記録として保存
+                            下書きを中止し<br>新規として保存
                         </x-ui.button>
                         {{-- <div x-show="isDraft" class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書きをやめて新しい記録として保存</div> --}}
                     </div>

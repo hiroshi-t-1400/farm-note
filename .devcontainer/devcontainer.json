@@ -11,6 +11,17 @@
     // コンテナ内の作業ディレクトリ（環境に合わせて変更してください）
     // "workspaceFolder": "/var/www/html",
     "workspaceFolder": "/var/www",
+
+    // 明示的にポートフォワードを指定
+    "forwardPorts": [80, 8000, 5173],
+
+    // ポートの自動変更を防ぐ属性指定（オプションですが安全です）
+    "portsAttributes": {
+        "5173": {
+            "label": "Vite Dev Server",
+            "onAutoForward": "notify"
+        }
+    },
     
     // VS Code起動（コンテナ接続）時に自動実行するコマンド
     // "postAttachCommand": "npm run dev",
@@ -19,22 +30,26 @@
     "customizations": {
         "vscode": {
             "extensions": [
+                // --- PHP / Laravel ---
                 "bmewburn.vscode-intelephense-client",
-                "adrianwilczynski.alpine-js-intellisense",
-                "EditorConfig.EditorConfig",
-                "dbaeumer.vscode-eslint",
-                "eamodio.gitlens",
-                "oderwat.indent-rainbow",
-                "shufo.vscode-blade-formatter",
-                "onecentlin.laravel-blade",
-                "IHunte.laravel-blade-wrapper",
-                "amiralizadeh9480.laravel-extra-intellisense",
-                "codingyu.laravel-goto-view",
                 "porifa.laravel-intelephense",
+                "amiralizadeh9480.laravel-extra-intellisense",
+                "onecentlin.laravel-blade",
+                "shufo.vscode-blade-formatter",
+                "codingyu.laravel-goto-view",
                 "naoray.laravel-goto-components",
+                "glitchbl.laravel-create-view",
+                "ihunte.laravel-blade-wrapper",
                 "xdebug.php-debug",
                 "neilbrayfield.php-docblocker",
-                "MS-CEINTL.vscode-language-pack-ja"
+
+                // --- JS / Alpine.js ---
+                "adrianwilczynski.alpine-js-intellisense",
+                "dbaeumer.vscode-eslint",
+                "xabikos.javascriptsnippets",
+
+                // --- 設定ファイル設定 ---
+                "mikestead.dotenv"
             ],
             "settings": {
                 "terminal.integrated.cwd": "/var/www/src",

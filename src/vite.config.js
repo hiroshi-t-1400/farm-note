@@ -17,7 +17,7 @@ export default defineConfig({
             // 外部からアクセスできるホスト名を設定
             host: "192.168.11.20",
             // 必要であればポートも指定。今回はデフォルト値である5173をそのまま使用するのでコメントアウト
-            // port: 5173
+            port: 5173
         },
         watch: {
             usePolling: true,
@@ -25,6 +25,7 @@ export default defineConfig({
         },
         // 開発環境のためWindowsからアクセスできるようにtrueを返させる
         host: true,
-
+        port: 5173,
+        strictPort: true,
     },
 });
