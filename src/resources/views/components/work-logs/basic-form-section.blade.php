@@ -11,8 +11,6 @@
     </select>
     {{-- 作付マスターに遷移 --}}
     <a href="" class="mx-5 text-bold">＋作付けを新規に追加する</a>
-    {{-- バリデーションメッセージ --}}
-    <x-common.form.error field='crop_season_id' />
 </x-ui.form-group>
 
 {{-- 作業名称 --}}
@@ -30,8 +28,6 @@
             <label for="status" class="font-semibold text-base text-gray-700">予定</label>
         </div>
     </div>
-    {{-- バリデーションメッセージ --}}
-    <x-common.form.error field='status' />
 </x-ui.form-group>
 
 {{-- 作業実施者 --}}
@@ -44,15 +40,11 @@
     </select>
     {{-- ユーザ登録に遷移 --}}
     <a href="" class="mx-5 text-bold">＋作業者を新規に追加する</a>
-    {{-- バリデーションメッセージ --}}
-    <x-common.form.error field="performed_by" />
 </x-ui.form-group>
 
 {{-- 作業内容 --}}
 <x-ui.form-group label="作業内容" name="content">
     <textarea x-model="formData.content" name="content" id="content" class="block rounded-md outline outline-2 outline-gray-600 px-4 m-0.5 text-lg" placeholder="作業した内容を記入してください。"></textarea>
     {{-- 内容のテンプレートを作成する？ --}}
-    {{-- バリデーションメッセージ --}}
-    <x-common.form.error field="content" />
 </x-ui.form-group>
 

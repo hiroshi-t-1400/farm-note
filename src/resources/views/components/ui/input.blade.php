@@ -19,6 +19,7 @@
         $baseClasses = 'text-base rounded-sm px-2 sm:py-0 py-2 shadow-sm transition';
         $classes = "{$baseClasses} {$selectedVariant}";
     }
+    $id = $id ?: $name;
 
 @endphp
 
@@ -29,13 +30,17 @@
     @endphp
     <input
         type="text"
-        :name={{ $name }}
-        id={{ $name }}
+        name="{{ $name }}"
+        id="{{ $name }}"
         inputmode="numeric"
         x-on:input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '')"
         {{ $attributes->merge(['class' => $classes]) }}
     >
 {{-- <input type="text" inputmode="numeric" {{ $attributes->merge(['class' => $classes, '@input' => "\$el.value = \$el.value.replace(/[^0-9]/g, '')"]) }}> --}}
 @else
-    <input type="{{ $type }}" name={{ $name }} id={{ $name }} {{ $attributes->merge(['class' => $classes]) }}>
+    <input
+        type="{{ $type }}"
+        name="{{ $name }}"
+        id="{{ $name }}"
+        {{ $attributes->merge(['class' => $classes]) }}>
 @endif
