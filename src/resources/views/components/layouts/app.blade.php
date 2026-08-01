@@ -20,13 +20,10 @@
         @endif
 
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+
+    {{ $content }}
 
 
-        <div class="main-part">
-            {{ $content }}
-
-        </div>
-        
 </body>
 </html>
