@@ -1,5 +1,4 @@
 @props([
-    'type' => 'text',
     'name' => '',
     'id' => '',
     'variant' => 'default',
@@ -23,25 +22,10 @@
     $id = $id ?: $name;
 
 @endphp
-
-@if ($type == 'number' || $type == 'numeric')
-    {{-- Alpine.jsによって半角英数をふるいにかけているので、万が一Alpine.jsのスコープ外で呼び出す場合は文字列の入力が許容されているので注意すること --}}
-    @php
-        $classes = "{$classes} text-right";
-    @endphp
-    <input
-        type="text"
+    <select
         name="{{ $name }}"
         id="{{ $id }}"
-        inputmode="numeric"
-        x-on:input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '')"
         {{ $attributes->merge(['class' => $classes]) }}
     >
-{{-- <input type="text" inputmode="numeric" {{ $attributes->merge(['class' => $classes, '@input' => "\$el.value = \$el.value.replace(/[^0-9]/g, '')"]) }}> --}}
-@else
-    <input
-        type="{{ $type }}"
-        name="{{ $name }}"
-        id="{{ $id }}"
-        {{ $attributes->merge(['class' => $classes]) }}>
-@endif
+    {{ $slot }}
+    </select>
