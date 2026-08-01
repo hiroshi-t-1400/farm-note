@@ -9,7 +9,6 @@ export default (config) => {
 
             allMaterials: config.initialMaterials,
             types: config.initialTypes,
-            allCropSeasons: config.initialCropSeasons,
             allCrops: config.initialCrops,
             allUsers: config.initialUsers,
             selectedType: '',
@@ -26,19 +25,26 @@ export default (config) => {
             mappedErrors: {},
 
             draftWorkLog: [],
+            // crop_seasonを扱いやすいように変形する
+            allCropSeasons: (config.initialCropSeasons || []).map((season, index) => ({
+                ...season,
+                id: index + 1,
+                crop_name: season.crops?.name ?? '',
+                crop_season_nameYear: `${season.crops?.name ?? ''}${season.year ?? ''}`,
+            })),
 
             init() {
                 this.formData.work_date = this.getToday;
                 this.resetFormData();
                 this.remapCropSeasons();
-                this.initDraftWorkLog();
                 //debug
                 this.getOnlineStatus;
             },
 
             getDefaultFormData() {
                 return {
-                    formData_uuid: crypto.randomUUID(),
+                    // formData_uuid: crypto.randomUUID(),
+                    formData_uuid: this.generateUUID(),
                     draft_uuid: '',
                     crop_name: '不明',
 
@@ -118,17 +124,6 @@ export default (config) => {
                 return foundObject;
             },
 
-            // crop_season_idから作物名を取得する
-            getCropNameByCropSeasonId(targetId) {
-                targetId = parseInt(targetId) || '';
-                if (!targetId || targetId <= 0 ) {
-                    console.error('[getCropsName] targetIdが不正な値です。', { targetId: targetId })
-                    return null;
-                }
-                const foundObject = this.allCropSeasons.find(({ id }) => id == targetId);
-                return foundObject.crop_name;
-            },
-
             // 選択された種別から資材選択を助ける
             get filteredMaterials() {
                 return this.allMaterials.filter(material => {
@@ -155,10 +150,24 @@ export default (config) => {
                 this.selectedMaterialId = '';
             },
 
+            // UUIDを安全に生成するヘルパーメソッド（非セキュア環境互換）
+            generateUUID() {
+                if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+                    return crypto.randomUUID();
+                }
+                // 非HTTPS（http://192.168.x.x 等）環境向けのフォールバック
+                return 'xxxx-xxxx-4xxx-yxxx-xxxx'.replace(/[xy]/g, (c) => {
+                    const r = (Math.random() * 16) | 0;
+                    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+                    return v.toString(16);
+                });
+            },
+
             // 資材追加フォームの初期化メソッド
             initAddForm(master) {
                 return {
-                    addForm_uuid: crypto.randomUUID(),
+                    // addFormUuid: crypto.randomUUID(),
+                    addFormUuid: this.generateUUID(),
                     type_label: master.material_categories.label,
 
                     material_id: master.id,
@@ -174,7 +183,7 @@ export default (config) => {
             // 資材フォームの削除ロジック
             removeMaterial_log(uuid) {
                 this.formData.material_logs = this.formData.material_logs.filter(
-                    log => log.addForm_uuid !== uuid
+                    log => log.addFormUuid !== uuid
                 );
 
                 // 対応するエラー・メッセージを持っていたら削除
@@ -318,7 +327,7 @@ export default (config) => {
                         const fieldName = match[2];
 
                         if (this.formData.material_logs && this.formData.material_logs[index]) {
-                            const rowId = this.formData.material_logs[index].addForm_uuid;
+                            const rowId = this.formData.material_logs[index].addFormUuid;
 
                             // 初期化
                             if (!this.mappedErrors[rowId]) {
@@ -493,7 +502,8 @@ export default (config) => {
 
                 let { formData_uuid, draft_uuid, saved_at, crop_name, crop_season_nameYear, ...payload } = formData;
                 return {
-                    draft_uuid: draft_uuid || crypto.randomUUID(),
+                    // draft_uuid: draft_uuid || crypto.randomUUID(),
+                    draft_uuid: draft_uuid || this.generateUUID(),
                     saved_at: saved_at || new Date().toISOString(),
                     meta:{
                         crop_name: crop_name,

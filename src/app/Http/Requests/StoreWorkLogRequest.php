@@ -45,7 +45,7 @@ class StoreWorkLogRequest extends FormRequest
             'material_logs.*.quantity' => ['required_with:material_logs', 'string', 'max:10000'],
             'material_logs.*.material_amount' => ['present_with:material_on_work', 'nullable', 'string', 'max:10000'],
             'material_logs.*.dilution_rate' => Rule::forEach(function ($value, $attribute) {
-                // 
+                //
                 preg_match('/material_logs\.(\d+)\.dilution_rate/', $attribute, $matches);
                 $index = $matches[1] ?? null;
 
@@ -65,7 +65,9 @@ class StoreWorkLogRequest extends FormRequest
             'crop_season_id.required' => ':attributeを選択してください。',
             'created_by.required' => 'attributeを選択してください。',
             'performed_by.required' => ':attributeを選択してください。',
-            'material_logs.dilution_rate.numeric' => '希釈倍率は『倍』を付けず、倍率の数値だけを半角で入力してください。',
+            'material_logs.dilution_rate.numeric' => '希釈倍率は『倍』を付けず、倍率を半角数字で入力してください。',
+            'material_logs.*.quantity.required_with' => '使用量は必ず入力してください。',
+
         ];
     }
 

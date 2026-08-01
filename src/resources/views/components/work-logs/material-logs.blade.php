@@ -49,13 +49,13 @@
             </div>
 
             {{-- 追加フォームボディ --}}
-            <template x-for="(material_log, index) in formData.material_logs" :key="material_log.addForm_uuid">
+            <template x-for="(material_log, index) in formData.material_logs" :key="material_log.addFormUuid">
                 <div class="grid grid-cols-1 bg-white rounded-sm border border-gray-200 p-1" >
                     <div class="flex">
                         <span class="text-sm font-bold self-center" x-text="'資材' + (index + 1)"></span>
                         <button
                             type="button"
-                            @click="removeMaterial_log(addForm_uuid)"
+                            @click="removeMaterial_log(addFormUuid)"
                             x-show="formData.material_logs.length > 1"
                             class="px-1 py-1 text-red-600 hover:bg-red-50 rounded-md transition"
                         >
@@ -95,6 +95,12 @@
                             class="max-w-xs"
                             placeholder="例：10本 300L"
                             />
+                            <span
+                                x-show="getError('quantity', formData.material_logs[index].addFormUuid)"
+                                x-text="getError('quantity', formData.material_logs[index].addFormUuid)"
+                                class="alert alert-danger text-sm text-red-500 font-semibold px-2"
+                                role="alert">
+                            </span>
                         </x-ui.form-group>
 
                         <div
@@ -106,26 +112,38 @@
                                     希釈倍率
                                 </label>
                                 <x-ui.input
-                                type="number"
-                                x-model="material_log.dilution_rate"
-                                ::name="`formData.material_logs[${index}][dilution_rate]`"
-                                ::id="`formData.material_logs[${index}][dilution_rate]`"
-                                class="max-w-xs"
-                                placeholder="例：3000"
+                                    type="number"
+                                    x-model="material_log.dilution_rate"
+                                    ::name="`formData.material_logs[${index}][dilution_rate]`"
+                                    ::id="`formData.material_logs[${index}][dilution_rate]`"
+                                    class="max-w-xs"
+                                    placeholder="例：3000"
                                 />
+                                <span
+                                    x-show="getError('dilution_rate', formData.material_logs[index].addFormUuid)"
+                                    x-text="getError('dilution_rate', formData.material_logs[index].addFormUuid)"
+                                    class="alert alert-danger text-sm text-red-500 font-semibold px-2"
+                                    role="alert">
+                                </span>
                             </x-ui.form-group>
                             <x-ui.form-group >
                                 <label :for="`formData.material_logs[${index}][material_amount]`" class="block font-semibold text-sm text-gray-700">
                                     原液量
                                 </label>
                                 <x-ui.input
-                                type="text"
-                                x-model="material_log.dilution_rate"
-                                ::name="`formData.material_logs[${index}][material_amount]`"
-                                ::id="`formData.material_logs[${index}][material_amount]`"
-                                class="max-w-xs"
-                                placeholder="例：150ml"
+                                    type="text"
+                                    x-model="material_log.dilution_rate"
+                                    ::name="`formData.material_logs[${index}][material_amount]`"
+                                    ::id="`formData.material_logs[${index}][material_amount]`"
+                                    class="max-w-xs"
+                                    placeholder="例：150ml"
                                 />
+                                <span
+                                    x-show="getError('material_amount', formData.material_logs[index].addFormUuid)"
+                                    x-text="getError('material_amount', formData.material_logs[index].addFormUuid)"
+                                    class="alert alert-danger text-sm text-red-500 font-semibold px-2"
+                                    role="alert">
+                                </span>
                             </x-ui.form-group>
                         </div>
                     </div>

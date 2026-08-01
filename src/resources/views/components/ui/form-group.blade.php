@@ -5,7 +5,7 @@
 ])
 
 <div {{ $attributes->merge(['class' => 'grid grid-cols-1 gap-1 bg-white mb-1 px-1 py-1']) }}>
-    @if ($label)
+    @if ($name)
         <x-ui.form-label for="{{ $name }}">
             {{ $label }}
         </x-ui.form-label>
@@ -13,5 +13,7 @@
 
     {{ $slot }}
 
-    <x-common.form.error field='title' />
+    @if ($name)
+        <x-common.form.error field="{{ $name }}" />
+    @endif
 </div>
