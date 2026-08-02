@@ -38,7 +38,7 @@ class WorkLog extends Model
 
     public function createdBy (): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id', 'created_by');
+        return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
     public function performedBy (): BelongsToMany
@@ -49,6 +49,6 @@ class WorkLog extends Model
 
     public function updatedBy (): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id', 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 }

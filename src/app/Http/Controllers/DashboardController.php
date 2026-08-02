@@ -13,15 +13,15 @@ class DashboardController extends Controller
     {
         // $user = Auth::user();
 
-        $cropSeasons = CropSeason::with('crops')
+        $crop_seasons = CropSeason::with('crops', 'fields')
             ->withCount('workLogs')
             ->get();
 
-        $latestWorkLogs = WorkLog::with('cropSeasons', 'createdBy', 'paerformedBy', 'updatedBy')
+        $latest_work_logs = WorkLog::with('cropSeasons', 'createdBy', 'performedBy', 'updatedBy')
             ->latest('updated_at')
             ->take(5)
             ->get();
 
-        return response()->view('/dashboard', compact('cropSeason', 'latestWorkLogs'));
+        return response()->view('/dashboard', compact('crop_seasons', 'latest_work_logs'));
     }
 }
