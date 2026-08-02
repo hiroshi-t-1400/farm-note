@@ -132,7 +132,7 @@
                                 </label>
                                 <x-ui.input
                                     type="text"
-                                    x-model="material_log.dilution_rate"
+                                    x-model="material_log.material_amount"
                                     ::name="`formData.material_logs[${index}][material_amount]`"
                                     ::id="`formData.material_logs[${index}][material_amount]`"
                                     class="max-w-xs"
