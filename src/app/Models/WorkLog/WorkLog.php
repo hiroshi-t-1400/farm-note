@@ -4,6 +4,7 @@
 namespace App\Models;
 namespace App\Models\WorkLog;
 
+use App\Models\Crop\CropSeason;
 use App\Models\Material\Material;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,6 @@ class WorkLog extends Model
     protected $fillable = [
         'crop_season_id',
         'created_by',
-        // 'performed_by',
         'work_date',
         'status',
         'title',
@@ -31,6 +31,10 @@ class WorkLog extends Model
                     ->withTimestamps();
     }
 
+    public function cropSeasons(): BelongsTo
+    {
+        return $this->belongsTo(CropSeason::class);
+    }
 
     public function createdBy (): BelongsTo
     {

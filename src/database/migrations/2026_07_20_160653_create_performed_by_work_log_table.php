@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('performed_by_work_log', function (Blueprint $table) {
             $table->id();
             $table->foreignId('work_log_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->restrictOnDelete();
             $table->timestamps();
         });
     }

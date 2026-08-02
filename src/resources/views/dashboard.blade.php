@@ -18,8 +18,17 @@
 
         <!-- 作付別閲覧へ（今後の開発対象） -->
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 opacity-75">
-            <h2 class="text-lg font-bold text-gray-800 mb-2">📊 作付別日誌閲覧（開発予定）</h2>
-            <p class="text-sm text-gray-600 mb-4">作物ごとの作業履歴や年次ガントチャートを確認します。</p>
+            <h2 class="text-lg font-bold text-gray-800 mb-2">📊 作付け作物一覧</h2>
+
+            <div x-data="indexLog({
+                initialCropSeasons: @js($crop_seasons),
+            })">
+                <template x-for="cropSeason in allCropSeasons" :key="cropSeason.id">
+                    <li x-text="cropSeason[cropSeason.id].crop_season_nameYear"></li>
+                </template>
+            </div>
+
+            <p class="text-sm text-gray-600 mb-4"></p>
             <button disabled class="bg-gray-300 text-gray-600 font-bold py-2 px-4 rounded text-sm cursor-not-allowed">
                 順次開発中...
             </button>

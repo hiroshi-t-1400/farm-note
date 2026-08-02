@@ -17,9 +17,16 @@ class initCropSeeder extends Seeder
     {
         //
         DB::table('crops')->insert([
+            [
             'name' => 'トマト',
             'created_at' => now(),
             'updated_at' => now(),
+            ],
+            [
+            'name' => 'すいか',
+            'created_at' => now(),
+            'updated_at' => now(),
+            ]
         ]);
 
     }
