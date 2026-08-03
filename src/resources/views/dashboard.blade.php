@@ -1,4 +1,3 @@
-{{-- resources/views/dashboard.blade.php --}}
 <x-layouts.layout title="ダッシュボード - 農作業日誌">
     <x-slot:header>
         ダッシュボード
@@ -7,6 +6,7 @@
     <!-- 開発時用のクイックナビゲーションカード -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+        {{-- ダッシュボード半面コンテナ１ -左 --}}
         <!-- 作業登録へ -->
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 class="text-lg font-bold text-gray-800 mb-2">📝 作業の登録</h2>
@@ -16,16 +16,14 @@
             </a>
         </div>
 
+        {{-- ダッシュボード半面コンテナ２ -右 --}}
         <div>
 
-            <x-dashboard.index-crop-season :crop_seasons="$crop_seasons">
 
-            </x-dashboard.index-crop-season>
+            <x-dashboard.crop-seasons :crop_seasons="$crop_seasons" />
 
+            <x-dashboard.recent-logs :recent="$latest_work_logs" :workLogs="$latest_work_logs" />
 
-            <x-dashboard.recent-work-log :recent="$latest_work_logs" :workLogs="$latest_work_logs">
-
-            </x-dashboard.recent-work-log>
 
         </div>
     </div>
