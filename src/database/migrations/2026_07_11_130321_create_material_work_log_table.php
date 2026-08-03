@@ -14,13 +14,9 @@ return new class extends Migration
     {
         Schema::create('material_work_log', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('work_log_id')->constrained();
-            $table->foreignId('work_log_id')
-                    ->constrained(table: 'work_logs', column: 'id');
+            $table->foreignId('work_log_id')->constrained(table: 'work_logs', column: 'id');
 
-            // $table->foreignId('material_id')->constrained();
-            $table->foreignId('material_id')
-                    ->constrained(table: 'materials', column: 'id');
+            $table->foreignId('material_id')->constrained(table: 'materials', column: 'id');
             $table->string('quantity');
             $table->string('dilution_rate')->nullable();
             $table->string('material_amount')->nullable();

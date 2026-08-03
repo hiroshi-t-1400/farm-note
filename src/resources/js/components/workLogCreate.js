@@ -7,12 +7,12 @@ export default (config) => {
         return {
             formData: {},
 
-            allMaterials: config.initialMaterials,
-            types: config.initialTypes,
-            allCrops: config.initialCrops,
-            allUsers: config.initialUsers,
             selectedType: '',
             selectedMaterialId: '',
+            types: config.initialModels?.types || [],
+            allMaterials: config.initialModels?.materials || [],
+            allUsers: config.initialModels?.users || [],
+
 
             // isOnline: window.navigator.onLine,
             // isOnline: false,
@@ -25,8 +25,9 @@ export default (config) => {
             mappedErrors: {},
 
             draftWorkLog: [],
+
             // crop_seasonを扱いやすいように変形する
-            allCropSeasons: (config.initialCropSeasons || []).map((season, index) => ({
+            allCropSeasons: (config.initialModels?.crop_seasons || []).map((season, index) => ({
                 ...season,
                 id: index + 1,
                 crop_name: season.crops?.name ?? '',

@@ -30,6 +30,6 @@ class Material extends Model
 
     public function materialCategories(): HasOne
     {
-        return $this->hasOne(MaterialCategory::class, 'id', 'type_id');
+        return $this->hasOne(MaterialCategory::class, 'id','type_id');
     }
 }

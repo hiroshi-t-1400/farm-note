@@ -16,6 +16,7 @@ class initCropSeasonSeeder extends Seeder
     public function run(): void
     {
         DB::table('crop_seasons')->insert([
+            [
             'crop_id' => 1,
             'field_id' => 1,
             'variety' => '桃太郎ブライト',
@@ -26,6 +27,19 @@ class initCropSeasonSeeder extends Seeder
             'year' => '2026',
             'created_at' => now(),
             'updated_at' => now(),
+        ],
+            [
+            'crop_id' => 2,
+            'field_id' => 2,
+            'variety' => '紅しずく',
+            'supplier' => 'おかだ種苗',
+            'planted_area' => 300,
+            'plant_count' => 5,
+            'total_yield' => null,
+            'year' => '2026',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
         ]);
     }
 }
