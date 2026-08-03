@@ -34,7 +34,14 @@ class WorkController extends Controller
 
         $types = MaterialCategory::all();
 
-        return response()->view('/work-logs/create', compact('crop_seasons', 'users', 'materials', 'types'));
+        $models = [
+            'crop_seasons' => $crop_seasons,
+            'users' => $users,
+            'materials' => $materials,
+            'types' => $types,
+        ];
+
+        return response()->view('/work-logs/create', compact('models'));
     }
 
     /**

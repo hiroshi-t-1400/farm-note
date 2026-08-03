@@ -55,11 +55,12 @@
                         </x-slot>
                     </x-dashboard.list>
 
-
                 </template>
-                <x-ui.button variant="primary" href="" class="mt-3 justify-self-end">
-                    作付けマスターを追加する
-                </x-ui.button>
+                <div class="justify-self-end">
+                    <x-ui.button variant="primary" href="" class="mt-3">
+                        作付けマスターを追加する
+                    </x-ui.button>
+                </div>
 
         </div>
     </x-dashboard.card>

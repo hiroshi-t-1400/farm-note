@@ -15,7 +15,7 @@ class MaterialCategory extends Model
 
     public function materials (): BelongsTo
     {
-        return $this->belongsTo(Material::class, 'type_id');
+        return $this->belongsTo(Material::class, 'id','type_id');
     }
 }
 
