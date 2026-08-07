@@ -21,7 +21,7 @@ class Field extends Model
         'notes',
     ];
 
-    public function cropSeasons(): BelongsTo
+    public function cropSeason(): BelongsTo
     {
         return $this->belongsTo(CropSeason::class);
     }

@@ -8,7 +8,6 @@
 
     <x-work-logs.application.post-form :models="$models">
 
-        <x-slot>
             {{-- デバッグ用のネットワーク状態インジケータ --}}
             <x-debug.network />
 
@@ -43,7 +42,6 @@
                     下書きを中止し<br>新規として保存
                 </x-ui.button>
             </div>
-        </x-slot>
 
     </x-work-logs.application.post-form>
 

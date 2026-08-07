@@ -1,9 +1,9 @@
 @props([
-    'crop_seasons' => '',
+    'cropSeasons' => '',
 ])
 
 <div x-data="indexLog({
-        initialCropSeasons: @js($crop_seasons)
+        initialCropSeasons: @js($cropSeasons)
     })"
     class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 opacity-75"
 >

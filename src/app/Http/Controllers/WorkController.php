@@ -37,12 +37,6 @@ class WorkController extends Controller
         $materials = Material::with('materialCategory')->get();
         $mat_types = MaterialCategory::all();
 
-        // $models = [
-        //     'cropSeasons' => $crop_seasons,
-        //     'users' => $users,
-        //     'materials' => $materials,
-        // ];
-
         $models = [
             'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
             'users' => UserResource::collection($users)->resolve(),
@@ -65,7 +59,7 @@ class WorkController extends Controller
         $validated = $request->validated();
 
         // 登録する作業が予定plan、完了completed、下書きdraftで分岐
-        $status = $validated['status'] ?? 'completed';
+        $status = $validated['status'] ? 'plan' : 'completed';
 
         $workLog = WorkLog::create([
             'crop_season_id' => $validated['crop_season_id'],
@@ -83,7 +77,7 @@ class WorkController extends Controller
         // 資材が複数あればすべて中間テーブルに登録する
         if (!empty($validated['material_logs'])) {
             foreach ($validated['material_logs'] as $material) {
-                $workLog->materials()->attach($material["material_id"], [
+                $workLog->material()->attach($material["material_id"], [
                     'quantity' => $material["quantity"],
                     'dilution_rate' => $material["dilution_rate"],
                     'material_amount' => $material["material_amount"] ?? null,

@@ -34,7 +34,7 @@ class CropSeason extends Model
         return $this->belongsTo(Field::class);
     }
 
-    public function workLogs(): HasMany
+    public function workLog(): HasMany
     {
         return $this->HasMany(WorkLog::class, 'crop_season_id');
     }

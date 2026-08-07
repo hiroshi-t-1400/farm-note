@@ -1,12 +1,13 @@
 {{-- src/resources/views/components/dashboard/index.blade.php --}}
 
 @props([
-    'crop_seasons' => '',
+    'cropSeasons' => '',
     'models' => '',
-    'latest_work_logs' => ''
+    'recent' => ''
     ])
 
     <!-- 開発時用のクイックナビゲーションカード -->
+    {{-- <div class="grid grid-cols-1 lg:grid-cols-12 gap-6"> --}}
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {{-- ダッシュボード半面コンテナ１ -左 --}}
@@ -20,9 +21,9 @@
         {{-- ダッシュボード半面コンテナ２ -右 --}}
         <div class="lg:col-span-5">
 
-            <x-dashboard.crop-seasons :crop_seasons="$crop_seasons" />
+            <x-dashboard.crop-seasons :cropSeasons="$models['cropSeasons']" />
 
-            <x-dashboard.recent-logs :recent="$latest_work_logs" :workLogs="$latest_work_logs" />
+            <x-dashboard.recent-logs :recent="$models['recent']" />
 
 
         </div>

@@ -15,8 +15,8 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'userId' => $this->id,
-            'userName' => $this->name,
+            'id' => $this->id,
+            'name' => $this->name,
 
             // Eagerロードしているとき
             'createdBy' => $this->whenLoaded('createdBy', function () {

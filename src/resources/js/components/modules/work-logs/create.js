@@ -1,13 +1,10 @@
 // src/resources/js/components/modules/work-logs/create.js
 
-import { transForm } from "./transformatters";
 import { storeFormLogic } from "./form-logic";
-import { generateUUID, tsToDate } from "./utils";
+import { generateUUID, objToSnakeCase, strToSnakeCase, tsToDate } from "./utils";
 
 
 export default (config) => {
-
-    const debugModel = config?.initialModels || {};
 
     const {
         cropSeasons: allCropSeasons = {},
@@ -17,9 +14,9 @@ export default (config) => {
     } = config?.initialModels || {};
 
 
-        const DRAFT_LOG = 'farm-note:work-logs:draft-work-log';
+    const DRAFT_LOG = 'farm-note:work-logs:draft-work-log';
 
-        const warnedKeys = new Set();
+    const warnedKeys = new Set();
 
         return {
 
@@ -52,10 +49,15 @@ export default (config) => {
             isMobile() {return this.windowWidth < 768;},
 
             init() {
-                this.formData.workDate = tsToDate(Date())
                 this.resetFormData();
                 //debug
                 this.getOnlineStatus;
+                this.initDraftWorkLog();
+            },
+
+            resetFormData() {
+                const newFormData = this.getDefaultFormData();
+                this.formData = newFormData;
             },
 
             getDefaultFormData() {
@@ -65,27 +67,29 @@ export default (config) => {
                     draftUuid: '',
                     cropName: '不明',
 
-                    cropSeasonsId: '',
+                    cropSeasonId: '',
                     cropSeasonsNameYear: '不明',
-                    createdById: 1,
-                    performedById: '',
-                    workDate: this.getToday,
+                    createdBy: 1,
+                    performedBy: '',
+                    workDate: tsToDate(Date()),
                     status: false,
                     title: '',
                     content: '',
-                    updatedById: '',
+                    updatedBy: '',
                     materialLogs: []
                 };
-            },
-
-            resetFormData() {
-                const newFormData = this.getDefaultFormData();
-                this.formData = newFormData;
             },
 
             // ----------------------------------------------------
             // ここまで初期化
             // ----------------------------------------------------
+
+            changeCropSeasons() {
+                const id = this.formData.cropSeasonId;
+                this.formData.cropSeasonsNameYear = this.allCropSeasons?.find(cs => cs.id == id).cropSeasonsNameYear;
+                this.formData.cropName = this.allCropSeasons?.find(cs => cs.id == id).cropName;
+
+            },
 
             // 選択された種別から資材選択を助ける
             get filteredMaterials() {
@@ -108,7 +112,7 @@ export default (config) => {
                 const newMaterialLog = this.initAddForm(this.selectedMaterial);
 
                 this.formData.materialLogs.push(newMaterialLog);
-                console.info('pushのあと', {materialLogs: this.formData.materialLogs, selectMaterial: this.selectedMaterial});
+                // console.info('pushのあと', {materialLogs: this.formData.materialLogs, selectMaterial: this.selectedMaterial});
                 // 追加したら選択欄をリセット
                 this.selectedMaterialId = '';
             },
@@ -184,22 +188,11 @@ export default (config) => {
 
             // @submit.preventで呼び出し
             async submitForm() {
-                // formDataからmetaデータとpayloadを分離し構造化したrecordを受け取る
-                let record = {};
-                try{
-                    record = this.buildRecord(this.formData);
-                } catch(e) {
-                    console.error(e.message);
-                    alert('送信データに異常があります。ブラウザを閉じてやり直してください。連続してエラーが発生する場合は管理者に連絡してください。');
-
-                    resetFormData();
-                    initDraftWorkLog();
-                    return;
-                }
 
                 // オフラインならLocalstorageに保存して退避
                 if (!this.isOnline) {
-                    this.saveToLocalStorage(record);
+                    this.saveToLocalStorage();
+                    alert('通信オフラインのためブラウザに一時保存しました。(localStorage)');
                     return;
                 }
 
@@ -207,6 +200,9 @@ export default (config) => {
                 let timeoutId = null;
 
                 try {
+                    // post送信用のpayloadを生成
+                    const payload = this.buildPostPayload();
+
                     const controller = new AbortController();
                     timeoutId = setTimeout(() => controller.abort(), 5000); // 5000ms to timeout
 
@@ -218,7 +214,7 @@ export default (config) => {
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
-                        body: JSON.stringify(record.formData),
+                        body: JSON.stringify(payload),
                         signal: controller.signal // controle timeout
                     });
 
@@ -244,7 +240,6 @@ export default (config) => {
                         console.error('サーバーエラーが発生しました。Status:', response.status);
                         alert('サーバーエラーが発生しました。（Status: ' + response.status + '）');
 
-                        // throw new Error('Server Error: ' + response.status);
                         return;
                     }
 
@@ -273,8 +268,54 @@ export default (config) => {
                     }
 
                     // 通信エラー、タイムアウトなど通信によるエラーの場合はLocalStorageに退避
-                    this.saveToLocalStorage(record);
+                    this.saveToLocalStorage();
+                    alert('通信エラー\nブラウザに一時保存しました。(localStorage)');
+
                 }
+            },
+
+            /**
+             * postするpayloadを構築する。snake caseへリネーム。
+             */
+            buildPostPayload() {
+                // オブジェクトの型によるバリデーション
+                if (!this.formData || typeof this.formData !== 'object') {
+                    throw new Error('formDataの型が一致しませんでした。');
+                }
+
+                const {
+                    cropSeasonId,
+                    createdBy,
+                    performedBy,
+                    workDate,
+                    status,
+                    title,
+                    content,
+                    updatedBy,
+                    materialLogs
+                } = this.formData;
+
+
+                const snakedML = materialLogs?.map(ml => {
+                    return {
+                        dilution_rate: ml.dilutionRate,
+                        material_amount: ml.materialAmount,
+                        material_id: ml.materialId,
+                        quantity: ml.quantity,
+                    }
+                });
+
+                return {
+                    crop_season_id: cropSeasonId,
+                    created_by: createdBy,
+                    performed_by: performedBy,
+                    work_date: workDate,
+                    status: status,
+                    title: title,
+                    content: content,
+                    updated_by: updatedBy,
+                    material_logs: snakedML
+                };
             },
 
             // バックエンドから返ってくるerrorなので命名がsnake caseなので注意
@@ -284,7 +325,7 @@ export default (config) => {
 
                 Object.keys(rawErrors).forEach(key => {
                     // 動的フォーム配列materialLogsを持つキーからindex数字とフィールド名を抽出
-                    const match = key.match(/^material_logs\.(\d+)\.(.+)$/);
+                    const match = key.match(/^materialLogs\.(\d+)\.(.+)$/);
                     // materialLogsに関するエラーがあるか
                     if (match) {
 
@@ -321,8 +362,17 @@ export default (config) => {
             // ----------------------------------------------------
             // 下書き機能
             // ----------------------------------------------------
-            hasDraft() {
+            showDraftInfo() {
+                const id = this.selectedDraftUuid;
+                const draft = this.draftWorkLog.find(log => log.draftUuid == id);
+                return {
+                    draft,
+                    cropName: `作物名: ${draft?.cropName || '未選択'}`,
+                    title: `作業名: ${draft?.title || '未記入'}`
+                }
+            },
 
+            hasDraft() {
                 return this.draftWorkLog.length || null;
             },
 
@@ -339,7 +389,7 @@ export default (config) => {
             loadDrafts() {
                 const rawDrafts = localStorage.getItem('DRAFT_LOG'); // キーが無くてもreturn null
                 if (!rawDrafts) {
-                    console.info('[_getStrageDRAFT_LOG] LocalStorageにDRAFT_LOGがありませんでした。(no issue)', { rawDrafts: rawDrafts });
+                    console.info('[_getStrageDRAFT_LOG] LocalStorageにDRAFT_LOGがありませんでした。(no issue)', { 'rawDrafts': rawDrafts });
                     return;
                 }
 
@@ -352,35 +402,18 @@ export default (config) => {
              * payloadを生成
              * localStrage：Camel caseのまま　==> 呼び出してフォームにそのまま流し込むため
              * submit post：Snake caseへ変換　==> DBへ登録するため
-             * 
+             *
              */
             _parseRawDrafts(rawDrafts) {
-                const newConstructDrafts = [];
-
+                let newParsedDrafts = [];
                 try {
-                    const newParsedDrafts = JSON.parse(rawDrafts);
-                    for (let {draftUuid, savedAt, meta, formData} of newParsedDrafts ) {
-                        // draftUuidが存在しない場合は即座に例外を発生させて処理を打ち切る
-                        if (!draftUuid) {
-                            // throw new Error('UUIDが存在しない要素が含まれています');
-                            throw {name: 'Exist broken Draft', message:'UUIDが存在しない要素が含まれています'};
+                    newParsedDrafts = JSON.parse(rawDrafts);
+                    for (const draft of newParsedDrafts) {
+                        if (!draft.draftUuid){
+                            throw {name: 'Exist broken Draft', message:'UUIDが存在しない記録が含まれています'};
                         }
-
-                        // 下書きをフォームに流し込むまでmetaデータを上層に配置、非正規化
-                        newConstructDrafts.push({
-                            savedAt: savedAt,
-                            draftUuid: draftUuid,
-                            cropName: meta?.cropName || '未選択',
-
-                            formData: {
-                                ...formData,
-                                savedAt: savedAt,
-                                draftUuid: draftUuid,
-                                cropName: meta?.cropName || '未選択',
-                                cropSeasonsNameYear: meta?.cropSeasonsNameYear
-                            }
-                        });
                     }
+
                 } catch (e) {
                     // ほぼ確実にLocalStorageの下書きが破損しているため、LocalStorageの下書きを削除
                     // これはリリース前のデバッグ用、キャンセルでLocalStorageの内容を取得するため
@@ -396,57 +429,42 @@ export default (config) => {
                         console.error(`'[_parseRawDrafts JSON.parse(rawDrafts)] Exist broken Draft. SyntaxError ${e.message}'`, { rawDrafts: rawDrafts });
                         return;
                     } else {
-                        console.error(`'[_parseRawDrafts] Exist broken Draft. ${e.message}'`, { newConstructDrafts: newConstructDrafts });
+                        // console.error(`'[_parseRawDrafts] Exist broken Draft. ${e.message}'`, { 'newParsedDrafts': newParsedDrafts });
+                        console.error(`'[_parseRawDrafts] Exist broken Draft. ${e.message}'`);
                         return;
                     }
                 }
-                return newConstructDrafts;
-            },
-
-            /**
-             *
-             * @function
-             * @param void
-             * @returns {Array | null} rawData
-             *
-             */
-            get _getStorageDRAFT_LOG() {
-                const rawData = localStorage.getItem('DRAFT_LOG'); // キーが無くてもreturn null
-                if (!rawData) {
-                    console.info('[_getStrageDRAFT_LOG] LocalStorageにDRAFT_LOGがありませんでした。(no issue)', { rawData: rawData });
-                    return null;
-                }
-                return JSON.parse(rawData);
+                return newParsedDrafts;
             },
 
             // Localstorage保存ロジック
-            saveToLocalStorage(newRecord) {
-                const tempRecords = [];
+            saveToLocalStorage() {
+                const newRecord = this.buildDraftRecord(this.formData);
+
                 try {
 
-                    const oldRecords = this.draftWorkLog || [];
+                    const tempRecords = this.draftWorkLog || [];
 
-                    for (const old of oldRecords) {
-                        tempRecords.push(this.buildRecord(old.formData));
-                    };
+                    // for (const old of tempRecords) {
+                    //     tempRecords.push(this.buildDraftRecord(old.formData));
+                    // };
                     // 上書き処理 or push
-                    const deleteIndex = tempRecords.findIndex(p => p.draftUuid == newRecord.draftUuid);
+                    const deleteIndex = tempRecords.findIndex(p => p.draftUuid == newRecord?.draftUuid);
                     if (deleteIndex !== -1) {
-                        tempRecords[deleteIndex] = newRecord;
+                        tempRecords[deleteIndex] = JSON.parse(JSON.stringify(newRecord));
                         tempRecords[deleteIndex].savedAt = new Date().toISOString;
                     } else {
                         tempRecords.push(JSON.parse(JSON.stringify(newRecord)));
                     }
                     localStorage.setItem('DRAFT_LOG', JSON.stringify(tempRecords));
 
-                    alert('オフラインのためブラウザに一時保存しました。(localStorage)');
                     this.resetFormData();
 
                 } catch(e) {
                     console.group('[saveToLocalStorage] 下書きの保存に失敗しました。');
                         console.info('実行メソッド: JSON.stringify(newRecord)');
                         console.error(`'${e.name}: ${e.message}\n保存予定のデータ'`, { newRecord: newRecord });
-                        console.error('コンポーネント上の下書きデータ', { 'oldRecords = this.draftWorkLog': this.draftWorkLog });
+                        console.error('コンポーネント上の下書きデータ', { 'tempRecords = this.draftWorkLog': this.draftWorkLog });
                     console.groupEnd();
                     // ユーザにリトライさせてなお失敗するのであれば、端末やブラウザの種類・バージョンによる違い？
                     alert('エラー：下書きに失敗しました。ブラウザを閉じてからやり直してください。\n※連続してエラーが発生する場合は管理者に連絡してください。');
@@ -457,30 +475,23 @@ export default (config) => {
                 }
             },
 
-            // 保存用にpayloadとmetaデータなどに構造分解する
-            // 新規１件および下書きストックがある場合はそれらのformDataもビルドする
             /**
              *
-             * @param {Object}
              */
-            buildRecord(formData) {
+            buildDraftRecord(formData) {
                 // オブジェクトの型によるバリデーション
                 if (!formData || typeof formData !== 'object') {
                     throw new Error('formDataの型が一致しませんでした。');
                 }
 
-                let { formDataUuid, draftUuid, savedAt, cropName, cropSeasonsNameYear, ...payload } = formData;
+                const {draftUuid = '', savedAt = '', ...rest} = formData;
                 return {
-                    // draftUuid: draftUuid || crypto.randomUUID(),
+                    ...rest,
                     draftUuid: draftUuid || this.generateUUID(),
                     savedAt: savedAt || new Date().toISOString(),
-                    meta:{
-                        cropName: cropName,
-                        cropSeasonsNameYear: cropSeasonsNameYear
-                    },
-                    formData: { ...payload , cropName }
                 };
             },
+
 
             // ----------------------------------------------------
             // 下書きの削除
@@ -545,15 +556,15 @@ export default (config) => {
                 }
                 // 選択した下書きデータ１件を取得
                 const selectedDraft = this.draftWorkLog.find(draft => draft.draftUuid === this.selectedDraftUuid);
-                const draftFormData = { ...selectedDraft?.formData };
-                if (!draftFormData) {
+                // const draftFormData = { ...selectedDraft };
+                if (!selectedDraft) {
                     console.error(`[fillWithDraft] 下書きデータが破損しています。`, { draftWorkLog:this.draftWorkLog, selectedDraftUuid: this.selectedDraftUuid });
 
                     alert('下書きの読み込みに失敗しました。ブラウザを閉じてからやり直してください。');
                     return;
                 }
 
-                this.formData = draftFormData;
+                this.formData = {...selectedDraft};
             },
 
             // 下書きの途中で新規の作業入力に切り替えてしまったとき

@@ -15,17 +15,15 @@ class WorkLogResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'workLogId' => $this->id,
+            'id' => $this->id,
             'cropSeasonId' => $this->crop_season_id,
-            'createdById' => $this->created_by,
-            'updatedById' => $this->updated_by,
-            'workDate' => $this->work_date->format('Y-m-d'),
-            'workDateHi' => $this->work_date->format('Y-m-d H:i'),
-            'workDateTS' => $this->work_date,
+            'createdBy' => $this->created_by,
+            'updatedBy' => $this->updated_by,
+            'workDate' => $this->work_date,
             'title' => $this->title,
             'content' => $this->content,
-            'createdAt' => $this->created_at->format('Y-m-d'),
-            'updatedAt' => $this->updated_at->format('Y-m-d'),
+            'createdAt' => $this->created_at,
+            'updatedAt' => $this->updated_at,
 
             // eagerロードしているとき
             'cropSeason' => $this->whenLoaded('cropSeason', function () {

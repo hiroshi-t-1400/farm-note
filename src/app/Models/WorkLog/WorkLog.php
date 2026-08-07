@@ -24,14 +24,14 @@ class WorkLog extends Model
         'updated_by',
     ];
 
-    public function materials(): BelongsToMany
+    public function material(): BelongsToMany
     {
         return $this->belongsToMany(Material::class, 'material_work_log')
                     ->withPivot('quantity', 'dilution_rate', 'material_amount')
                     ->withTimestamps();
     }
 
-    public function cropSeasons(): BelongsTo
+    public function cropSeason(): BelongsTo
     {
         return $this->belongsTo(CropSeason::class);
     }

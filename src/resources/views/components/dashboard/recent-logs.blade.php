@@ -39,14 +39,14 @@
                 <x-dashboard.list>
                     {{-- 日付やタイトル --}}
                     <x-slot:title>
-                        <p x-text="tsToDate(log.created_at)" class="text-xs text-gray-500"></p>
+                        <p x-text="tsToDate(log.createdAt)" class="text-xs text-gray-500"></p>
                         <a
                             :href="`{{ url('/work-logs/show') }}/${log.id}`"
                             x-text="log.title ?? '無題の日誌'"
                             class="text-sm font-medium text-gray-900 hover:underline"
                         ></a>
                     </x-slot>
-                    
+
                     {{-- 関連情報 --}}
                     <x-slot:info>
                         <x-dashboard.list-info>
