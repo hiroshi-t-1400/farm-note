@@ -14,11 +14,7 @@ class MaterialCategory extends Model
         'label',
     ];
 
-<<<<<<< Updated upstream
-    public function materials (): BelongsTo
-=======
     public function material(): HasMany
->>>>>>> Stashed changes
     {
         return $this->hasMany(Material::class, 'id','type_id');
     }

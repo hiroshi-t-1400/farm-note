@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreWorkLogRequest;
 use App\Http\Resources\CropSeasonResource;
 use App\Http\Resources\MaterialResource;
+use App\Http\Resources\MaterialCategoryResource;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 
@@ -31,27 +32,25 @@ class WorkController extends Controller
      */
     public function create()
     {
-        $crop_seasons = CropSeason::with('crops')->get();
+        $crop_seasons = CropSeason::with('crop')->get();
         $users = User::all();
-        $materials = Material::with('materialCategories')->get();
+        $materials = Material::with('materialCategory')->get();
+        $mat_types = MaterialCategory::all();
+
+        // $models = [
+        //     'cropSeasons' => $crop_seasons,
+        //     'users' => $users,
+        //     'materials' => $materials,
+        // ];
 
         $models = [
-            'cropSeasons' => $crop_seasons,
-            'users' => $users,
-            'materials' => $materials,
-        ];
-
-<<<<<<< Updated upstream
-        return response()->view('/work-logs/create', compact('models'));
-=======
-        $resModels = [
             'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
             'users' => UserResource::collection($users)->resolve(),
-            'materials' => MaterialResource::collection($materials)->resolve()
+            'materials' => MaterialResource::collection($materials)->resolve(),
+            'matTypes' => MaterialCategoryResource::collection($mat_types)->resolve()
         ];
 
-        return response()->view('/work-logs.create', compact('models', 'resModels'));
->>>>>>> Stashed changes
+        return response()->view('/work-logs.create', compact('models'));
     }
 
     /**
@@ -104,9 +103,6 @@ class WorkController extends Controller
      */
     public function show(string $id)
     {
-<<<<<<< Updated upstream
-        //
-=======
         $work_log = WorkLog::with(
                 'material.materialCategory',
                 'cropSeason.crop',
@@ -117,7 +113,6 @@ class WorkController extends Controller
             ->find($id);
 
             return response()->view('/work-logs.show', compact('work_log'));
->>>>>>> Stashed changes
     }
 
     /**

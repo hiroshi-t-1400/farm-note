@@ -3,8 +3,9 @@ import './bootstrap';
 import Alpine from 'alpinejs';
 // import collapse from '@alpinejs/collapse'; // プラグインのインポート
 // import postForm from './components/postForm';
-import postForm from './components/workLogCreate';
+// import indexLog from './components/workLogIndex';
 import indexLog from './components/workLogIndex';
+import postForm from './components/modules/work-logs/create'
 
 //コンポーネントの登録
 Alpine.data('postForm', postForm);

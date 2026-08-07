@@ -54,7 +54,6 @@ export default (config) => {
 
     return {
 
-        formData,
 
 
     }

@@ -15,13 +15,22 @@ class CropSeasonResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'cropSeasonsId' => $this->id,
+            'id' => $this->id,
             'variety' => $this->variety,
             'supplier' => $this->supplier,
             'plantedArea' => $this->planted_area,
             'plantCount' => $this->plant_count,
             'totalYield' => $this->total_yield,
             'year' => $this->year,
+
+            'cropName' => $this->whenLoaded('crop', function() {
+                return $this->crop->name;
+            }),
+
+            'cropSeasonsNameYear' => $this->whenLoaded('crop', function() {
+                    $temp = $this->crop->name.strval($this->year);
+                return $temp;
+            }),
 
             // リレーション先についてEagerロードされているときのみ
             'crop' => $this->whenLoaded('crop', function() {

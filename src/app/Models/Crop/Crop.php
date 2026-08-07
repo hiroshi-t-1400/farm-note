@@ -13,11 +13,7 @@ class Crop extends Model
         'name',
     ];
 
-<<<<<<< Updated upstream
-    public function cropSeasons (): BelongsTo
-=======
     public function cropSeason(): HasMany
->>>>>>> Stashed changes
     {
         return $this->hasMany(CropSeason::class);
     }

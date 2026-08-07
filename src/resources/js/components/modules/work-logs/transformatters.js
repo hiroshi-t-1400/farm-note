@@ -26,8 +26,9 @@ export function transForm (initialData = {}) {
         allCropSeasons: (initialData.cropSeasons || []).map((season, index) => ({
             ...season,
             id: index + 1,
-            cropName: season.crop?.name ?? '',
-            cropSeasonNameYear: `${season.crop?.name ?? ''}${season.year ?? ''}`,
+            cropNmae: season?.crop?.cropName ?? '',
+            // cropName: season.crop?.name ?? '',
+            cropSeasonNameYear: `${season?.crop?.cropName ?? ''}${season.year ?? ''}`,
         })),
 
         // allMaterials: initialData.materials || [],

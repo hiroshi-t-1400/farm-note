@@ -2,25 +2,38 @@
 
 import { transForm } from "./transformatters";
 import { storeFormLogic } from "./form-logic";
-import { generateUUID } from "./utils";
-
+import { generateUUID, tsToDate } from "./utils";
 
 
 export default (config) => {
+
+    const debugModel = config?.initialModels || {};
+
+    const {
+        cropSeasons: allCropSeasons = {},
+        users: allUsers = {},
+        materials: allMaterials = {},
+        matTypes: matTypes,
+    } = config?.initialModels || {};
+
 
         const DRAFT_LOG = 'farm-note:work-logs:draft-work-log';
 
         const warnedKeys = new Set();
 
         return {
+
+            debugModel,
+
+            allUsers,
+            allMaterials,
+            allCropSeasons,
+            matTypes,
+
             formData: {},
 
             selectedType: '',
             selectedMaterialId: '',
-            types: config.initialModels?.types || [],
-            allMaterials: config.initialModels?.materials || [],
-            allUsers: config.initialModels?.users || [],
-
 
             // isOnline: window.navigator.onLine,
             // isOnline: false,
@@ -34,31 +47,13 @@ export default (config) => {
 
             draftWorkLog: [],
 
-<<<<<<< Updated upstream:src/resources/js/components/workLogCreate.js
-            // crop_seasonを扱いやすいように変形する
-            allCropSeasons: (config.initialModels?.crop_seasons || []).map((season, index) => ({
-                ...season,
-                id: index + 1,
-                crop_name: season.crops?.name ?? '',
-                crop_season_nameYear: `${season.crops?.name ?? ''}${season.year ?? ''}`,
-=======
             // レスポンシブ対応のため
             windowWidth: window.innerWidth,
             isMobile() {return this.windowWidth < 768;},
 
-            // cropSeasonsを扱いやすいように変形する
-            allCropSeasons: (config.initialModels?.cropSeasons || []).map((season, index) => ({
-                ...season,
-                id: index + 1,
-                cropName: season.crop?.name ?? '',
-                cropSeasonNameYear: `${season.crop?.name ?? ''}${season.year ?? ''}`,
->>>>>>> Stashed changes:src/resources/js/components/modules/work-logs/create.js
-            })),
-
             init() {
-                this.formData.workDate = this.getToday;
+                this.formData.workDate = tsToDate(Date())
                 this.resetFormData();
-                this.remapCropSeasons();
                 //debug
                 this.getOnlineStatus;
             },
@@ -70,15 +65,15 @@ export default (config) => {
                     draftUuid: '',
                     cropName: '不明',
 
-                    cropSeasonId: '',
-                    cropSeasonNameYear: '不明',
-                    createdBy: 1,
-                    performedBy: '',
+                    cropSeasonsId: '',
+                    cropSeasonsNameYear: '不明',
+                    createdById: 1,
+                    performedById: '',
                     workDate: this.getToday,
                     status: false,
                     title: '',
                     content: '',
-                    updatedBy: '',
+                    updatedById: '',
                     materialLogs: []
                 };
             },
@@ -88,68 +83,14 @@ export default (config) => {
                 this.formData = newFormData;
             },
 
-            // 楽観ロックによるバージョン管理、不要そうになったので保留
-            // updateData(key, value) {
-            //     this[key] = value;
-            //     this.version++;
-            // },
-
-            get getToday() {
-                const today = new Date();
-
-                const yyyy = today.getFullYear();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                return `${yyyy}-${mm}-${dd}`;
-            },
-
-            // init():作物の名称をオブジェクトの上の階層に挿入して配列を使いやすくする
-            remapCropSeasons() {
-                const remapArray = this.allCropSeasons.map((season, index) => ({
-                    ...season,
-                    id: index + 1,
-                    crop_name: season.crops.name,
-                    crop_season_nameYear: season.crops.name + season.year,
-                }));
-                this.allCropSeasons = remapArray;
-            },
-
             // ----------------------------------------------------
             // ここまで初期化
             // ----------------------------------------------------
 
-            // 作物表示用metaデータの生成と格納
-            changeCropSeasons() {
-                const targetId = this.formData.cropSeasonId;
-
-                const newCropSeason = this.getCropSeasonByCropSeasonId(targetId);
-                if (!newCropSeason) {
-                    console.trace('[changeCropSeasons] 取得したオブジェクトが不正です。', { newCropSeason: newCropSeason, 'targetId':targetId })
-                    return;
-                }
-
-                const getName = newCropSeason.cropName;
-                const getNameYear = newCropSeason.cropSeasonNameYear;
-
-                this.formData.cropName = newCropSeason.cropName;
-                this.formData.cropSeasonNameYear = newCropSeason.cropSeasonNameYear;
-            },
-
-            // cropSeasonIdから作物名を取得する
-            getCropSeasonByCropSeasonId(targetId) {
-                targetId = parseInt(targetId) || '';
-                if (!targetId || targetId <= 0 ) {
-                    console.error('[getCropsName] targetIdが不正な値です。', { targetId: targetId })
-                    return null;
-                }
-                const foundObject = this.allCropSeasons.find(({ id }) => id == targetId);
-                return foundObject;
-            },
-
             // 選択された種別から資材選択を助ける
             get filteredMaterials() {
                 return this.allMaterials.filter(m => {
-                    const matchType = this.selectedType === '' || m.type_id == this.selectedType;
+                    const matchType = this.selectedType === '' || m.typeId == this.selectedType;
 
                     return matchType;
                 });
@@ -167,7 +108,7 @@ export default (config) => {
                 const newMaterialLog = this.initAddForm(this.selectedMaterial);
 
                 this.formData.materialLogs.push(newMaterialLog);
-                console.warn('pushのあと', {materialLogs: this.formData.materialLogs, selectMaterial: this.selectedMaterial});
+                console.info('pushのあと', {materialLogs: this.formData.materialLogs, selectMaterial: this.selectedMaterial});
                 // 追加したら選択欄をリセット
                 this.selectedMaterialId = '';
             },
@@ -190,13 +131,13 @@ export default (config) => {
                 return {
                     // addFormUuid: crypto.randomUUID(),
                     addFormUuid: this.generateUUID(),
-                    typeLabel: master.material_category.label,
+                    typeLabel: master.typeLabel,
 
                     materialId: master.id,
                     name: master.name,
-                    typeId: master.type_id,
-                    dilutionRate: master.default_dilution_rate,
-                    quantity: master.standard_spray_volume,
+                    typeId: master.typeId,
+                    dilutionRate: master.defaultDilutionRate,
+                    quantity: master.standardSprayVolume,
                     materialAmount: '',
                     manufacturer: master.manufacturer
                 };
@@ -232,7 +173,7 @@ export default (config) => {
                 }
 
                 // メインロジック 重複の確認
-                if (this.formData.materialLogs?.some(m => m.materialId == materialId)) {
+                if (this.formData.materialLogs?.some(mlog => mlog.materialId == materialId)) {
                     return '** 登録済みです **';
                 }
                 return '';
@@ -336,12 +277,14 @@ export default (config) => {
                 }
             },
 
+            // バックエンドから返ってくるerrorなので命名がsnake caseなので注意
+            // errorもフロントエンドに返すときCamelに変換する？
             insertUuidToErrors(rawErrors) {
                 this.mappedErrors = {};
 
                 Object.keys(rawErrors).forEach(key => {
                     // 動的フォーム配列materialLogsを持つキーからindex数字とフィールド名を抽出
-                    const match = key.match(/^materialLogs\.(\d+)\.(.+)$/);
+                    const match = key.match(/^material_logs\.(\d+)\.(.+)$/);
                     // materialLogsに関するエラーがあるか
                     if (match) {
 
@@ -406,6 +349,10 @@ export default (config) => {
 
             /**
              *
+             * payloadを生成
+             * localStrage：Camel caseのまま　==> 呼び出してフォームにそのまま流し込むため
+             * submit post：Snake caseへ変換　==> DBへ登録するため
+             * 
              */
             _parseRawDrafts(rawDrafts) {
                 const newConstructDrafts = [];
@@ -430,7 +377,7 @@ export default (config) => {
                                 savedAt: savedAt,
                                 draftUuid: draftUuid,
                                 cropName: meta?.cropName || '未選択',
-                                cropSeasonNameYear: meta?.cropSeasonNameYear
+                                cropSeasonsNameYear: meta?.cropSeasonsNameYear
                             }
                         });
                     }
@@ -522,14 +469,14 @@ export default (config) => {
                     throw new Error('formDataの型が一致しませんでした。');
                 }
 
-                let { formDataUuid, draftUuid, savedAt, cropName, cropSeasonNameYear, ...payload } = formData;
+                let { formDataUuid, draftUuid, savedAt, cropName, cropSeasonsNameYear, ...payload } = formData;
                 return {
                     // draftUuid: draftUuid || crypto.randomUUID(),
                     draftUuid: draftUuid || this.generateUUID(),
                     savedAt: savedAt || new Date().toISOString(),
                     meta:{
                         cropName: cropName,
-                        cropSeasonNameYear: cropSeasonNameYear
+                        cropSeasonsNameYear: cropSeasonsNameYear
                     },
                     formData: { ...payload , cropName }
                 };

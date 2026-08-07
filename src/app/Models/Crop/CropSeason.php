@@ -24,20 +24,12 @@ class CropSeason extends Model
         'year',
     ];
 
-<<<<<<< Updated upstream
-    public function crops(): HasOne
-=======
     public function crop(): BelongsTo
->>>>>>> Stashed changes
     {
         return $this->belongsTo(Crop::class);
     }
 
-<<<<<<< Updated upstream
-    public function fields(): HasOne
-=======
     public function field(): BelongsTo
->>>>>>> Stashed changes
     {
         return $this->belongsTo(Field::class);
     }

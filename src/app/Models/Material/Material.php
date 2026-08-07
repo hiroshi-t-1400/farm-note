@@ -29,11 +29,7 @@ class Material extends Model
                     // ->using(MaterialWorkLog::class);
     }
 
-<<<<<<< Updated upstream
-    public function materialCategories(): HasOne
-=======
     public function materialCategory(): BelongsTo
->>>>>>> Stashed changes
     {
         return $this->belongsTo(MaterialCategory::class, 'type_id', 'id');
     }

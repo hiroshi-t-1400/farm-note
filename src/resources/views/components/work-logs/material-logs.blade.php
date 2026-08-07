@@ -12,7 +12,7 @@
                         <input type="radio" name="typeFilter" value='' x-model="selectedType" class="form-radio text-blue-600">
                         <span class="ml-1 text-sm">すべて</span>
                     </label>
-                    <template x-for="type in types" :key="type.id">
+                    <template x-for="type in matTypes" :key="type.id">
                         <label class="inline-flex items-center">
                             <input type="radio" name="typeFilter" :value="type.id" x-model="selectedType" class="form-radio text-blue-600">
                             <span class="ml-1 text-sm" x-text="type.label"></span>

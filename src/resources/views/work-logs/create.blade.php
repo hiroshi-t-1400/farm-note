@@ -1,6 +1,3 @@
-<<<<<<< Updated upstream
-<x-work-logs.application.create :models="$models" />
-=======
 <!-- resources/views/work-logs/create.blade.php -->
 
 <x-layouts.layout title="日誌記録画面 - 農作業日誌">
@@ -15,4 +12,3 @@
 
 </x-layouts.layout>
 
->>>>>>> Stashed changes

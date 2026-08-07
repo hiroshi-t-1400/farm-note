@@ -1,12 +1,12 @@
 {{-- エリア１非動的フォーム部 --}}
 
 {{-- 作物選択 --}}
-<x-ui.form-group label="作業した作物" name="cropSeasonId" >
-    <x-ui.select x-model="formData.cropSeasonId" @change="changeCropSeasons()" name="cropSeasonId" class="max-w-sm" >
+<x-ui.form-group label="作業した作物" name="cropSeasonsId" >
+    <x-ui.select x-model="formData.cropSeasonsId" @change="changeCropSeasons()" name="cropSeasonsId" class="max-w-sm" >
         <x-slot>
             <option value="">作物を選択</option>
             <template x-for="cropSeason in allCropSeasons" :key="cropSeason.id">
-                <option :value="cropSeason.id" x-text="cropSeason.cropSeasonNameYear"></option>
+                <option :value="cropSeason.id" x-text="cropSeason.cropSeasonsNameYear"></option>
             </template>
         </x-slot>
     </x-ui.select>
@@ -22,11 +22,7 @@
 {{-- 作業日 --}}
 <x-ui.form-group label="作業日" name="workDate" >
     <div>
-<<<<<<< Updated upstream
-        <x-ui.input type="date" x-model="formData.work_date" name="work_date" class="max-w-40" />
-=======
         <x-ui.input type="date" x-model="formData.workDate" name="workDate" class="sm:max-w-40 w-full max-w-full" />
->>>>>>> Stashed changes
         <div class="inline-block">
             {{-- 完了した作業を登録する場合は予定日のチェックオフ、今後の予定を登録する場合はチェックオン、投稿が下書きになった場合は上書きしてチェックオフ、現在より過去か未来かで自動的に値を決定する？>>するつもりだった作業を登録する場合を考慮する？ --}}
             <input type="checkbox" x-model="formData.status" name="status" id="status" class="ms-2" >

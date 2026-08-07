@@ -53,11 +53,7 @@ class User extends Authenticatable
         ];
     }
 
-<<<<<<< Updated upstream
-    public function workLogs (): BelongsToMany
-=======
     public function performedBy(): BelongsToMany
->>>>>>> Stashed changes
     {
         return $this->belongsToMany(WorkLog::class, 'performed_by_work_log')
                     ->withTimestamps();
