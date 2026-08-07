@@ -27,7 +27,7 @@ class DashboardController extends Controller
             ->withCount('workLog')
             ->get();
 
-        $get_recent = WorkLog::with('cropSeason', 'createdBy', 'performedBy', 'updatedBy')
+        $get_recent = WorkLog::with(['cropSeason', 'createdBy', 'performedBy', 'updatedBy'])
             ->latest('updated_at')
             ->take(5)
             ->get();

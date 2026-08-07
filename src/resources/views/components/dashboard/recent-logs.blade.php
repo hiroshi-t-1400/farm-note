@@ -2,7 +2,7 @@
     'recent' => [],
 ])
 
-<div x-data="indexLog({
+<div x-data="recentLog({
         initialRecent: @js($recent)
     })"
     class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 opacity-75"
@@ -39,7 +39,7 @@
                 <x-dashboard.list>
                     {{-- 日付やタイトル --}}
                     <x-slot:title>
-                        <p x-text="tsToDate(log.createdAt)" class="text-xs text-gray-500"></p>
+                        <p x-text="log.createdAt" class="text-xs text-gray-500"></p>
                         <a
                             :href="`{{ url('/work-logs/show') }}/${log.id}`"
                             x-text="log.title ?? '無題の日誌'"
@@ -50,11 +50,11 @@
                     {{-- 関連情報 --}}
                     <x-slot:info>
                         <x-dashboard.list-info>
-                            作業実施：<span x-text="log.performed_by?.[0]?.name ?? '作業者不明'">
+                            作業実施：<span x-text="log.performedBy[0].name ?? '作業者不明'">
                             </span>
                         </x-dashboard.list-info>
                         <x-dashboard.list-info>
-                            記録：<span x-text="log.created_by?.name ?? '記録者不明'">
+                            記録：<span x-text="log.createdByName ?? '記録者不明'">
                             </span>
                         </x-dashboard.list-info>
                     </x-slot>

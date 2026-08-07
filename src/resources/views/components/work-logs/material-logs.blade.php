@@ -23,7 +23,7 @@
 
             {{-- 資材選択フォーム --}}
             <div class="mb-2">
-                <x-ui.select x-model="selectedMaterialId" class="max-w-lg">
+                <x-ui.select x-model="selectedMaterialId" class="w-full max-w-lg">
                     <x-slot>
                         <option value="">-- 資材を選択してください（<span x-text="filteredMaterials.length"></span>件該当） --</option>
                         <template x-for="material in filteredMaterials" :key="material.id">

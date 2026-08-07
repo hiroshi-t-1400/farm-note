@@ -12,7 +12,7 @@ export function tsToDate(ts, mode='date') {
     const MM = String(today.getMinutes());
 
     if (mode == 'date')return `${yyyy}-${mm}-${dd}`;
-    if (mode == 'Hi') return `${yyyy}-${mm}-${dd}-${HH}-${MM}`;
+    if (mode == 'Hi') return `${yyyy}-${mm}-${dd} ${HH}:${MM}`;
 };
 
 // UUIDを安全に生成するヘルパーメソッド（非セキュア環境互換）

@@ -34,17 +34,34 @@ class WorkLogResource extends JsonResource
                 ];
             }),
 
+            'createdByName' => $this->whenLoaded('createdBy', function() {
+                return $this->createdBy->name;
+            }),
+
+            'updatedByName' => $this->whenLoaded('updatedBy', function() {
+                return $this->updatedBy->name;
+            }),
+
+            'performedBy' => $this->whenLoaded('performedBy', function() {
+                return $this->performedBy->map(function ($u) {
+                    return [
+                        'id' => $u->id,
+                        'name' => $u->name,
+                    ];
+                });
+            }),
+
             'material' => $this->whenLoaded('material', function () {
                 return  $this->material->map(function ($mat) {
                     return [
-                        'materialId' => $mat->id,
-                        'materialName' => $mat->name,
+                        'id' => $mat->id,
+                        'name' => $mat->name,
                         'defaultDilutionRate' => $mat->default_dilution_rate,
                         'standardSprayVolume' => $mat->standard_spray_volume,
                         'unit' => $mat->unit,
                         'manufacturer' => $mat->manufacturer,
-                        'materialTypeId' => $mat->materialCategory->id,
-                        'materialType' => $mat->materialCategory->label,
+                        'typeId' => $mat->materialCategory->id,
+                        'typeLabel' => $mat->materialCategory->label,
 
                         'quantity' => $mat->pivot->quantity,
                         'dilutionRate' => $mat->pivot->dilution_rate,

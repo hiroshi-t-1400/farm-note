@@ -5,6 +5,7 @@ namespace App\Models\WorkLog;
 use App\Models\Crop\CropSeason;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Field extends Model
 {
@@ -21,9 +22,9 @@ class Field extends Model
         'notes',
     ];
 
-    public function cropSeason(): BelongsTo
+    public function cropSeason(): HasMany
     {
-        return $this->belongsTo(CropSeason::class);
+        return $this->hasMany(CropSeason::class);
     }
 }
 

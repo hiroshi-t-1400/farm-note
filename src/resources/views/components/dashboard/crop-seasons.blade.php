@@ -36,21 +36,21 @@
         {{-- 2. データが存在する場合のダッシュボード表示 --}}
         <div x-show="allCropSeasons.length > 0">
 
-                <template x-for="crop in allCropSeasons" :key="crop.id">
+                <template x-for="row in allCropSeasons" :key="row.id">
                     <x-dashboard.list>
                         <x-slot:title>
                                 <a
-                                    href="" x-text="`${crop.crop_name} ${crop.year}`"
+                                    href="{row.id}" x-text="row.cropSeasonsNameYear"
                                     class="text-base font-medium text-gray-900 hover:underline" >
                                 </a>
                         </x-slot>
 
                         <x-slot:info>
                             <x-dashboard.list-info>
-                                    品種名：<span x-text="crop.variety" ></span>
+                                    品種名：<span x-text="row.variety" ></span>
                             </x-dashboard.list-info>
                             <x-dashboard.list-info>
-                                    圃場：<span x-text="crop.field.name" ></span>
+                                    圃場：<span x-text="row.fieldName" ></span>
                             </x-dashboard.list-info>
                         </x-slot>
                     </x-dashboard.list>

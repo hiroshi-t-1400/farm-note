@@ -7,6 +7,7 @@
             x-model="selectedDraftUuid"
             @change="showDraftInfo()"
             name="draft_select"
+            class="w-full max-w-lg"
             >
             <x-slot>
                 <option value="">-- 選択して下書きを確認してください。（<span x-text="draftWorkLog.length"></span>件） --</option>

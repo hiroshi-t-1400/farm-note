@@ -23,9 +23,6 @@ class CropSeasonResource extends JsonResource
             'totalYield' => $this->total_yield,
             'year' => $this->year,
 
-            'cropName' => $this->whenLoaded('crop', function() {
-                return $this->crop->name;
-            }),
 
             'cropSeasonsNameYear' => $this->whenLoaded('crop', function() {
                     $temp = $this->crop->name.strval($this->year);
@@ -39,6 +36,11 @@ class CropSeasonResource extends JsonResource
                     'cropName'  => $this->crop->name,
                 ];
             }),
+
+            'cropName' => $this->whenLoaded('crop', function() {
+                return $this->crop->name;
+            }),
+
             'field' => $this->whenLoaded('field', function() {
                 return [
                     'id'         => $this->field->id,
@@ -46,6 +48,11 @@ class CropSeasonResource extends JsonResource
                     'fieldNotes' => $this->field->notes,
                 ];
             }),
+
+            'fieldName' => $this->whenLoaded('field', function() {
+                return $this->field->name;
+            }),
+
         ];
     }
 }

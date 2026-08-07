@@ -20,8 +20,6 @@ export default (config) => {
 
         return {
 
-            debugModel,
-
             allUsers,
             allMaterials,
             allCropSeasons,
