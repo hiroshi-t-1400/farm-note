@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkLogRequest;
+use App\Http\Resources\CropSeasonResource;
+use App\Http\Resources\MaterialResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 
 use App\Models\Crop\CropSeason;
@@ -32,16 +35,23 @@ class WorkController extends Controller
         $users = User::all();
         $materials = Material::with('materialCategories')->get();
 
-        $types = MaterialCategory::all();
-
         $models = [
-            'crop_seasons' => $crop_seasons,
+            'cropSeasons' => $crop_seasons,
             'users' => $users,
             'materials' => $materials,
-            'types' => $types,
         ];
 
+<<<<<<< Updated upstream
         return response()->view('/work-logs/create', compact('models'));
+=======
+        $resModels = [
+            'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
+            'users' => UserResource::collection($users)->resolve(),
+            'materials' => MaterialResource::collection($materials)->resolve()
+        ];
+
+        return response()->view('/work-logs.create', compact('models', 'resModels'));
+>>>>>>> Stashed changes
     }
 
     /**
@@ -94,7 +104,20 @@ class WorkController extends Controller
      */
     public function show(string $id)
     {
+<<<<<<< Updated upstream
         //
+=======
+        $work_log = WorkLog::with(
+                'material.materialCategory',
+                'cropSeason.crop',
+                'cropSeason.field',
+                'createdBy',
+                'performedBy',
+                'updatedBy')
+            ->find($id);
+
+            return response()->view('/work-logs.show', compact('work_log'));
+>>>>>>> Stashed changes
     }
 
     /**
@@ -103,6 +126,23 @@ class WorkController extends Controller
     public function edit(string $id)
     {
         //
+        $work_log = WorkLog::with(
+                'material',
+                'performedBy')
+        ->find($id);
+
+        $crop_seasons = CropSeason::with('crop')->get();
+        $users = User::all();
+        $materials = Material::with('materialCategory')->get();
+
+        $models = [
+            'workLog' => $work_log,
+            'cropSeasons' => $crop_seasons,
+            'users' => $users,
+            'materials' => $materials,
+        ];
+
+        return response()->view('/work-logs.create', compact('models'));
     }
 
     /**

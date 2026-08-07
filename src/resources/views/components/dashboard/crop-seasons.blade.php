@@ -50,7 +50,7 @@
                                     品種名：<span x-text="crop.variety" ></span>
                             </x-dashboard.list-info>
                             <x-dashboard.list-info>
-                                    圃場：<span x-text="crop.fields.name" ></span>
+                                    圃場：<span x-text="crop.field.name" ></span>
                             </x-dashboard.list-info>
                         </x-slot>
                     </x-dashboard.list>

@@ -41,7 +41,7 @@
                     <x-slot:title>
                         <p x-text="tsToDate(log.created_at)" class="text-xs text-gray-500"></p>
                         <a
-                            href=""
+                            :href="`{{ url('/work-logs/show') }}/${log.id}`"
                             x-text="log.title ?? '無題の日誌'"
                             class="text-sm font-medium text-gray-900 hover:underline"
                         ></a>

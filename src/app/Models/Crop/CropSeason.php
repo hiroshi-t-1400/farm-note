@@ -6,6 +6,7 @@ use App\Models\WorkLog\WorkLog;
 use App\Models\Crop\Crop;
 use App\Models\WorkLog\Field;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -23,14 +24,22 @@ class CropSeason extends Model
         'year',
     ];
 
+<<<<<<< Updated upstream
     public function crops(): HasOne
+=======
+    public function crop(): BelongsTo
+>>>>>>> Stashed changes
     {
-        return $this->hasOne(Crop::class, 'id', 'crop_id');
+        return $this->belongsTo(Crop::class);
     }
 
+<<<<<<< Updated upstream
     public function fields(): HasOne
+=======
+    public function field(): BelongsTo
+>>>>>>> Stashed changes
     {
-        return $this->hasOne(Field::class, 'id', 'field_id');
+        return $this->belongsTo(Field::class);
     }
 
     public function workLogs(): HasMany

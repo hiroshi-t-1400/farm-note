@@ -12,6 +12,11 @@ use Illuminate\Http\Request;
 //     return view('welcome');
 // });
 
+<<<<<<< Updated upstream
+=======
+Route::get('/work-logs/show/{log}', [WorkController::class, 'show'])->name('work-logs.show');
+Route::get('/work-logs/edit/{log}', [WorkController::class, 'edit'])->name('work-logs.edit');
+>>>>>>> Stashed changes
 
 Route::get('/work-logs/create', [WorkController::class, 'create'])->name('create');
 Route::post('/work-logs/create', [WorkController::class, 'store'])->name('store');

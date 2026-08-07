@@ -31,6 +31,7 @@ class StoreWorkLogRequest extends FormRequest
             //
             'crop_season_id' => ['required', 'numeric', 'exists:crop_seasons,id'],
             'created_by' => ['required', 'numeric', 'exists:users,id'],
+            // 理想的にはarrayで送られてくるので要改修
             'performed_by' => ['required', 'numeric', 'exists:users,id'],
             'work_date' => ['required', 'date'],
             // 'status' => ['sometimes', 'in:plan,completed,draft'],
