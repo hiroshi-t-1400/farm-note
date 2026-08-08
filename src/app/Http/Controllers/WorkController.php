@@ -7,6 +7,7 @@ use App\Http\Resources\CropSeasonResource;
 use App\Http\Resources\MaterialResource;
 use App\Http\Resources\MaterialCategoryResource;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\WorkLogResource;
 use Illuminate\Http\Request;
 
 use App\Models\Crop\CropSeason;
@@ -97,16 +98,17 @@ class WorkController extends Controller
      */
     public function show(string $id)
     {
-        $work_log = WorkLog::with(
-                'material.materialCategory',
-                'cropSeason.crop',
-                'cropSeason.field',
+        $work_log = WorkLog::with([
+                'material',
+                'cropSeason',
                 'createdBy',
                 'performedBy',
-                'updatedBy')
+                'updatedBy'])
             ->find($id);
 
-            return response()->view('/work-logs.show', compact('work_log'));
+        $workLog = new WorkLogResource($work_log)->resolve();
+
+            return response()->view('/work-logs.show', compact('workLog'));
     }
 
     /**

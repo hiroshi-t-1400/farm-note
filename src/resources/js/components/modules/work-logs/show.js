@@ -1,61 +1,51 @@
 
+import { tsToDate } from "./utils";
 
 export default (config) => {
 
+    const debugWorkLog = config?.initialWorkLog;
+
     const {
-            created_at,
-            created_by: createdBy = '',
-            updated_at,
-            updated_by: updatedBy = '',
-            title: title = '',
-            work_date,
-            status: status = '',
-            content: content = '',
-            // content,
-            performed_by: performedBy = [],
-            crop_season,
-            material,
-            ...rest
+        // createdAt,
+        createdBy,
+        // updatedAt,
+        updatedBy,
+        title,
+        // workDate,
+        status,
+        content,
+        performedBy,
+        cropSeason,
+        // material: materials = [],
+        material,
+        ...rest
     } = config?.initialWorkLog;
 
-    const cropSeason = {
-        ...crop_season,
-        crop_name: crop_season.crop.name,
-        field_name: crop_season.field.name,
-        field_notes: crop_season.field.notes
-    };
+    const createdAt = tsToDate(config?.initialWorkLog?.createdAt);
+    const updatedAt = tsToDate(config?.initialWorkLog?.updatedAt);
+    const workDate = tsToDate(config?.initialWorkLog?.workDate);
 
-    function tsToDate(ts) {
-        const newTS = Date.parse(ts);
-        const today = new Date(newTS);
-
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-
-        return `${yyyy}-${mm}-${dd}`;
-    };
-
-    const createdAt = tsToDate(created_at);
-    const updatedAt = tsToDate(updated_at);
-    const workDate = tsToDate(work_date);
-
-    const materials = material.map(m => ({
-        quantity: m.pivot.quantity,
-        dilutionRate: m.pivot.dilution_rate + '倍',
-        materialAmount: m.pivot.material_amount,
-
-        name: m.name,
-        type: m.material_category.label,
-        manufacturer: m.manufacturer,
-        defaultDilutionRate: m.default_dilution_rate,
-        standardSprayVolume: m.standard_spray_volume + 'L',
-        unit: m.unit,
+    const materials = material.map((mat, index) => ({
+        ...mat,
+        indexStr: `資材 ${index + 1}` || '',
+        typeLabel: `【${mat.typeLabel}】` || '',
+        defaultDilutionRate: `${mat.defaultDilutionRate}倍` || '',
+        dilutionRate: `${mat.dilutionRate}倍` || '',
+        materialAmount: `${mat.materialAmount}` || ''
+        // logs: {
+        //     defaultDilutionRate: {label: '使用量', value:`${mat.defaultDilutionRate}倍` || ''},
+        //     dilutionRate: {label: '希釈倍率', value:`${mat.dilutionRate}倍` || ''},
+        //     materialAmount: {label: '原液量', value:`${mat.materialAmount}倍` || ''}
+        // }
     }));
 
     console.log(config?.initialWorkLog);
+    console.log('マテリアルログ: ', {'materials': materials});
+
 
     return {
+        debugWorkLog,
+
         createdAt,
         createdBy,
         updatedAt,

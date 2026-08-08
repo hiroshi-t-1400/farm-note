@@ -28,7 +28,10 @@ class WorkLogResource extends JsonResource
             // eagerロードしているとき
             'cropSeason' => $this->whenLoaded('cropSeason', function () {
                 return [
+                    'cropSeasonsNameYear' => $this->cropSeason->crop->name.$this->cropSeason->year,
                     'cropName' => $this->cropSeason->crop->name,
+                    'year' => $this->cropSeason->year,
+                    'variety' => $this->cropSeason->variety,
                     'fieldName' => $this->cropSeason->field->name,
                     'fieldNotes' => $this->cropSeason->field->notes,
                 ];
