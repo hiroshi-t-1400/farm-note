@@ -2,7 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CropSeasonResource;
+use App\Http\Resources\MaterialCategoryResource;
+use App\Http\Resources\MaterialResource;
+use App\Http\Resources\UserResource;
+use App\Http\Resources\WorkLogResource;
 use App\Models\Crop\CropSeason;
+use App\Models\Material\Material;
+use App\Models\Material\MaterialCategory;
+use App\Models\User;
 use App\Models\WorkLog\WorkLog;
 use Illuminate\Http\Request;
 
@@ -12,16 +20,26 @@ class DashboardController extends Controller
     public function index()
     {
         // $user = Auth::user();
-
-        $crop_seasons = CropSeason::with('crops', 'fields')
-            ->withCount('workLogs')
+        $users = User::all();
+        $materials = Material::with('materialCategory')->get();
+        $mat_types = MaterialCategory::all();
+        $crop_seasons = CropSeason::with('crop', 'field')
+            ->withCount('workLog')
             ->get();
 
-        $latest_work_logs = WorkLog::with('cropSeasons', 'createdBy', 'performedBy', 'updatedBy')
+        $get_recent = WorkLog::with(['cropSeason', 'createdBy', 'performedBy', 'updatedBy'])
             ->latest('updated_at')
             ->take(5)
             ->get();
 
-        return response()->view('/dashboard', compact('crop_seasons', 'latest_work_logs'));
+        $models = [
+            'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
+            'users' => UserResource::collection($users)->resolve(),
+            'materials' => MaterialResource::collection($materials)->resolve(),
+            'matTypes' => MaterialCategoryResource::collection($mat_types)->resolve(),
+            'recent' => WorkLogResource::collection($get_recent)->resolve()
+        ];
+
+        return response()->view('/dashboard', compact('models'));
     }
 }

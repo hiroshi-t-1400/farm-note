@@ -8,6 +8,7 @@ use App\Models\WorkLog\WorkLog;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -52,9 +53,19 @@ class User extends Authenticatable
         ];
     }
 
-    public function workLogs (): BelongsToMany
+    public function performedBy(): BelongsToMany
     {
         return $this->belongsToMany(WorkLog::class, 'performed_by_work_log')
                     ->withTimestamps();
+    }
+
+    public function createdBy(): HasMany
+    {
+        return $this->hasMany(WorkLog::class, 'id', 'created_by');
+    }
+
+    public function updatedBy(): HasMany
+    {
+        return $this->hasMany(WorkLog::class, 'id', 'updated_by');
     }
 }

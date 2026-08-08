@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkLogRequest;
+use App\Http\Resources\CropSeasonResource;
+use App\Http\Resources\MaterialResource;
+use App\Http\Resources\MaterialCategoryResource;
+use App\Http\Resources\UserResource;
+use App\Http\Resources\WorkLogResource;
 use Illuminate\Http\Request;
 
 use App\Models\Crop\CropSeason;
@@ -28,20 +33,19 @@ class WorkController extends Controller
      */
     public function create()
     {
-        $crop_seasons = CropSeason::with('crops')->get();
+        $crop_seasons = CropSeason::with('crop')->get();
         $users = User::all();
-        $materials = Material::with('materialCategories')->get();
-
-        $types = MaterialCategory::all();
+        $materials = Material::with('materialCategory')->get();
+        $mat_types = MaterialCategory::all();
 
         $models = [
-            'crop_seasons' => $crop_seasons,
-            'users' => $users,
-            'materials' => $materials,
-            'types' => $types,
+            'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
+            'users' => UserResource::collection($users)->resolve(),
+            'materials' => MaterialResource::collection($materials)->resolve(),
+            'matTypes' => MaterialCategoryResource::collection($mat_types)->resolve()
         ];
 
-        return response()->view('/work-logs/create', compact('models'));
+        return response()->view('/work-logs.create', compact('models'));
     }
 
     /**
@@ -56,7 +60,7 @@ class WorkController extends Controller
         $validated = $request->validated();
 
         // 登録する作業が予定plan、完了completed、下書きdraftで分岐
-        $status = $validated['status'] ?? 'completed';
+        $status = $validated['status'] ? 'plan' : 'completed';
 
         $workLog = WorkLog::create([
             'crop_season_id' => $validated['crop_season_id'],
@@ -74,7 +78,7 @@ class WorkController extends Controller
         // 資材が複数あればすべて中間テーブルに登録する
         if (!empty($validated['material_logs'])) {
             foreach ($validated['material_logs'] as $material) {
-                $workLog->materials()->attach($material["material_id"], [
+                $workLog->material()->attach($material["material_id"], [
                     'quantity' => $material["quantity"],
                     'dilution_rate' => $material["dilution_rate"],
                     'material_amount' => $material["material_amount"] ?? null,
@@ -94,7 +98,17 @@ class WorkController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $work_log = WorkLog::with([
+                'material',
+                'cropSeason',
+                'createdBy',
+                'performedBy',
+                'updatedBy'])
+            ->find($id);
+
+        $workLog = new WorkLogResource($work_log)->resolve();
+
+            return response()->view('/work-logs.show', compact('workLog'));
     }
 
     /**
@@ -103,6 +117,23 @@ class WorkController extends Controller
     public function edit(string $id)
     {
         //
+        $work_log = WorkLog::with(
+                'material',
+                'performedBy')
+        ->find($id);
+
+        $crop_seasons = CropSeason::with('crop')->get();
+        $users = User::all();
+        $materials = Material::with('materialCategory')->get();
+
+        $models = [
+            'workLog' => $work_log,
+            'cropSeasons' => $crop_seasons,
+            'users' => $users,
+            'materials' => $materials,
+        ];
+
+        return response()->view('/work-logs.create', compact('models'));
     }
 
     /**

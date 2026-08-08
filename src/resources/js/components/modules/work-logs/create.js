@@ -1,18 +1,34 @@
+// src/resources/js/components/modules/work-logs/create.js
+
+import { storeFormLogic } from "./form-logic";
+import { generateUUID, objToSnakeCase, strToSnakeCase, tsToDate } from "./utils";
+
+
 export default (config) => {
 
-        const DRAFT_LOG = 'farm-note:work-logs:draft-work-log';
+    const {
+        cropSeasons: allCropSeasons = {},
+        users: allUsers = {},
+        materials: allMaterials = {},
+        matTypes: matTypes,
+    } = config?.initialModels || {};
 
-        const warnedKeys = new Set();
+
+    const DRAFT_LOG = 'farm-note:work-logs:draft-work-log';
+
+    const warnedKeys = new Set();
 
         return {
+
+            allUsers,
+            allMaterials,
+            allCropSeasons,
+            matTypes,
+
             formData: {},
 
             selectedType: '',
             selectedMaterialId: '',
-            types: config.initialModels?.types || [],
-            allMaterials: config.initialModels?.materials || [],
-            allUsers: config.initialModels?.users || [],
-
 
             // isOnline: window.navigator.onLine,
             // isOnline: false,
@@ -26,40 +42,15 @@ export default (config) => {
 
             draftWorkLog: [],
 
-            // crop_seasonを扱いやすいように変形する
-            allCropSeasons: (config.initialModels?.crop_seasons || []).map((season, index) => ({
-                ...season,
-                id: index + 1,
-                crop_name: season.crops?.name ?? '',
-                crop_season_nameYear: `${season.crops?.name ?? ''}${season.year ?? ''}`,
-            })),
+            // レスポンシブ対応のため
+            windowWidth: window.innerWidth,
+            isMobile() {return this.windowWidth < 768;},
 
             init() {
-                this.formData.work_date = this.getToday;
                 this.resetFormData();
-                this.remapCropSeasons();
                 //debug
                 this.getOnlineStatus;
-            },
-
-            getDefaultFormData() {
-                return {
-                    // formData_uuid: crypto.randomUUID(),
-                    formData_uuid: this.generateUUID(),
-                    draft_uuid: '',
-                    crop_name: '不明',
-
-                    crop_season_id: '',
-                    crop_season_nameYear: '不明',
-                    created_by: 1,
-                    performed_by: '',
-                    work_date: this.getToday,
-                    status: false,
-                    title: '',
-                    content: '',
-                    updated_by: '',
-                    material_logs: []
-                };
+                this.initDraftWorkLog();
             },
 
             resetFormData() {
@@ -67,68 +58,41 @@ export default (config) => {
                 this.formData = newFormData;
             },
 
-            // 楽観ロックによるバージョン管理、不要そうになったので保留
-            // updateData(key, value) {
-            //     this[key] = value;
-            //     this.version++;
-            // },
+            getDefaultFormData() {
+                return {
+                    // formData_uuid: crypto.randomUUID(),
+                    formDataUuid: this.generateUUID(),
+                    draftUuid: '',
+                    cropName: '不明',
 
-            get getToday() {
-                const today = new Date();
-
-                const yyyy = today.getFullYear();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                return `${yyyy}-${mm}-${dd}`;
-            },
-
-            // init():作物の名称をオブジェクトの上の階層に挿入して配列を使いやすくする
-            remapCropSeasons() {
-                const remapArray = this.allCropSeasons.map((season, index) => ({
-                    ...season,
-                    id: index + 1,
-                    crop_name: season.crops.name,
-                    crop_season_nameYear: season.crops.name + season.year,
-                }));
-                this.allCropSeasons = remapArray;
+                    cropSeasonId: '',
+                    cropSeasonsNameYear: '不明',
+                    createdBy: 1,
+                    performedBy: '',
+                    workDate: tsToDate(Date()),
+                    status: false,
+                    title: '',
+                    content: '',
+                    updatedBy: '',
+                    materialLogs: []
+                };
             },
 
             // ----------------------------------------------------
             // ここまで初期化
             // ----------------------------------------------------
 
-            // 作物表示用metaデータの生成と格納
             changeCropSeasons() {
-                const targetId = this.formData.crop_season_id;
+                const id = this.formData.cropSeasonId;
+                this.formData.cropSeasonsNameYear = this.allCropSeasons?.find(cs => cs.id == id).cropSeasonsNameYear;
+                this.formData.cropName = this.allCropSeasons?.find(cs => cs.id == id).cropName;
 
-                const newCropSeason = this.getCropSeasonByCropSeasonId(targetId);
-                if (!newCropSeason) {
-                    console.trace('[changeCropSeasons] 取得したオブジェクトが不正です。', { newCropSeason: newCropSeason, 'targetId':targetId })
-                    return;
-                }
-
-                const getName = newCropSeason.crop_name;
-                const getNameYear = newCropSeason.crop_season_nameYear;
-
-                this.formData.crop_name = newCropSeason.crop_name;
-                this.formData.crop_season_nameYear = newCropSeason.crop_season_nameYear;
-            },
-
-            // crop_season_idから作物名を取得する
-            getCropSeasonByCropSeasonId(targetId) {
-                targetId = parseInt(targetId) || '';
-                if (!targetId || targetId <= 0 ) {
-                    console.error('[getCropsName] targetIdが不正な値です。', { targetId: targetId })
-                    return null;
-                }
-                const foundObject = this.allCropSeasons.find(({ id }) => id == targetId);
-                return foundObject;
             },
 
             // 選択された種別から資材選択を助ける
             get filteredMaterials() {
-                return this.allMaterials.filter(material => {
-                    const matchType = this.selectedType === '' || material.type_id == this.selectedType;
+                return this.allMaterials.filter(m => {
+                    const matchType = this.selectedType === '' || m.typeId == this.selectedType;
 
                     return matchType;
                 });
@@ -145,8 +109,8 @@ export default (config) => {
                 // 追加フォームの初期化
                 const newMaterialLog = this.initAddForm(this.selectedMaterial);
 
-                this.formData.material_logs.push(newMaterialLog);
-                console.warn('pushのあと', {material_logs: this.formData.material_logs, selectMaterial: this.selectedMaterial});
+                this.formData.materialLogs.push(newMaterialLog);
+                // console.info('pushのあと', {materialLogs: this.formData.materialLogs, selectMaterial: this.selectedMaterial});
                 // 追加したら選択欄をリセット
                 this.selectedMaterialId = '';
             },
@@ -169,21 +133,21 @@ export default (config) => {
                 return {
                     // addFormUuid: crypto.randomUUID(),
                     addFormUuid: this.generateUUID(),
-                    type_label: master.material_categories.label,
+                    typeLabel: master.typeLabel,
 
-                    material_id: master.id,
+                    materialId: master.id,
                     name: master.name,
-                    type_id: master.type_id,
-                    dilution_rate: master.default_dilution_rate,
-                    quantity: master.standard_spray_volume,
-                    material_amount: '',
+                    typeId: master.typeId,
+                    dilutionRate: master.defaultDilutionRate,
+                    quantity: master.standardSprayVolume,
+                    materialAmount: '',
                     manufacturer: master.manufacturer
                 };
             },
 
             // 資材フォームの削除ロジック
-            removeMaterial_log(uuid) {
-                this.formData.material_logs = this.formData.material_logs.filter(
+            removeMaterialLog(uuid) {
+                this.formData.materialLogs = this.formData.materialLogs.filter(
                     log => log.addFormUuid !== uuid
                 );
 
@@ -196,22 +160,22 @@ export default (config) => {
             // 登録資材重複の確認
             isDuplicated(materialId) {
                 // エラーチェック
-                if (this.formData.material_logs?.length == 0) {
-                    if (!warnedKeys.has('isDuplicated_no_material_warn')) {
-                        console.info(`[in isDuplicated()] 資材の入力が０件です(no issue)`, { materialId, material_logs: this.formData.material_logs });
-                        warnedKeys.add('isDuplicated_no_material_warn');
+                if (this.formData.materialLogs?.length == 0) {
+                    if (!warnedKeys.has('isDuplicatedNoMaterial_warn')) {
+                        console.info(`[in isDuplicated()] 資材の入力が０件です(no issue)`, { materialId, materialLogs: this.formData.materialLogs });
+                        warnedKeys.add('isDuplicatedNoMaterial_warn');
                     }
                     return '';
-                } else if (!Array.isArray(this.formData.material_logs)) {
-                    if (!warnedKeys.has('isDuplicated_reference_isArray_error')) {
-                        console.error(`[in isDuplicated()] this.formData.material_logsの参照に失敗しました。`, { materialId, material_logs: this.formData.material_logs });
-                        warnedKeys.add('isDuplicated_reference_isArray_error');
+                } else if (!Array.isArray(this.formData.materialLogs)) {
+                    if (!warnedKeys.has('isDuplicatedReferenceIsArrayError')) {
+                        console.error(`[in isDuplicated()] this.formData.materialLogsの参照に失敗しました。`, { materialId, materialLogs: this.formData.materialLogs });
+                        warnedKeys.add('isDuplicatedReferenceIsArrayError');
                     }
                     return '';
                 }
 
                 // メインロジック 重複の確認
-                if (this.formData.material_logs?.some(material => material.material_id == materialId)) {
+                if (this.formData.materialLogs?.some(mlog => mlog.materialId == materialId)) {
                     return '** 登録済みです **';
                 }
                 return '';
@@ -222,22 +186,11 @@ export default (config) => {
 
             // @submit.preventで呼び出し
             async submitForm() {
-                // formDataからmetaデータとpayloadを分離し構造化したrecordを受け取る
-                let record = {};
-                try{
-                    record = this.buildRecord(this.formData);
-                } catch(e) {
-                    console.error(e.message);
-                    alert('送信データに異常があります。ブラウザを閉じてやり直してください。連続してエラーが発生する場合は管理者に連絡してください。');
-
-                    resetFormData();
-                    initDraftWorkLog();
-                    return;
-                }
 
                 // オフラインならLocalstorageに保存して退避
                 if (!this.isOnline) {
-                    this.saveToLocalStorage(record);
+                    this.saveToLocalStorage();
+                    alert('通信オフラインのためブラウザに一時保存しました。(localStorage)');
                     return;
                 }
 
@@ -245,6 +198,9 @@ export default (config) => {
                 let timeoutId = null;
 
                 try {
+                    // post送信用のpayloadを生成
+                    const payload = this.buildPostPayload();
+
                     const controller = new AbortController();
                     timeoutId = setTimeout(() => controller.abort(), 5000); // 5000ms to timeout
 
@@ -256,7 +212,7 @@ export default (config) => {
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
-                        body: JSON.stringify(record.formData),
+                        body: JSON.stringify(payload),
                         signal: controller.signal // controle timeout
                     });
 
@@ -282,7 +238,6 @@ export default (config) => {
                         console.error('サーバーエラーが発生しました。Status:', response.status);
                         alert('サーバーエラーが発生しました。（Status: ' + response.status + '）');
 
-                        // throw new Error('Server Error: ' + response.status);
                         return;
                     }
 
@@ -311,24 +266,72 @@ export default (config) => {
                     }
 
                     // 通信エラー、タイムアウトなど通信によるエラーの場合はLocalStorageに退避
-                    this.saveToLocalStorage(record);
+                    this.saveToLocalStorage();
+                    alert('通信エラー\nブラウザに一時保存しました。(localStorage)');
+
                 }
             },
 
+            /**
+             * postするpayloadを構築する。snake caseへリネーム。
+             */
+            buildPostPayload() {
+                // オブジェクトの型によるバリデーション
+                if (!this.formData || typeof this.formData !== 'object') {
+                    throw new Error('formDataの型が一致しませんでした。');
+                }
+
+                const {
+                    cropSeasonId,
+                    createdBy,
+                    performedBy,
+                    workDate,
+                    status,
+                    title,
+                    content,
+                    updatedBy,
+                    materialLogs
+                } = this.formData;
+
+
+                const snakedML = materialLogs?.map(ml => {
+                    return {
+                        dilution_rate: ml.dilutionRate,
+                        material_amount: ml.materialAmount,
+                        material_id: ml.materialId,
+                        quantity: ml.quantity,
+                    }
+                });
+
+                return {
+                    crop_season_id: cropSeasonId,
+                    created_by: createdBy,
+                    performed_by: performedBy,
+                    work_date: workDate,
+                    status: status,
+                    title: title,
+                    content: content,
+                    updated_by: updatedBy,
+                    material_logs: snakedML
+                };
+            },
+
+            // バックエンドから返ってくるerrorなので命名がsnake caseなので注意
+            // errorもフロントエンドに返すときCamelに変換する？
             insertUuidToErrors(rawErrors) {
                 this.mappedErrors = {};
 
                 Object.keys(rawErrors).forEach(key => {
-                    // 動的フォーム配列material_logsを持つキーからindex数字とフィールド名を抽出
-                    const match = key.match(/^material_logs\.(\d+)\.(.+)$/);
-                    // material_logsに関するエラーがあるか
+                    // 動的フォーム配列materialLogsを持つキーからindex数字とフィールド名を抽出
+                    const match = key.match(/^materialLogs\.(\d+)\.(.+)$/);
+                    // materialLogsに関するエラーがあるか
                     if (match) {
 
                         const index = parseInt(match[1]); // マッチグループ2行目
                         const fieldName = match[2];
 
-                        if (this.formData.material_logs && this.formData.material_logs[index]) {
-                            const rowId = this.formData.material_logs[index].addFormUuid;
+                        if (this.formData.materialLogs && this.formData.materialLogs[index]) {
+                            const rowId = this.formData.materialLogs[index].addFormUuid;
 
                             // 初期化
                             if (!this.mappedErrors[rowId]) {
@@ -338,7 +341,7 @@ export default (config) => {
                             this.mappedErrors[rowId][fieldName] = rawErrors[key][0];
                         }
                     } else {
-                        // material_logs以外の通常属性のエラーもそのまま保持
+                        // materialLogs以外の通常属性のエラーもそのまま保持
                         this.mappedErrors[key] = rawErrors[key][0];
                     }
                 });
@@ -357,8 +360,17 @@ export default (config) => {
             // ----------------------------------------------------
             // 下書き機能
             // ----------------------------------------------------
-            hasDraft() {
+            showDraftInfo() {
+                const id = this.selectedDraftUuid;
+                const draft = this.draftWorkLog.find(log => log.draftUuid == id);
+                return {
+                    draft,
+                    cropName: `作物名: ${draft?.cropName || '未選択'}`,
+                    title: `作業名: ${draft?.title || '未記入'}`
+                }
+            },
 
+            hasDraft() {
                 return this.draftWorkLog.length || null;
             },
 
@@ -375,7 +387,7 @@ export default (config) => {
             loadDrafts() {
                 const rawDrafts = localStorage.getItem('DRAFT_LOG'); // キーが無くてもreturn null
                 if (!rawDrafts) {
-                    console.info('[_getStrageDRAFT_LOG] LocalStorageにDRAFT_LOGがありませんでした。(no issue)', { rawDrafts: rawDrafts });
+                    console.info('[_getStrageDRAFT_LOG] LocalStorageにDRAFT_LOGがありませんでした。(no issue)', { 'rawDrafts': rawDrafts });
                     return;
                 }
 
@@ -385,34 +397,21 @@ export default (config) => {
 
             /**
              *
+             * payloadを生成
+             * localStrage：Camel caseのまま　==> 呼び出してフォームにそのまま流し込むため
+             * submit post：Snake caseへ変換　==> DBへ登録するため
+             *
              */
             _parseRawDrafts(rawDrafts) {
-                const newConstructDrafts = [];
-
+                let newParsedDrafts = [];
                 try {
-                    const newParsedDrafts = JSON.parse(rawDrafts);
-                    for (let {draft_uuid, saved_at, meta, formData} of newParsedDrafts ) {
-                        // draft_uuidが存在しない場合は即座に例外を発生させて処理を打ち切る
-                        if (!draft_uuid) {
-                            // throw new Error('UUIDが存在しない要素が含まれています');
-                            throw {name: 'Exist broken Draft', message:'UUIDが存在しない要素が含まれています'};
+                    newParsedDrafts = JSON.parse(rawDrafts);
+                    for (const draft of newParsedDrafts) {
+                        if (!draft.draftUuid){
+                            throw {name: 'Exist broken Draft', message:'UUIDが存在しない記録が含まれています'};
                         }
-
-                        // 下書きをフォームに流し込むまでmetaデータを上層に配置、非正規化
-                        newConstructDrafts.push({
-                            saved_at: saved_at,
-                            draft_uuid: draft_uuid,
-                            crop_name: meta?.crop_name || '未選択',
-
-                            formData: {
-                                ...formData,
-                                saved_at: saved_at,
-                                draft_uuid: draft_uuid,
-                                crop_name: meta?.crop_name || '未選択',
-                                crop_season_nameYear: meta?.crop_season_nameYear
-                            }
-                        });
                     }
+
                 } catch (e) {
                     // ほぼ確実にLocalStorageの下書きが破損しているため、LocalStorageの下書きを削除
                     // これはリリース前のデバッグ用、キャンセルでLocalStorageの内容を取得するため
@@ -428,57 +427,42 @@ export default (config) => {
                         console.error(`'[_parseRawDrafts JSON.parse(rawDrafts)] Exist broken Draft. SyntaxError ${e.message}'`, { rawDrafts: rawDrafts });
                         return;
                     } else {
-                        console.error(`'[_parseRawDrafts] Exist broken Draft. ${e.message}'`, { newConstructDrafts: newConstructDrafts });
+                        // console.error(`'[_parseRawDrafts] Exist broken Draft. ${e.message}'`, { 'newParsedDrafts': newParsedDrafts });
+                        console.error(`'[_parseRawDrafts] Exist broken Draft. ${e.message}'`);
                         return;
                     }
                 }
-                return newConstructDrafts;
-            },
-
-            /**
-             *
-             * @function
-             * @param void
-             * @returns {Array | null} rawData
-             *
-             */
-            get _getStorageDRAFT_LOG() {
-                const rawData = localStorage.getItem('DRAFT_LOG'); // キーが無くてもreturn null
-                if (!rawData) {
-                    console.info('[_getStrageDRAFT_LOG] LocalStorageにDRAFT_LOGがありませんでした。(no issue)', { rawData: rawData });
-                    return null;
-                }
-                return JSON.parse(rawData);
+                return newParsedDrafts;
             },
 
             // Localstorage保存ロジック
-            saveToLocalStorage(newRecord) {
-                const tempRecords = [];
+            saveToLocalStorage() {
+                const newRecord = this.buildDraftRecord(this.formData);
+
                 try {
 
-                    const oldRecords = this.draftWorkLog || [];
+                    const tempRecords = this.draftWorkLog || [];
 
-                    for (const old of oldRecords) {
-                        tempRecords.push(this.buildRecord(old.formData));
-                    };
+                    // for (const old of tempRecords) {
+                    //     tempRecords.push(this.buildDraftRecord(old.formData));
+                    // };
                     // 上書き処理 or push
-                    const deleteIndex = tempRecords.findIndex(p => p.draft_uuid == newRecord.draft_uuid);
+                    const deleteIndex = tempRecords.findIndex(p => p.draftUuid == newRecord?.draftUuid);
                     if (deleteIndex !== -1) {
-                        tempRecords[deleteIndex] = newRecord;
-                        tempRecords[deleteIndex].saved_at = new Date().toISOString;
+                        tempRecords[deleteIndex] = JSON.parse(JSON.stringify(newRecord));
+                        tempRecords[deleteIndex].savedAt = new Date().toISOString;
                     } else {
                         tempRecords.push(JSON.parse(JSON.stringify(newRecord)));
                     }
                     localStorage.setItem('DRAFT_LOG', JSON.stringify(tempRecords));
 
-                    alert('オフラインのためブラウザに一時保存しました。(localStorage)');
                     this.resetFormData();
 
                 } catch(e) {
                     console.group('[saveToLocalStorage] 下書きの保存に失敗しました。');
                         console.info('実行メソッド: JSON.stringify(newRecord)');
                         console.error(`'${e.name}: ${e.message}\n保存予定のデータ'`, { newRecord: newRecord });
-                        console.error('コンポーネント上の下書きデータ', { 'oldRecords = this.draftWorkLog': this.draftWorkLog });
+                        console.error('コンポーネント上の下書きデータ', { 'tempRecords = this.draftWorkLog': this.draftWorkLog });
                     console.groupEnd();
                     // ユーザにリトライさせてなお失敗するのであれば、端末やブラウザの種類・バージョンによる違い？
                     alert('エラー：下書きに失敗しました。ブラウザを閉じてからやり直してください。\n※連続してエラーが発生する場合は管理者に連絡してください。');
@@ -489,30 +473,23 @@ export default (config) => {
                 }
             },
 
-            // 保存用にpayloadとmetaデータなどに構造分解する
-            // 新規１件および下書きストックがある場合はそれらのformDataもビルドする
             /**
              *
-             * @param {Object}
              */
-            buildRecord(formData) {
+            buildDraftRecord(formData) {
                 // オブジェクトの型によるバリデーション
                 if (!formData || typeof formData !== 'object') {
                     throw new Error('formDataの型が一致しませんでした。');
                 }
 
-                let { formData_uuid, draft_uuid, saved_at, crop_name, crop_season_nameYear, ...payload } = formData;
+                const {draftUuid = '', savedAt = '', ...rest} = formData;
                 return {
-                    // draft_uuid: draft_uuid || crypto.randomUUID(),
-                    draft_uuid: draft_uuid || this.generateUUID(),
-                    saved_at: saved_at || new Date().toISOString(),
-                    meta:{
-                        crop_name: crop_name,
-                        crop_season_nameYear: crop_season_nameYear
-                    },
-                    formData: { ...payload , crop_name }
+                    ...rest,
+                    draftUuid: draftUuid || this.generateUUID(),
+                    savedAt: savedAt || new Date().toISOString(),
                 };
             },
+
 
             // ----------------------------------------------------
             // 下書きの削除
@@ -536,13 +513,13 @@ export default (config) => {
             // ----------------------------------------------------
             clearSubmittedDraft() {
                 // formDataが下書きである場合にのみ実行
-                if (this.formData.draft_uuid) {
+                if (this.formData.draftUuid) {
                     // コア削除処理を呼び出す
-                    this._deleteDraftByUuid(this.formData.draft_uuid);
+                    this._deleteDraftByUuid(this.formData.draftUuid);
 
 
-                    // this.updateData('formData.draft_uuid', null);
-                    this.formData.draft_uuid = '';
+                    // this.updateData('formData.draftUuid', null);
+                    this.formData.draftUuid = '';
                 }
             },
 
@@ -550,7 +527,7 @@ export default (config) => {
             // コア関数 UUIDを受け取り localStorage/配列から削除するだけ
             // ----------------------------------------------------
             _deleteDraftByUuid(uuid) {
-                this.draftWorkLog = this.draftWorkLog.filter(log => log.draft_uuid !== uuid);
+                this.draftWorkLog = this.draftWorkLog.filter(log => log.draftUuid !== uuid);
                 localStorage.setItem('DRAFT_LOG', JSON.stringify(this.draftWorkLog));
 
                 this.initDraftWorkLog();
@@ -576,21 +553,21 @@ export default (config) => {
                     return;
                 }
                 // 選択した下書きデータ１件を取得
-                const selectedDraft = this.draftWorkLog.find(draft => draft.draft_uuid === this.selectedDraftUuid);
-                const draftFormData = { ...selectedDraft?.formData };
-                if (!draftFormData) {
+                const selectedDraft = this.draftWorkLog.find(draft => draft.draftUuid === this.selectedDraftUuid);
+                // const draftFormData = { ...selectedDraft };
+                if (!selectedDraft) {
                     console.error(`[fillWithDraft] 下書きデータが破損しています。`, { draftWorkLog:this.draftWorkLog, selectedDraftUuid: this.selectedDraftUuid });
 
                     alert('下書きの読み込みに失敗しました。ブラウザを閉じてからやり直してください。');
                     return;
                 }
 
-                this.formData = draftFormData;
+                this.formData = {...selectedDraft};
             },
 
             // 下書きの途中で新規の作業入力に切り替えてしまったとき
             skipDraft() {
-                this.formData.draft_uuid = '';
+                this.formData.draftUuid = '';
 
                 this.saveToLocalStorage();
             },

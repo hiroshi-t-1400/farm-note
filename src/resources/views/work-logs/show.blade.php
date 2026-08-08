@@ -2,10 +2,10 @@
 
 <x-layouts.layout title="日誌記録画面 - 農作業日誌">
     <x-slot:header>
-        日誌記録
+        日誌の閲覧
     </x-slot>
 
-    <x-work-logs.create-section :models="$models" />
+    <x-work-logs.show-section :workLog="$workLog" />
 
 
     {{-- </x-work-logs.application.create> --}}

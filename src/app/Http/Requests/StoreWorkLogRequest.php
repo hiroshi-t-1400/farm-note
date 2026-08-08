@@ -3,9 +3,13 @@
 namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Override;
+
+use Illuminate\Support\Str;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreWorkLogRequest extends FormRequest
 {
@@ -31,9 +35,9 @@ class StoreWorkLogRequest extends FormRequest
             //
             'crop_season_id' => ['required', 'numeric', 'exists:crop_seasons,id'],
             'created_by' => ['required', 'numeric', 'exists:users,id'],
+            // 理想的にはarrayで送られてくるので要改修
             'performed_by' => ['required', 'numeric', 'exists:users,id'],
             'work_date' => ['required', 'date'],
-            // 'status' => ['sometimes', 'in:plan,completed,draft'],
             'status' => ['required', 'boolean'],
             'title' => ['required', 'string', 'max:50'],
             'content' => ['nullable', 'string', 'max:200'],
@@ -56,6 +60,30 @@ class StoreWorkLogRequest extends FormRequest
                 return ['nullable', 'numeric', 'max:10000'];
             }),
         ];
+    }
+
+    #[Override]
+    protected function failedValidation(Validator $validator)
+    {
+        // エラーメッセージを取得
+        $errors = $validator->errors()->toArray();
+
+        $camelErrors = [];
+
+        // キーをキャメルケースへ変換
+        foreach ($errors as $key => $messages) {
+            $camelKey = Str::camel($key);
+            $camelErrors[$camelKey] = $messages;
+        }
+
+        // カスタムしたJSONレスポンス（422 unprocessable Entity）を投げる
+        throw new HttpResponseException(
+            response()->json([
+                'message' => '無効な値が入力されています。',
+                'errors' => $camelErrors,
+            ], 422)
+        );
+
     }
 
     #[Override]
