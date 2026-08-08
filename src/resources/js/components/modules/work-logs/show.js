@@ -1,3 +1,4 @@
+// src/resources/js/components/modules/work-logs/show.js
 
 import { tsToDate } from "./utils";
 
@@ -6,17 +7,13 @@ export default (config) => {
     const debugWorkLog = config?.initialWorkLog;
 
     const {
-        // createdAt,
         createdBy,
-        // updatedAt,
         updatedBy,
         title,
-        // workDate,
         status,
         content,
         performedBy,
         cropSeason,
-        // material: materials = [],
         material,
         ...rest
     } = config?.initialWorkLog;
@@ -38,10 +35,6 @@ export default (config) => {
         //     materialAmount: {label: '原液量', value:`${mat.materialAmount}倍` || ''}
         // }
     }));
-
-    console.log(config?.initialWorkLog);
-    console.log('マテリアルログ: ', {'materials': materials});
-
 
     return {
         debugWorkLog,

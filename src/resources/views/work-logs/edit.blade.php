@@ -5,8 +5,7 @@
         日誌の編集
     </x-slot>
 
-    <x-work-logs.application.edit-section :models="$models" />
-
+    <x-work-logs.edit-section :models="$models" />
 
     {{-- </x-work-logs.application.create> --}}
 

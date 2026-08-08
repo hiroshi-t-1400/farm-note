@@ -116,24 +116,27 @@ class WorkController extends Controller
      */
     public function edit(string $id)
     {
+
         //
-        $work_log = WorkLog::with(
+        $work_log = WorkLog::with([
                 'material',
-                'performedBy')
-        ->find($id);
+                'performedBy'])
+            ->find($id);
 
         $crop_seasons = CropSeason::with('crop')->get();
         $users = User::all();
         $materials = Material::with('materialCategory')->get();
+        $mat_types = MaterialCategory::all();
 
         $models = [
-            'workLog' => $work_log,
-            'cropSeasons' => $crop_seasons,
-            'users' => $users,
-            'materials' => $materials,
+            'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
+            'users' => UserResource::collection($users)->resolve(),
+            'materials' => MaterialResource::collection($materials)->resolve(),
+            'matTypes' => MaterialCategoryResource::collection($mat_types)->resolve(),
+            'workLog' => new WorkLogResource($work_log)->resolve()
         ];
 
-        return response()->view('/work-logs.create', compact('models'));
+        return response()->view('/work-logs.edit', compact('models'));
     }
 
     /**

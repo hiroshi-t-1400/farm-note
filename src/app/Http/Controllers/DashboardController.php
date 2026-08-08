@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     //
-    public function index()
+    public function home()
     {
         // $user = Auth::user();
         $users = User::all();

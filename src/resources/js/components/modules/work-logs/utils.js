@@ -38,3 +38,42 @@ export function objToSnakeCase(obj) {
     });
 };
 
+
+export function networkCtl () {
+
+    return {
+
+        isOnline: window.navigator.onLine,
+
+        // debug
+        toggleOnline() {
+            if (this.isOnline) {
+                this.isOnline = false;
+                return this.saveOnlineFlag();
+            }
+            this.isOnline = true;
+            return this.saveOnlineFlag();
+        },
+
+        saveOnlineFlag() {
+            let flag = this.isOnline;
+            localStorage.setItem('ONLINE_FLAG', JSON.stringify(flag));
+        },
+
+        get getOnlineStatus() {
+            const savedFlag = JSON.parse(localStorage.getItem('ONLINE_FLAG'));
+            console.warn('[getOnlineStatus] savedFlag', {savedFlag:savedFlag});
+            if (savedFlag === null) {
+                console.warn('[getOnlineStatus] savedFlag===null', {savedFlag:savedFlag});
+
+                return this.isOnline = window.navigator.onLine;
+            }
+            return this.isOnline = savedFlag;
+        },
+
+        get showOnlineStatus() {
+            return this.isOnline ? 'オン' : 'オフ';
+        }
+
+    }
+}

@@ -1,7 +1,7 @@
 // src/resources/js/components/modules/work-logs/create.js
 
-import { storeFormLogic } from "./form-logic";
-import { generateUUID, objToSnakeCase, strToSnakeCase, tsToDate } from "./utils";
+// import { storeFormLogic } from "./form-logic";
+import { generateUUID, objToSnakeCase, strToSnakeCase, tsToDate, networkCtl } from "./utils";
 
 
 export default (config) => {
@@ -20,6 +20,8 @@ export default (config) => {
 
         return {
 
+            network: networkCtl(),
+
             allUsers,
             allMaterials,
             allCropSeasons,
@@ -32,7 +34,6 @@ export default (config) => {
 
             // isOnline: window.navigator.onLine,
             // isOnline: false,
-            isOnline: '',
 
             allDrafts: '',
             selectedDraftUuid: '',
@@ -573,36 +574,5 @@ export default (config) => {
             },
 
 
-
-        // debug
-            toggleOnline() {
-                if (this.isOnline) {
-                    this.isOnline = false;
-                    return this.saveOnlineFlag();
-                }
-                this.isOnline = true;
-                return this.saveOnlineFlag();
-            },
-
-            saveOnlineFlag() {
-                let flag = this.isOnline;
-                localStorage.setItem('ONLINE_FLAG', JSON.stringify(flag));
-            },
-
-            get getOnlineStatus() {
-                const savedFlag = JSON.parse(localStorage.getItem('ONLINE_FLAG'));
-                console.warn('[getOnlineStatus] savedFlag', {savedFlag:savedFlag});
-                if (savedFlag === null) {
-                console.warn('[getOnlineStatus] savedFlag===null', {savedFlag:savedFlag});
-
-                    return this.isOnline = window.navigator.onLine;
-                }
-                return this.isOnline = savedFlag;
-            },
-
-            get showOnlineStatus() {
-                if (this.isOnline) return 'オン';
-                return 'オフ';
-            },
         }
     }

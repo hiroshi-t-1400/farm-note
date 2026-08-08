@@ -18,7 +18,7 @@ Route::get('/work-logs/edit/{log}', [WorkController::class, 'edit'])->name('work
 Route::get('/work-logs/create', [WorkController::class, 'create'])->name('create');
 Route::post('/work-logs/create', [WorkController::class, 'store'])->name('store');
 
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'home'])->name('dashboard');
 // Route::get('/', function () {
 //     return view('dashboard');
 // })->name('dashboard');
