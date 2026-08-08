@@ -20,7 +20,7 @@ class initFieldSeeder extends Seeder
             'name' => 'ハウス全面',
             'address' => null,
             'area' => 150,
-            'notes' => '墓の横のハウス',
+            'notes' => '池の横のハウス',
             'created_at' => now(),
             'updated_at' => now(),
         ],
