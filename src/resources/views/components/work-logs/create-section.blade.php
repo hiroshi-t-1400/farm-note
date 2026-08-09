@@ -6,7 +6,14 @@
 
     <h2 class="text-lg font-bold text-gray-800 mb-2">📝 作業の登録</h2>
 
-    <x-work-logs.application.post-form :models="$models">
+    <div class="input-form-wrapper">
+
+        <form
+            x-data="createWorkLog({
+                initialModels: @js($models)
+            })"
+            @submit.prevent="submitForm"
+        >
 
             {{-- デバッグ用のネットワーク状態インジケータ --}}
             <x-debug.network />
@@ -42,6 +49,8 @@
                     下書きを中止し<br>新規として保存
                 </x-ui.button>
             </div>
+        </form>
+    </div>
 
-    </x-work-logs.application.post-form>
+
 

@@ -8,6 +8,7 @@ export default (config) => {
 
     const {workLog, cropSeasons, users, materials, matTypes} = config?.initialModels;
 
+    // バックエンドから受け取った日誌モデルを分解
     const targetFormData = {
         ...workLog,
         materialLogs: workLog.material,
@@ -15,8 +16,6 @@ export default (config) => {
         updatedAt: tsToDate(workLog?.updatedAt),
         workDate: tsToDate(workLog?.workDate),
     };
-
-    console.log('workLogのid', workLog.id);
 
     return {
 

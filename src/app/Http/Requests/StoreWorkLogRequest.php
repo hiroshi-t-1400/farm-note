@@ -107,6 +107,7 @@ class StoreWorkLogRequest extends FormRequest
             'crop_season_id' => '対象の作物',
             'created_by' => '記入者',
             'performed_by' => '作業実施者',
+            'performed_by.*.id' => '作業実施者',
             'work_date' => '作業日',
             'status' => '作業の完了状況（完了or予定）',
             'title' => '作業名（ひとこと）',

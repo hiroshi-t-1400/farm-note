@@ -41,43 +41,44 @@ export function storeFormLogic (initialData = {}) {
 
             draftWorkLog: [],
 
-            workLog,
+            // 呼び出し元が編集ページか
+            isEdit: workLog.id > -1 ? true : false,
 
             // レスポンシブ対応のため
             windowWidth: window.innerWidth,
             isMobile() {return this.windowWidth < 768;},
 
             init() {
-                // this.resetFormData();
+                if (!this.isEdit) this.resetFormData();
                 //debug
                 this.getOnlineStatus;
                 this.initDraftWorkLog();
             },
 
-            // resetFormData() {
-            //     const newFormData = this.getDefaultFormData();
-            //     this.formData = newFormData;
-            // },
+            resetFormData() {
+                const newFormData = this.getDefaultFormData();
+                this.formData = newFormData;
+            },
 
-            // getDefaultFormData() {
-            //     return {
-            //         // formData_uuid: crypto.randomUUID(),
-            //         formDataUuid: generateUUID(),
-            //         draftUuid: '',
-            //         cropName: '不明',
+            getDefaultFormData() {
+                return {
+                    // formData_uuid: crypto.randomUUID(),
+                    formDataUuid: generateUUID(),
+                    draftUuid: '',
+                    cropName: '不明',
 
-            //         cropSeasonId: '',
-            //         cropSeasonsNameYear: '不明',
-            //         createdBy: 1,
-            //         performedBy: '',
-            //         workDate: tsToDate(Date()),
-            //         status: false,
-            //         title: '',
-            //         content: '',
-            //         updatedBy: '',
-            //         materialLogs: []
-            //     };
-            // },
+                    cropSeasonId: '',
+                    cropSeasonsNameYear: '不明',
+                    createdBy: 1,
+                    performedBy: [{}], // 暫定措置
+                    workDate: tsToDate(Date()),
+                    status: false,
+                    title: '',
+                    content: '',
+                    updatedBy: '',
+                    materialLogs: []
+                };
+            },
 
             // ----------------------------------------------------
             // ここまで初期化
@@ -91,24 +92,23 @@ export function storeFormLogic (initialData = {}) {
             },
 
             // 選択された種別から資材選択を助ける
-            get filteredMaterials() {
+            filteredMaterials() {
                 return this.allMaterials.filter(m => {
                     const matchType = this.selectedType === '' || m.typeId == this.selectedType;
-
                     return matchType;
                 });
             },
 
             // 選択された資材の情報を取得する
-            get selectedMaterial() {
+            selectedMaterial() {
                 return this.allMaterials.find(m => m.id == this.selectedMaterialId) || null;
             },
 
             // 材料の追加ロジック
             addMaterialLogs() {
-                if (!this.selectedMaterial) return;
+                if (!this.selectedMaterial()) return;
                 // 追加フォームの初期化
-                const newMaterialLog = this.initAddForm(this.selectedMaterial);
+                const newMaterialLog = this.initAddForm(this.selectedMaterial());
 
                 this.formData.materialLogs.push(newMaterialLog);
                 // console.info('pushのあと', {materialLogs: this.formData.materialLogs, selectMaterial: this.selectedMaterial});
@@ -147,24 +147,9 @@ export function storeFormLogic (initialData = {}) {
 
             // 登録資材重複の確認
             isDuplicated(materialId) {
-                // エラーチェック
-                if (this.formData.materialLogs?.length == 0) {
-                    if (!warnedKeys.has('isDuplicatedNoMaterial_warn')) {
-                        console.info(`[in isDuplicated()] 資材の入力が０件です(no issue)`, { materialId, materialLogs: this.formData.materialLogs });
-                        warnedKeys.add('isDuplicatedNoMaterial_warn');
-                    }
-                    return '';
-                } else if (!Array.isArray(this.formData.materialLogs)) {
-                    if (!warnedKeys.has('isDuplicatedReferenceIsArrayError')) {
-                        console.error(`[in isDuplicated()] this.formData.materialLogsの参照に失敗しました。`, { materialId, materialLogs: this.formData.materialLogs });
-                        warnedKeys.add('isDuplicatedReferenceIsArrayError');
-                    }
-                    return '';
-                }
-
                 // メインロジック 重複の確認
                 if (this.formData.materialLogs?.some(mlog => mlog.materialId == materialId)) {
-                    return '** 登録済みです **';
+                    return '** 登録済 **';
                 }
                 return '';
             },
@@ -174,9 +159,6 @@ export function storeFormLogic (initialData = {}) {
 
             // @submit.preventで呼び出し
             async submitForm() {
-
-                console.log('submitの中', {'isOnline': this.$store.network.showOnlineStatus});
-
                 // オフラインならLocalstorageに保存して退避
                 // if (!this.isOnline) {
                 if (!this.$store.network.isOnline) {
@@ -198,7 +180,7 @@ export function storeFormLogic (initialData = {}) {
 
                     let response;
 
-                    if (this.workLog.id > -1) {
+                    if (this.isEdit) {
                         response = await fetch(`/work-logs/edit/${workLog.id}`, {
                             method: 'PUT',
                             headers: {
@@ -252,7 +234,10 @@ export function storeFormLogic (initialData = {}) {
                     // ----------------------------------------------------
                     const data = await response.json(); // 成功レスポンスのJSONを解析
 
-                    // this.resetFormData();
+                    // 呼び出し元が編集ページなら現在の画面の再レンダリングをスキップして遷移
+                    if (this.isEdit) return window.location.href = data.redirect_url;
+
+                    this.resetFormData();
                     alert(data.message || '保存しました。');
 
                     // 下書きの続きならlocalstorageの該当の記録を削除
@@ -470,6 +455,10 @@ export function storeFormLogic (initialData = {}) {
                     }
                     localStorage.setItem('DRAFT_LOG', JSON.stringify(tempRecords));
 
+                    // 呼び出し元が編集ページなら下書きに保存したら遷移元のページに遷移
+                    if (this.isEdit) {
+                        return window.location.replace(document.referrer || '/');
+                    }
                     this.resetFormData();
 
                 } catch(e) {
