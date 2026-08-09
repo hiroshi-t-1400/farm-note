@@ -22,17 +22,23 @@
             </div>
 
             {{-- 資材選択フォーム --}}
-            <div class="mb-2">
-                <x-ui.select x-model="selectedMaterialId" class="w-full max-w-lg">
-                    <x-slot>
-                        <option value="">-- 資材を選択してください（<span x-text="filteredMaterials.length"></span>件該当） --</option>
-                        <template x-for="material in filteredMaterials" :key="material.id">
-                            <option :value="material.id" x-text="isDuplicated(material.id) + material.name + ' | メーカー名：' + (material?.manufacturer || '未登録') ">
-                            </option>
-                        </template>
-                    </x-slot>
+            <div class="mb-2" x-date="{ show: false }">
+                <x-ui.select x-model="selectedMaterialId" @change="{  }" class="w-full max-w-lg">
+                    <option value="">-- 資材の選択（<span x-text="filteredMaterials().length"></span>件該当） --</option>
+                    <template x-for="material in filteredMaterials()" :key="material.id">
+                        <option
+                            :value="material.id"
+                            {{-- x-text="isDuplicated(material.id) + material.name + ' | メーカー名：' + (material?.manufacturer || '未登録')"> --}}
+                            x-text="material.name">
+                        </option>
+                    </template>
                 </x-ui.select>
+                <div class="p-2 bg-gray-200 text-sm text-gray-800 ">
+                    <span x-text="isDuplicated(selectedMaterial()?.id || '')" class="text-xs text-red-700 font-semibold"></span>
+                    <span x-text="`メーカー： ${selectedMaterial()?.manufacturer || ''}`"></span>
+                </div>
             </div>
+
             {{-- 動的フォーム追加ボタン --}}
             <div>
                 <button

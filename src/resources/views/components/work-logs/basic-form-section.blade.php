@@ -1,14 +1,17 @@
 {{-- エリア１非動的フォーム部 --}}
 
+
 {{-- 作物選択 --}}
 <x-ui.form-group label="作業した作物" name="cropSeasonId" >
     <x-ui.select x-model="formData.cropSeasonId" @change="changeCropSeasons()" name="cropSeasonId" class="max-w-sm" >
-        <x-slot>
-            <option value="">作物を選択</option>
-            <template x-for="cropSeason in allCropSeasons" :key="cropSeason.id">
-                <option :value="cropSeason.id" x-text="cropSeason.cropSeasonsNameYear"></option>
-            </template>
-        </x-slot>
+        <option value="">作物を選択</option>
+        <template x-for="cropSeason in allCropSeasons" :key="cropSeason.id">
+            <option
+                :value="cropSeason.id"
+                x-text="cropSeason.cropSeasonsNameYear"
+                :selected="cropSeason.id == formData?.cropSeasonId">
+            </option>
+        </template>
     </x-ui.select>
     {{-- 作付マスターに遷移 --}}
     <a href="" class="mx-5 text-bold">＋作付けを新規に追加する</a>
@@ -32,16 +35,18 @@
 </x-ui.form-group>
 
 {{-- 作業実施者 --}}
-<x-ui.form-group label="作業実施者" name="performedBy">
-    <x-ui.select x-model="formData.performedBy" name="performedBy" class="max-w-sm" >
+    <x-ui.form-group label="作業実施者" name="performedBy.0.id"> {{-- 暫定措置 --}}
+        <x-ui.select x-model="formData.performedBy[0].id" name="performedBy" class="max-w-sm" >
             <option value="">作業実施者</option>
             <template x-for="user in allUsers">
-                <option :value="user.id" x-text="user.name"></option>
+                <option :value="user.id" x-text="user.name" :selected="user.id == formData?.performedBy?.[0]?.id">
+                </option>
             </template>
-    </x-ui.select>
-    {{-- ユーザ登録に遷移 --}}
-    <a href="" class="mx-5 text-bold">＋作業者を新規に追加する</a>
-</x-ui.form-group>
+        </x-ui.select>
+
+        {{-- ユーザ登録に遷移 --}}
+        <a href="" class="mx-5 text-bold">＋作業者を新規に追加する</a>
+    </x-ui.form-group>
 
 {{-- 作業内容 --}}
 <x-ui.form-group label="作業内容" name="content">

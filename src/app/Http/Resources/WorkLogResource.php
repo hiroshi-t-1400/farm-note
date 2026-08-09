@@ -20,6 +20,7 @@ class WorkLogResource extends JsonResource
             'createdBy' => $this->created_by,
             'updatedBy' => $this->updated_by,
             'workDate' => $this->work_date,
+            'status' => $this->status == 'plan' ? true : false,
             'title' => $this->title,
             'content' => $this->content,
             'createdAt' => $this->created_at,

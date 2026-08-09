@@ -4,17 +4,15 @@
     'models' => '',
     ])
 
-    <h2 class="text-lg font-bold text-gray-800 mb-2">📝 作業の登録</h2>
-
+{{-- <h2 class="text-lg font-bold text-gray-800 mb-2">📝 日誌の編集</h2> --}}
     <div class="input-form-wrapper">
-
         <form
-            x-data="createWorkLog({
+            x-data="editWorkLog({
                 initialModels: @js($models)
             })"
             @submit.prevent="submitForm"
         >
-
+            @csrf
             {{-- デバッグ用のネットワーク状態インジケータ --}}
             <x-debug.network />
 
@@ -23,8 +21,6 @@
                 作業登録者：　<span x-text="allUsers[0].name"></span>
             </div>
 
-            {{-- 下書き用のUI・アラート --}}
-            <x-work-logs.draft-ui />
 
             <div class="input-form-inner ">
 
@@ -51,6 +47,4 @@
             </div>
         </form>
     </div>
-
-
 
