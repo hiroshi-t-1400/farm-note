@@ -1,7 +1,7 @@
 // src/resources/js/components/modules/work-logs/create.js
 
 // import { storeFormLogic } from "./form-logic";
-import { generateUUID, objToSnakeCase, strToSnakeCase, tsToDate, networkCtl } from "./utils";
+import { generateUUID, objToSnakeCase, strToSnakeCase, tsToDate } from "./utils";
 
 
 export default (config) => {
@@ -20,8 +20,6 @@ export default (config) => {
 
         return {
 
-            network: networkCtl(),
-
             allUsers,
             allMaterials,
             allCropSeasons,
@@ -32,6 +30,7 @@ export default (config) => {
             selectedType: '',
             selectedMaterialId: '',
 
+            // リリース時にアクティブ、submitのオンライン判定
             // isOnline: window.navigator.onLine,
             // isOnline: false,
 
@@ -189,7 +188,8 @@ export default (config) => {
             async submitForm() {
 
                 // オフラインならLocalstorageに保存して退避
-                if (!this.isOnline) {
+                // if (!this.isOnline) {
+                if (!$store.network.isOnline) {
                     this.saveToLocalStorage();
                     alert('通信オフラインのためブラウザに一時保存しました。(localStorage)');
                     return;

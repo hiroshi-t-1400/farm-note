@@ -1,7 +1,7 @@
 // src/resources/js/components/modules/work-logs/edit.js
 
 import { storeFormLogic } from "./form-logic";
-import { generateUUID, objToSnakeCase, strToSnakeCase, tsToDate, networkCtl } from "./utils";
+import { generateUUID, objToSnakeCase, strToSnakeCase, tsToDate } from "./utils";
 
 
 export default (config) => {
@@ -16,14 +16,18 @@ export default (config) => {
         workDate: tsToDate(workLog?.workDate),
     };
 
+    console.log('workLogのid', workLog.id);
+
     return {
-        network: networkCtl(),
+
+        workLogId: workLog.id,
 
         ...storeFormLogic({
             cropSeasons,
             users,
             materials,
-            matTypes
+            matTypes,
+            workLog
         }),
         formData: {...targetFormData},
 

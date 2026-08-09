@@ -1,6 +1,6 @@
 <div x-show="hasDraft" class="grid grid-cols-1 mb-2 max-w-lg">
         <p>保存されていない下書きがあります。</p>
-        <p x-show="!network.isOnline">ネットワークがある場所で送信と保存を完了させてください。</p>
+        <p x-show="!$store.network.isOnline">ネットワークがある場所で送信と保存を完了させてください。</p>
 
     <div>
         <x-ui.select

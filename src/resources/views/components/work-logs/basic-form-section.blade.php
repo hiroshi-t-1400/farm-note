@@ -1,5 +1,6 @@
 {{-- エリア１非動的フォーム部 --}}
 
+
 {{-- 作物選択 --}}
 <x-ui.form-group label="作業した作物" name="cropSeasonId" >
     <x-ui.select x-model="formData.cropSeasonId" @change="changeCropSeasons()" name="cropSeasonId" class="max-w-sm" >
@@ -35,7 +36,7 @@
 
 {{-- 作業実施者 --}}
 <x-ui.form-group label="作業実施者" name="performedBy">
-    <x-ui.select x-model="formData.performedBy" name="performedBy" class="max-w-sm" >
+    <x-ui.select x-model="formData.performedBy[0].id" name="performedBy" class="max-w-sm" >
             <option value="">作業実施者</option>
             <template x-for="user in allUsers">
                 <option :value="user.id" x-text="user.name" :selected="user.id == formData?.performedBy[0].id">

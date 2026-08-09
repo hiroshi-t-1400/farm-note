@@ -8,6 +8,10 @@ import editWorkLog from './components/modules/work-logs/edit';
 import indexLog from './components/modules/dashboard/index';
 import recentLog from './components/modules/dashboard/recent';
 
+import { registerNetworkStore } from './components/debug/debug';
+
+// ストアの登録
+registerNetworkStore(Alpine);
 
 
 //コンポーネントの登録

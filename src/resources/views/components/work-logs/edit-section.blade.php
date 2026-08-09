@@ -4,16 +4,13 @@
     'models' => '',
     ])
 
-    {{-- <h2 class="text-lg font-bold text-gray-800 mb-2">📝 日誌の編集</h2> --}}
-
+{{-- <h2 class="text-lg font-bold text-gray-800 mb-2">📝 日誌の編集</h2> --}}
     <div class="input-form-wrapper">
         <form
             x-data="editWorkLog({
                 initialModels: @js($models)
             })"
             @submit.prevent="submitForm"
-            action="{{ route('store') }}"
-            method="post"
         >
             @csrf
             {{-- デバッグ用のネットワーク状態インジケータ --}}

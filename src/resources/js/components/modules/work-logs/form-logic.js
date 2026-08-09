@@ -13,7 +13,6 @@ export function storeFormLogic (initialData = {}) {
         workLog: workLog = {}
     } = initialData || {};
 
-
     const DRAFT_LOG = 'farm-note:work-logs:draft-work-log';
 
     const warnedKeys = new Set();
@@ -30,6 +29,7 @@ export function storeFormLogic (initialData = {}) {
             selectedType: '',
             selectedMaterialId: '',
 
+            // リリース時にアクティブ、submitのオンライン判定
             // isOnline: window.navigator.onLine,
             // isOnline: false,
 
@@ -40,6 +40,8 @@ export function storeFormLogic (initialData = {}) {
             mappedErrors: {},
 
             draftWorkLog: [],
+
+            workLog,
 
             // レスポンシブ対応のため
             windowWidth: window.innerWidth,
@@ -173,8 +175,11 @@ export function storeFormLogic (initialData = {}) {
             // @submit.preventで呼び出し
             async submitForm() {
 
+                console.log('submitの中', {'isOnline': this.$store.network.showOnlineStatus});
+
                 // オフラインならLocalstorageに保存して退避
-                if (!this.isOnline) {
+                // if (!this.isOnline) {
+                if (!this.$store.network.isOnline) {
                     this.saveToLocalStorage();
                     alert('通信オフラインのためブラウザに一時保存しました。(localStorage)');
                     return;
@@ -186,21 +191,36 @@ export function storeFormLogic (initialData = {}) {
                 try {
                     // post送信用のpayloadを生成
                     const payload = this.buildPostPayload();
+                // console.log('payloadのなかみ', {payload});
 
                     const controller = new AbortController();
                     timeoutId = setTimeout(() => controller.abort(), 5000); // 5000ms to timeout
 
-                    // オンライン時の処理、fetch()でJSONを送信
-                    const response = await fetch('/work-logs/create', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify(payload),
-                        signal: controller.signal // controle timeout
-                    });
+                    let response;
+
+                    if (this.workLog.id > -1) {
+                        response = await fetch(`/work-logs/edit/${workLog.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(payload),
+                            signal: controller.signal // controle timeout
+                        });
+                    } else {
+                        response = await fetch('/work-logs/create', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(payload),
+                            signal: controller.signal // controle timeout
+                        });
+                    }
 
                     clearTimeout(timeoutId); // 通信成功したらタイマーを解除
 
@@ -232,7 +252,7 @@ export function storeFormLogic (initialData = {}) {
                     // ----------------------------------------------------
                     const data = await response.json(); // 成功レスポンスのJSONを解析
 
-                    this.resetFormData();
+                    // this.resetFormData();
                     alert(data.message || '保存しました。');
 
                     // 下書きの続きならlocalstorageの該当の記録を削除
@@ -248,7 +268,7 @@ export function storeFormLogic (initialData = {}) {
                     if (error.name === 'AbortError') {
                         console.error('通信エラー：　タイムアウト（５秒）が発生しました。', error);
                     } else {
-                        console.error('通信に失敗たため、ローカル保存にフォールバックします。', error);
+                        console.error('通信に失敗したため、ローカル保存にフォールバックします。', {error});
                     }
 
                     // 通信エラー、タイムアウトなど通信によるエラーの場合はLocalStorageに退避
@@ -280,7 +300,7 @@ export function storeFormLogic (initialData = {}) {
                 } = this.formData;
 
 
-                const snakedML = materialLogs?.map(ml => {
+                const material_logs = materialLogs?.map(ml => {
                     return {
                         dilution_rate: ml.dilutionRate,
                         material_amount: ml.materialAmount,
@@ -289,16 +309,22 @@ export function storeFormLogic (initialData = {}) {
                     }
                 });
 
+                const performed_by = performedBy?.map(user => {
+                    return {
+                        id: user.id
+                    }
+                });
+
                 return {
                     crop_season_id: cropSeasonId,
                     created_by: createdBy,
-                    performed_by: performedBy,
+                    performed_by,
                     work_date: workDate,
                     status: status,
                     title: title,
                     content: content,
                     updated_by: updatedBy,
-                    material_logs: snakedML
+                    material_logs
                 };
             },
 
@@ -331,6 +357,8 @@ export function storeFormLogic (initialData = {}) {
                         this.mappedErrors[key] = rawErrors[key][0];
                     }
                 });
+
+                console.log(this.mappedErrors);
             },
 
             // バリデーションエラーメッセージを返す: null or String

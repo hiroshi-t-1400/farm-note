@@ -4,7 +4,7 @@
         デバッグツール
     </div>
     <div class="text-xs">現在のネットワーク：
-        <span x-text="network.showOnlineStatus" class="text-red-800 font-semibold text-sm"></span>
+        <span x-text="$store.network.showOnlineStatus" class="text-red-800 font-semibold text-sm"></span>
     </div>
-    <button type="button" @click="network.toggleOnline()" class="rounded-md border border-md bg-gray-600 text-white block">切り替え</button>
+    <button type="button" @click="$store.network.toggleOnline()" class="rounded-md border border-md bg-gray-600 text-white block">切り替え</button>
 </div>

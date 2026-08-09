@@ -72,7 +72,11 @@ class WorkController extends Controller
             'updated_by' => null,
         ]);
 
-        $workLog->performedBy()->sync($validated['performed_by']);
+        foreach ($validated['performed_by'] as $pu) {
+            $workLog->performedBy()->sync($pu['id']);
+        };
+        // $workLog->performedBy()->sync($validated['performed_by']);
+        // $workLog->performedBy()->sync($validated['performed_by']);
 
         // 登録された作業記録のなかで使用資材が記録されていれば登録を行う
         // 資材が複数あればすべて中間テーブルに登録する
@@ -142,9 +146,45 @@ class WorkController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(StoreWorkLogRequest $request, string $id): JsonResponse
     {
-        //
+        $validated = $request->validated();
+
+        // 登録する作業が予定plan、完了completed、下書きdraftで分岐
+        $status = $validated['status'] ? 'plan' : 'completed';
+
+        $target_log = WorkLog::find($id);
+
+        $target_log->update([
+                'crop_season_id' => $validated['crop_season_id'],
+                'work_date' => $validated['work_date'],
+                'status' => $status,
+                'title' => $validated['title'],
+                'content' => $validated['content'],
+                'updated_by' => $validated['created_by'],
+            ]);
+
+        foreach ($validated['performed_by'] as $pu) {
+            $target_log->performedBy()->sync($pu['id']);
+        };
+
+        // 登録された作業記録のなかで使用資材が記録されていれば登録を行う
+        // 資材が複数あればすべて中間テーブルに登録する
+        if (!empty($validated['material_logs'])) {
+            foreach ($validated['material_logs'] as $material) {
+                $target_log->material()->sync($material["material_id"], [
+                    'quantity' => $material["quantity"],
+                    'dilution_rate' => $material["dilution_rate"],
+                    'material_amount' => $material["material_amount"] ?? null,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '日誌を保存しました。',
+            'redirect_url' => route('dashboard')
+        ]);
     }
 
     /**
