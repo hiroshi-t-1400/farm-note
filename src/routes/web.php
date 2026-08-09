@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 //     return view('welcome');
 // });
 
+Route::get('/work-logs/index/{log}', [WorkController::class, 'indexSingle'])->name('work-logs.indexSingle');
+
 Route::get('/work-logs/show/{log}', [WorkController::class, 'show'])->name('work-logs.show');
 Route::get('/work-logs/edit/{log}', [WorkController::class, 'edit'])->name('work-logs.edit');
 Route::put('/work-logs/edit/{log}', [WorkController::class, 'update'])->name('work-logs.update');

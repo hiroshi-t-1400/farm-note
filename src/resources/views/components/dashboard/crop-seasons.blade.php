@@ -40,7 +40,7 @@
                     <x-dashboard.list>
                         <x-slot:title>
                                 <a
-                                    href="{row.id}" x-text="row.cropSeasonsNameYear"
+                                    :href="`/work-logs/index/${row.id}`" x-text="row.cropSeasonsNameYear"
                                     class="text-base font-medium text-gray-900 hover:underline" >
                                 </a>
                         </x-slot>
