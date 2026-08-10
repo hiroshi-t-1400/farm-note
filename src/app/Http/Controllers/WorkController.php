@@ -25,7 +25,35 @@ class WorkController extends Controller
      */
     public function index()
     {
+
+
+    }
+
+    public function indexSimple(string $id = '')
+    {
         //
+        if ($id == '') {
+            $work_log = WorkLog::with(['cropSeason', 'createdBy'])
+                ->orderBy('work_date')
+                ->cursorPaginate(15);
+        } else {
+            $work_log = WorkLog::with(['cropSeason', 'createdBy'])
+                ->where('crop_season_id', $id)
+                ->orderBy('work_date')
+                ->cursorPaginate(15);
+        }
+
+        $crop_seasons = CropSeason::with('crop', 'field')
+            ->withCount('workLog')
+            ->get();
+
+        $models = [
+            'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
+            'workLog' => WorkLogResource::collection($work_log)->response()->getData(true),
+        ];
+        // $cropSeasons = CropSeasonResource::collection($crop_seasons)->resolve();
+
+        return response()->view('/work-logs.index', compact('models'));
     }
 
     /**

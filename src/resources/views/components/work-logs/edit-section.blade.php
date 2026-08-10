@@ -30,20 +30,24 @@
 
             </div>
 
-            {{-- 下部ボタンエリア --}}
-            <div class="submit-button grid grid-cols-3 gap-2  sm:max-w-1/2 ">
+                {{-- 下部ボタンエリア --}}
+            <div class="grid sm:grid-cols-3 grid-cols-1 sm:gap-x-10 gap-y-2 pt-10 mb-4 sm:justity-center place-content-start">
                 <x-ui.button type="submit" variant="primary" >
                     保存
                 </x-ui.button>
-                <x-ui.button href="/work-logs/create" variant="secondary">キャンセル</x-ui.button>
-                {{-- <div class="grid place-content-center rounded-md bg-gray-400 text-bold text-white ">下書き保存</div> --}}
                 <x-ui.button
                     type="button"
+                    @click="skipDraft()"
                     x-show="formData.draftUuid"
                     variant="alert-ghost"
                 >
                     下書きを中止し<br>新規として保存
                 </x-ui.button>
+                <x-ui.button
+                    type="href"
+                    ::href="prevUrl"
+                    variant="secondary">キャンセル</x-ui.button>
+
             </div>
         </form>
     </div>

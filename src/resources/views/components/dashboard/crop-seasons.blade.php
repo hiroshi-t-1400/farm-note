@@ -35,12 +35,12 @@
 
         {{-- 2. データが存在する場合のダッシュボード表示 --}}
         <div x-show="allCropSeasons.length > 0">
-
-                <template x-for="row in allCropSeasons" :key="row.id">
+            <div  class="divide-y divide-1 divide-gray-200">
+                <template x-for="row in allCropSeasons" :key="row.id" >
                     <x-dashboard.list>
                         <x-slot:title>
                                 <a
-                                    href="{row.id}" x-text="row.cropSeasonsNameYear"
+                                    :href="`/work-logs/index/${row.id}`" x-text="row.cropSeasonsNameYear"
                                     class="text-base font-medium text-gray-900 hover:underline" >
                                 </a>
                         </x-slot>
@@ -54,13 +54,14 @@
                             </x-dashboard.list-info>
                         </x-slot>
                     </x-dashboard.list>
-
                 </template>
-                <div class="justify-self-end">
-                    <x-ui.button variant="primary" href="" class="mt-3">
-                        作付けマスターを追加する
-                    </x-ui.button>
-                </div>
+            </div>
+
+            <div class="justify-self-end">
+                <x-ui.button variant="primary" href="" class="mt-3">
+                    作付けマスターを追加する
+                </x-ui.button>
+            </div>
 
         </div>
     </x-dashboard.card>

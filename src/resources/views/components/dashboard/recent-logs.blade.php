@@ -11,7 +11,7 @@
         <x-slot:header>
             <h3 class="text-lg font-semibold text-gray-800">最近の新規日誌</h3>
             {{-- 必要に応じて一覧へのリンクなど --}}
-            <a href="" class="text-sm text-indigo-600 hover:text-indigo-500 font-medium">
+            <a :href="`${allLogUrl}`" class="text-sm text-indigo-600 hover:text-indigo-500 font-medium">
                 すべて見る &rarr;
             </a>
         </x-slot>

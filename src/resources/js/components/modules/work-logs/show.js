@@ -7,6 +7,7 @@ export default (config) => {
     const debugWorkLog = config?.initialWorkLog;
 
     const {
+        id,
         createdBy,
         updatedBy,
         title,
@@ -15,6 +16,9 @@ export default (config) => {
         performedBy,
         cropSeason,
         material,
+        createdByName,
+        updatedByName,
+        cropSeasonId,
         ...rest
     } = config?.initialWorkLog;
 
@@ -36,9 +40,15 @@ export default (config) => {
         // }
     }));
 
+    const backUrl = `${location.origin}/work-logs/index/${cropSeasonId}`;
+    const editUrl = `${location.origin}/work-logs/edit/${cropSeasonId}`;
+    // delete実装したらアクティブにする
+    // const editUrl = `${location.origin}/work-logs/edit/${cropSeasonId}`;
+
     return {
         debugWorkLog,
 
+        id,
         createdAt,
         createdBy,
         updatedAt,
@@ -50,7 +60,12 @@ export default (config) => {
         performedBy,
         cropSeason,
         materials,
+        createdByName,
+        updatedByName,
         rest,
+
+        backUrl,
+        editUrl,
 
     }
 }
