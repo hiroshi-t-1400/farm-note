@@ -30,7 +30,6 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                // --- PHP / Laravel ---
                 "bmewburn.vscode-intelephense-client",
                 "porifa.laravel-intelephense",
                 "amiralizadeh9480.laravel-extra-intellisense",
@@ -42,14 +41,13 @@
                 "ihunte.laravel-blade-wrapper",
                 "xdebug.php-debug",
                 "neilbrayfield.php-docblocker",
-
-                // --- JS / Alpine.js ---
                 "adrianwilczynski.alpine-js-intellisense",
                 "dbaeumer.vscode-eslint",
                 "xabikos.javascriptsnippets",
-
-                // --- 設定ファイル設定 ---
-                "mikestead.dotenv"
+                "mikestead.dotenv",
+                "EditorConfig.EditorConfig",
+                "oderwat.indent-rainbow",
+                "eamodio.gitlens"
             ],
             "settings": {
                 "terminal.integrated.cwd": "/var/www/src",

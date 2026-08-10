@@ -2,7 +2,7 @@
     'recent' => [],
 ])
 
-<div x-data="indexLog({
+<div x-data="recentLog({
         initialRecent: @js($recent)
     })"
     class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 opacity-75"
@@ -11,7 +11,7 @@
         <x-slot:header>
             <h3 class="text-lg font-semibold text-gray-800">最近の新規日誌</h3>
             {{-- 必要に応じて一覧へのリンクなど --}}
-            <a href="" class="text-sm text-indigo-600 hover:text-indigo-500 font-medium">
+            <a :href="`${allLogUrl}`" class="text-sm text-indigo-600 hover:text-indigo-500 font-medium">
                 すべて見る &rarr;
             </a>
         </x-slot>
@@ -39,22 +39,22 @@
                 <x-dashboard.list>
                     {{-- 日付やタイトル --}}
                     <x-slot:title>
-                        <p x-text="tsToDate(log.created_at)" class="text-xs text-gray-500"></p>
+                        <p x-text="log.createdAt" class="text-xs text-gray-500"></p>
                         <a
-                            href=""
+                            :href="`{{ url('/work-logs/show') }}/${log.id}`"
                             x-text="log.title ?? '無題の日誌'"
                             class="text-sm font-medium text-gray-900 hover:underline"
                         ></a>
                     </x-slot>
-                    
+
                     {{-- 関連情報 --}}
                     <x-slot:info>
                         <x-dashboard.list-info>
-                            作業実施：<span x-text="log.performed_by?.[0]?.name ?? '作業者不明'">
+                            作業実施：<span x-text="log.performedBy[0].name ?? '作業者不明'">
                             </span>
                         </x-dashboard.list-info>
                         <x-dashboard.list-info>
-                            記録：<span x-text="log.created_by?.name ?? '記録者不明'">
+                            記録：<span x-text="log.createdByName ?? '記録者不明'">
                             </span>
                         </x-dashboard.list-info>
                     </x-slot>
