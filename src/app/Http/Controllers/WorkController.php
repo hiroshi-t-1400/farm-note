@@ -29,18 +29,20 @@ class WorkController extends Controller
 
     }
 
-    public function indexSingle(string $id)
+    public function indexSimple(string $id = '')
     {
-        $work_log = WorkLog::with(['cropSeason', 'createdBy'])
-            ->where('crop_season_id', $id)
-            ->get();
-        $workLog = WorkLogResource::collection($work_log)->resolve();
-
-        // $post_info = CropSeason::with('crop')
-        //     ->find($id);
-
-        // $title = $post_info->crop->name. ' ' .$post_info->year;
-        // dd($title);
+        //
+        if ($id == '') {
+            $work_log = WorkLog::with(['cropSeason', 'createdBy'])
+                ->orderBy('work_date')
+                ->cursorPaginate(15);
+        } else {
+            $work_log = WorkLog::with(['cropSeason', 'createdBy'])
+                ->where('crop_season_id', $id)
+                ->orderBy('work_date')
+                ->cursorPaginate(15);
+        }
+        $workLog = WorkLogResource::collection($work_log)->response()->getData(true);
 
         return response()->view('/work-logs.index', compact('workLog'));
     }

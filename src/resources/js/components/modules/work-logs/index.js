@@ -1,14 +1,12 @@
 // src/resources/js/components/modules/work-logs/show.js
 
-import { tsToDate } from "./utils";
+import { tsToDate, pagenation } from "./utils";
 
 export default (config) => {
 
     const debugWorkLog = config?.initialWorkLog;
 
-    const workLog = config?.initialWorkLog.map(log => {
-    console.log({'mapのlog': log});
-
+    const workLog = config?.initialWorkLog['data'].map(log => {
         return {
 
             ...log,
@@ -18,11 +16,17 @@ export default (config) => {
             url: `/work-logs/show/${log.id}`
         }
     });
-    console.log({'mapのlog': workLog});
 
     const caption = workLog?.[0]?.cropSeason?.cropSeasonsNameYear || '';
 
+    const page = pagenation(config?.initialWorkLog['meta']);
+
     return {
+
+        next: page.next || '',
+        prev: page.prev || '',
+        nextClass: page.classes.next,
+        prevClass: page.classes.prev,
 
         debugWorkLog,
 
