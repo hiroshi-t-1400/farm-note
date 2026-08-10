@@ -134,17 +134,23 @@
         {{-- レスポンシブ適用させるボトムボタンエリアのコンポーネントつくる --}}
         <div class="grid sm:grid-cols-3 grid-cols-1 sm:gap-x-10 gap-y-2 pt-10 mb-4 sm:justity-center place-content-start">
 
-            <x-ui.button type="button" variant="secondary-ghost" class="max-w-3xs">
+            <x-ui.button
+                type="href"
+                ::href="backUrl"
+                variant="secondary-ghost" class="max-w-3xs">
                 作付け一覧へ戻る
             </x-ui.button>
-            <x-ui.button type="button" variant="primary-ghost" class="max-w-3xs">
+            <x-ui.button
+                type="href"
+                ::href="editUrl"
+                variant="alert-ghost" class="max-w-3xs">
                 編集する
             </x-ui.button>
-            <x-ui.button type="button" variant="secondary-ghost" class="max-w-3xs">
+            {{-- スマホでモーダル表示を実装したときのUI --}}
+            {{-- <x-ui.button type="button" variant="secondary-ghost" class="max-w-3xs">
                 ｘ 閉じる
-            </x-ui.button>
+            </x-ui.button> --}}
         </div>
-
 
     </div>
 </div>

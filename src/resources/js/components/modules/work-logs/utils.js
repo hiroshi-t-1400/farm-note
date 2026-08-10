@@ -41,26 +41,27 @@ export function objToSnakeCase(obj) {
 // @param JsonResponse meta{Object}
 export function pagenation({path, per_page, next_cursor, prev_cursor}) {
 
-    const enable = 'hover:text-gray-900 hover:underline transition-colors duration-150';
-    const disable = 'text-gray-300 cursor-not-allowed select-none';
+    // const enable = 'hover:text-gray-900 hover:underline transition-colors duration-150';
+    // const disable = 'text-gray-300 cursor-not-allowed select-none';
 
-    let nextClass, prevClass;
+    // let nextClass, prevClass;
 
-    const classes = {
-        next: enable,
-        prev: enable
-    };
+    // const classes = {
+    //     next: enable,
+    //     prev: enable
+    // };
 
-    if (!next_cursor) {
-        classes.next = disable;
-    }
-    if (!prev_cursor) {
-        classes.prev = disable;
-    }
+    // if (!next_cursor) {
+    //     classes.next = disable;
+    // }
+    // if (!prev_cursor) {
+    //     classes.prev = disable;
+    // }
 
     return {
         next: next_cursor !== null ? `${path}?cursor=${next_cursor}` : '',
         prev: prev_cursor !== null ? `${path}?cursor=${prev_cursor}` : '',
-        classes,
+        perPage: per_page,
+        // classes,
     }
 };

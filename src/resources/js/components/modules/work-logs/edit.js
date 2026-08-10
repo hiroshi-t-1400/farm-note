@@ -17,6 +17,8 @@ export default (config) => {
         workDate: tsToDate(workLog?.workDate),
     };
 
+    const prevUrl = document.referrer;
+
     return {
 
         workLogId: workLog.id,
@@ -30,7 +32,7 @@ export default (config) => {
         }),
         formData: {...targetFormData},
 
-
+        prevUrl,
     }
 }
 

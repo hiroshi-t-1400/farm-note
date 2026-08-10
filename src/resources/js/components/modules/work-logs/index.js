@@ -25,8 +25,7 @@ export default (config) => {
 
         next: page.next || '',
         prev: page.prev || '',
-        nextClass: page.classes.next,
-        prevClass: page.classes.prev,
+
 
         debugWorkLog,
 

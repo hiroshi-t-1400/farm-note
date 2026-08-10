@@ -32,10 +32,7 @@
         class="text-lg font-bold text-gray-800 mb-2">
     </h2>
 
-    <div class="flex flex-wrap gap-4 ps-5">
-        <a :href="prev" :class="prevClass" >前へ</a>
-        <a :href="next" :class="nextClass" >次へ</a>
-    </div>
+    <x-ui.pagenation />
 
     <div class="bg-white rounded-md py-5 px-2 divide-y divide-gray-200 ">
 
@@ -53,9 +50,7 @@
         </template>
     </div>
 
-    <div class="flex flex-wrap gap-4 ps-5">
-        <a :href="prev" :class="prevClass" >前へ</a>
-        <a :href="next" :class="nextClass" >次へ</a>
-    </div>
+
+    <x-ui.pagenation />
 
 </div>

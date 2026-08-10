@@ -343,7 +343,8 @@ export function storeFormLogic (initialData = {}) {
                     }
                 });
 
-                console.log(this.mappedErrors);
+                // デバッグ用バリデーションエラー全件表示
+                console.info({'[バリデーションエラー]this.mappedErrors':this.mappedErrors});
             },
 
             // バリデーションエラーメッセージを返す: null or String
@@ -446,6 +447,7 @@ export function storeFormLogic (initialData = {}) {
                     //     tempRecords.push(this.buildDraftRecord(old.formData));
                     // };
                     // 上書き処理 or push
+                    // const deleteIndex = tempRecords.findIndex(p => p.draftUuid == newRecord?.draftUuid);
                     const deleteIndex = tempRecords.findIndex(p => p.draftUuid == newRecord?.draftUuid);
                     if (deleteIndex !== -1) {
                         tempRecords[deleteIndex] = JSON.parse(JSON.stringify(newRecord));
@@ -569,10 +571,9 @@ export function storeFormLogic (initialData = {}) {
             },
 
             // 下書きの途中で新規の作業入力に切り替えてしまったとき
-            skipDraft() {
+            async skipDraft() {
+                await this.submitForm();
                 this.formData.draftUuid = '';
-
-                this.saveToLocalStorage();
             },
 
         }
