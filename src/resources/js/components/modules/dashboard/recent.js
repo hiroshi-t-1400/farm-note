@@ -16,7 +16,7 @@ export default (config) => {
         }
     })
 
-    const allLogUrl = `${location.origin}/work-logs/index/`;
+    const allLogUrl = `${location.origin}/work-logs/index`;
 
 
     return {

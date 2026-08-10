@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 // });
 
 Route::get('/work-logs/index/{log}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');
-Route::get('/work-logs/index/', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
+Route::get('/work-logs/index', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
 
 Route::get('/work-logs/show/{log}', [WorkController::class, 'show'])->name('work-logs.show');
 Route::get('/work-logs/edit/{log}', [WorkController::class, 'edit'])->name('work-logs.edit');

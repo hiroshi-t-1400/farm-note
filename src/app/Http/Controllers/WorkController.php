@@ -42,9 +42,18 @@ class WorkController extends Controller
                 ->orderBy('work_date')
                 ->cursorPaginate(15);
         }
-        $workLog = WorkLogResource::collection($work_log)->response()->getData(true);
 
-        return response()->view('/work-logs.index', compact('workLog'));
+        $crop_seasons = CropSeason::with('crop', 'field')
+            ->withCount('workLog')
+            ->get();
+
+        $models = [
+            'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
+            'workLog' => WorkLogResource::collection($work_log)->response()->getData(true),
+        ];
+        // $cropSeasons = CropSeasonResource::collection($crop_seasons)->resolve();
+
+        return response()->view('/work-logs.index', compact('models'));
     }
 
     /**

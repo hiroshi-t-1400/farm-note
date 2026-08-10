@@ -8,7 +8,7 @@
 
 
     {{-- 記事がない場合のフォールバック --}}
-    <div x-show="!caption">
+    <div x-show="workLog.length == 0">
         <x-dashboard.empty-state>
             <x-slot:alertMessage>
                 <span x-text="`${caption}についての作業日誌がありません`"></span>
@@ -27,30 +27,35 @@
     </div>
 
 
-    <h2
-        x-text="`${caption} の日誌一覧`"
-        class="text-lg font-bold text-gray-800 mb-2">
-    </h2>
+    <section class="pt-5">
 
-    <x-ui.pagenation />
+        <h2
+            x-show="caption"
+            x-text="`${caption}の日誌一覧`"
+            class="text-lg font-bold text-gray-800 mb-2">
+        </h2>
 
-    <div class="bg-white rounded-md py-5 px-2 divide-y divide-gray-200 ">
+        <x-ui.pagenation />
 
-        <template x-for="row in workLog" :key="row.id">
-            <article class="py-3 px-3 text-sm text-gray-800 font-semibold relative">
-                <a :href="row.url" class="py-2 text-lg font-semibold absolute inset-1"></a>
-                <div class="grid sm:grid-cols-[5rem_minmax(10rem,_0)_1fr] grid-cols-1 gap-x-2 gap-y-1 items-baseline" >
-                    <div x-text="`${row.workDate}`"></div>
-                    <div x-text="row.title" class="py-0 text-lg font-semibold truncate"></div>
-                    {{-- <a :href="row.url" x-text="row.title" class="py-2 text-lg font-semibold absolute inset-0"></a> --}}
-                    <div x-text="row.createdByName"></div>
-                </div>
-            </article>
+        <div class="bg-white rounded-md py-5 px-2 divide-y divide-gray-200 ">
 
-        </template>
-    </div>
+            <template x-for="row in workLog" :key="row.id">
+                <article class="py-3 px-3 text-sm text-gray-800 font-semibold relative">
+                    <a :href="row.url" class="py-2 text-lg font-semibold absolute inset-1"></a>
+                    <div class="grid sm:grid-cols-[5rem_minmax(10rem,_0)_1fr] grid-cols-1 gap-x-2 gap-y-1 items-baseline" >
+                        <div x-text="`${row.workDate}`"></div>
+                        <div x-text="row.title" class="py-0 text-lg font-semibold truncate"></div>
+                        {{-- <a :href="row.url" x-text="row.title" class="py-2 text-lg font-semibold absolute inset-0"></a> --}}
+                        <div x-text="row.createdByName"></div>
+                    </div>
+                </article>
+
+            </template>
+        </div>
 
 
-    <x-ui.pagenation />
+        <x-ui.pagenation />
+
+    </section>
 
 </div>

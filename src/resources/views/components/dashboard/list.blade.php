@@ -3,7 +3,7 @@
     'info' => '',
     ])
 
-        <div class="grid grid-cols-[auto_1fr] gap-x-10 p-1 divide-y divide-gray-200">
+        <div class="grid grid-cols-[auto_1fr] gap-x-10 p-1">
             {{-- 各行のタイトル --}}
             <div>
                 {{ $title }}

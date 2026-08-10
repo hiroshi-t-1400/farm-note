@@ -7,7 +7,6 @@
     ])
 
     <!-- 開発時用のクイックナビゲーションカード -->
-    {{-- <div class="grid grid-cols-1 lg:grid-cols-12 gap-6"> --}}
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {{-- ダッシュボード半面コンテナ１ -左 --}}

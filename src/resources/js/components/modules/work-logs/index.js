@@ -17,20 +17,22 @@ export default (config) => {
         }
     });
 
-    const caption = workLog?.[0]?.cropSeason?.cropSeasonsNameYear || '';
-
     const page = pagenation(config?.initialWorkLog['meta']);
+    const pathName = location.pathname;
 
     return {
+
+        debugWorkLog,
 
         next: page.next || '',
         prev: page.prev || '',
 
-
-        debugWorkLog,
-
         workLog,
-        caption,
+
+        get caption () {
+            if (pathName == '/work-logs/index/') return '';
+            return this.workLog[0].cropSeason.cropSeasonsNameYear;
+        },
 
     }
 }

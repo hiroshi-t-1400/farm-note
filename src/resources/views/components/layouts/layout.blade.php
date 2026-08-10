@@ -22,6 +22,11 @@
                             class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('create') ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100' }}">
                             作業登録
                         </a>
+                        <a href="{{ route('work-logs.indexSimpleAll') }}"
+                            class="px-3 py-2 rounded-md text-sm font-medium {{ (request()->is('work-logs/index*') || request()->is('work-logs/show*')) ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                            日誌閲覧
+                        </a>
+
                         <!-- 今後作成する作付別閲覧ページ用 -->
                         <a href="#"
                             class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100">
