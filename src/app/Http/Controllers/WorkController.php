@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkLogRequest;
+use App\Http\Resources\CropSeasonResource;
+use App\Http\Resources\MaterialResource;
+use App\Http\Resources\MaterialCategoryResource;
+use App\Http\Resources\UserResource;
+use App\Http\Resources\WorkLogResource;
 use Illuminate\Http\Request;
 
 use App\Models\Crop\CropSeason;
@@ -20,7 +25,35 @@ class WorkController extends Controller
      */
     public function index()
     {
+
+
+    }
+
+    public function indexSimple(string $id = '')
+    {
         //
+        if ($id == '') {
+            $work_log = WorkLog::with(['cropSeason', 'createdBy'])
+                ->orderBy('work_date')
+                ->cursorPaginate(15);
+        } else {
+            $work_log = WorkLog::with(['cropSeason', 'createdBy'])
+                ->where('crop_season_id', $id)
+                ->orderBy('work_date')
+                ->cursorPaginate(15);
+        }
+
+        $crop_seasons = CropSeason::with('crop', 'field')
+            ->withCount('workLog')
+            ->get();
+
+        $models = [
+            'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
+            'workLog' => WorkLogResource::collection($work_log)->response()->getData(true),
+        ];
+        // $cropSeasons = CropSeasonResource::collection($crop_seasons)->resolve();
+
+        return response()->view('/work-logs.index', compact('models'));
     }
 
     /**
@@ -28,20 +61,19 @@ class WorkController extends Controller
      */
     public function create()
     {
-        $crop_seasons = CropSeason::with('crops')->get();
+        $crop_seasons = CropSeason::with('crop')->get();
         $users = User::all();
-        $materials = Material::with('materialCategories')->get();
-
-        $types = MaterialCategory::all();
+        $materials = Material::with('materialCategory')->get();
+        $mat_types = MaterialCategory::all();
 
         $models = [
-            'crop_seasons' => $crop_seasons,
-            'users' => $users,
-            'materials' => $materials,
-            'types' => $types,
+            'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
+            'users' => UserResource::collection($users)->resolve(),
+            'materials' => MaterialResource::collection($materials)->resolve(),
+            'matTypes' => MaterialCategoryResource::collection($mat_types)->resolve()
         ];
 
-        return response()->view('/work-logs/create', compact('models'));
+        return response()->view('/work-logs.create', compact('models'));
     }
 
     /**
@@ -56,7 +88,7 @@ class WorkController extends Controller
         $validated = $request->validated();
 
         // 登録する作業が予定plan、完了completed、下書きdraftで分岐
-        $status = $validated['status'] ?? 'completed';
+        $status = $validated['status'] ? 'plan' : 'completed';
 
         $workLog = WorkLog::create([
             'crop_season_id' => $validated['crop_season_id'],
@@ -68,13 +100,17 @@ class WorkController extends Controller
             'updated_by' => null,
         ]);
 
-        $workLog->performedBy()->sync($validated['performed_by']);
+        foreach ($validated['performed_by'] as $pu) {
+            $workLog->performedBy()->sync($pu['id']);
+        };
+        // $workLog->performedBy()->sync($validated['performed_by']);
+        // $workLog->performedBy()->sync($validated['performed_by']);
 
         // 登録された作業記録のなかで使用資材が記録されていれば登録を行う
         // 資材が複数あればすべて中間テーブルに登録する
         if (!empty($validated['material_logs'])) {
             foreach ($validated['material_logs'] as $material) {
-                $workLog->materials()->attach($material["material_id"], [
+                $workLog->material()->attach($material["material_id"], [
                     'quantity' => $material["quantity"],
                     'dilution_rate' => $material["dilution_rate"],
                     'material_amount' => $material["material_amount"] ?? null,
@@ -94,7 +130,17 @@ class WorkController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $work_log = WorkLog::with([
+                'material',
+                'cropSeason',
+                'createdBy',
+                'performedBy',
+                'updatedBy'])
+            ->find($id);
+
+        $workLog = new WorkLogResource($work_log)->resolve();
+
+            return response()->view('/work-logs.show', compact('workLog'));
     }
 
     /**
@@ -102,15 +148,71 @@ class WorkController extends Controller
      */
     public function edit(string $id)
     {
+
         //
+        $work_log = WorkLog::with([
+                'material',
+                'performedBy'])
+            ->find($id);
+
+        $crop_seasons = CropSeason::with('crop')->get();
+        $users = User::all();
+        $materials = Material::with('materialCategory')->get();
+        $mat_types = MaterialCategory::all();
+
+        $models = [
+            'cropSeasons' => CropSeasonResource::collection($crop_seasons)->resolve(),
+            'users' => UserResource::collection($users)->resolve(),
+            'materials' => MaterialResource::collection($materials)->resolve(),
+            'matTypes' => MaterialCategoryResource::collection($mat_types)->resolve(),
+            'workLog' => new WorkLogResource($work_log)->resolve()
+        ];
+
+        return response()->view('/work-logs.edit', compact('models'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(StoreWorkLogRequest $request, string $id): JsonResponse
     {
-        //
+        $validated = $request->validated();
+
+        // 登録する作業が予定plan、完了completed、下書きdraftで分岐
+        $status = $validated['status'] ? 'plan' : 'completed';
+
+        $target_log = WorkLog::find($id);
+
+        $target_log->update([
+                'crop_season_id' => $validated['crop_season_id'],
+                'work_date' => $validated['work_date'],
+                'status' => $status,
+                'title' => $validated['title'],
+                'content' => $validated['content'],
+                'updated_by' => $validated['created_by'],
+            ]);
+
+        foreach ($validated['performed_by'] as $pu) {
+            $target_log->performedBy()->sync($pu['id']);
+        };
+
+        // 登録された作業記録のなかで使用資材が記録されていれば登録を行う
+        // 資材が複数あればすべて中間テーブルに登録する
+        if (!empty($validated['material_logs'])) {
+            foreach ($validated['material_logs'] as $material) {
+                $target_log->material()->sync($material["material_id"], [
+                    'quantity' => $material["quantity"],
+                    'dilution_rate' => $material["dilution_rate"],
+                    'material_amount' => $material["material_amount"] ?? null,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '日誌を保存しました。',
+            'redirect_url' => route('dashboard')
+        ]);
     }
 
     /**

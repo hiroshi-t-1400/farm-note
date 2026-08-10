@@ -19,8 +19,8 @@ class initCropSeasonSeeder extends Seeder
             [
             'crop_id' => 1,
             'field_id' => 1,
-            'variety' => '桃太郎ブライト',
-            'supplier' => 'タキイ種苗',
+            'variety' => 'ルビー美味しいトマト',
+            'supplier' => 'うれしいたねもの屋さん',
             'planted_area' => 300,
             'plant_count' => 5,
             'total_yield' => null,
@@ -31,8 +31,8 @@ class initCropSeasonSeeder extends Seeder
             [
             'crop_id' => 2,
             'field_id' => 2,
-            'variety' => '紅しずく',
-            'supplier' => 'おかだ種苗',
+            'variety' => '宝石すいか',
+            'supplier' => 'アグリショップおかだ',
             'planted_area' => 300,
             'plant_count' => 5,
             'total_yield' => null,

@@ -1,9 +1,9 @@
 @props([
-    'crop_seasons' => '',
+    'cropSeasons' => '',
 ])
 
 <div x-data="indexLog({
-        initialCropSeasons: @js($crop_seasons)
+        initialCropSeasons: @js($cropSeasons)
     })"
     class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 opacity-75"
 >
@@ -35,32 +35,33 @@
 
         {{-- 2. データが存在する場合のダッシュボード表示 --}}
         <div x-show="allCropSeasons.length > 0">
-
-                <template x-for="crop in allCropSeasons" :key="crop.id">
+            <div  class="divide-y divide-1 divide-gray-200">
+                <template x-for="row in allCropSeasons" :key="row.id" >
                     <x-dashboard.list>
                         <x-slot:title>
                                 <a
-                                    href="" x-text="`${crop.crop_name} ${crop.year}`"
+                                    :href="`/work-logs/index/${row.id}`" x-text="row.cropSeasonsNameYear"
                                     class="text-base font-medium text-gray-900 hover:underline" >
                                 </a>
                         </x-slot>
 
                         <x-slot:info>
                             <x-dashboard.list-info>
-                                    品種名：<span x-text="crop.variety" ></span>
+                                    品種名：<span x-text="row.variety" ></span>
                             </x-dashboard.list-info>
                             <x-dashboard.list-info>
-                                    圃場：<span x-text="crop.fields.name" ></span>
+                                    圃場：<span x-text="row.fieldName" ></span>
                             </x-dashboard.list-info>
                         </x-slot>
                     </x-dashboard.list>
-
                 </template>
-                <div class="justify-self-end">
-                    <x-ui.button variant="primary" href="" class="mt-3">
-                        作付けマスターを追加する
-                    </x-ui.button>
-                </div>
+            </div>
+
+            <div class="justify-self-end">
+                <x-ui.button variant="primary" href="" class="mt-3">
+                    作付けマスターを追加する
+                </x-ui.button>
+            </div>
 
         </div>
     </x-dashboard.card>
