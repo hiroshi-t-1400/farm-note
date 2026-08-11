@@ -17,7 +17,7 @@ class WorkLogsTableSeeder extends Seeder
     {
 
 
-        DB::table('work_logs')->delete();
+        // DB::table('work_logs')->delete();
 
         DB::table('work_logs')->insert(array (
             0 =>
