@@ -16,12 +16,21 @@ class initFieldSeeder extends Seeder
     {
         //
         DB::table('fields')->insert([
+            [
             'name' => 'ハウス全面',
             'address' => null,
             'area' => 150,
-            'notes' => '墓の横のハウス',
+            'notes' => '池の横のハウス',
             'created_at' => now(),
             'updated_at' => now(),
-        ]);
+        ],
+        [
+            'name' => '１番圃場',
+            'address' => null,
+            'area' => 200,
+            'notes' => '真ん中の畑',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]]);
     }
 }

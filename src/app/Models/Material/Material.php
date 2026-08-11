@@ -4,6 +4,7 @@ namespace App\Models\Material;
 
 use App\Models\WorkLog\WorkLog;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -28,8 +29,8 @@ class Material extends Model
                     // ->using(MaterialWorkLog::class);
     }
 
-    public function materialCategories(): HasOne
+    public function materialCategory(): BelongsTo
     {
-        return $this->hasOne(MaterialCategory::class, 'id', 'type_id');
+        return $this->belongsTo(MaterialCategory::class, 'type_id', 'id');
     }
 }

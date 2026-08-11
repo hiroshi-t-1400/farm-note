@@ -2,7 +2,12 @@
 
 namespace App\Models\Crop;
 
+use App\Models\WorkLog\WorkLog;
+use App\Models\Crop\Crop;
+use App\Models\WorkLog\Field;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CropSeason extends Model
@@ -19,9 +24,19 @@ class CropSeason extends Model
         'year',
     ];
 
-    public function crops(): HasOne
+    public function crop(): BelongsTo
     {
-        return $this->hasOne(Crop::class, 'id', 'crop_id');
+        return $this->belongsTo(Crop::class);
+    }
+
+    public function field(): BelongsTo
+    {
+        return $this->belongsTo(Field::class);
+    }
+
+    public function workLog(): HasMany
+    {
+        return $this->HasMany(WorkLog::class, 'crop_season_id');
     }
 }
 

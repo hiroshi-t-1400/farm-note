@@ -28,7 +28,12 @@
 @endphp
 
 @if ($href)
+    {{-- <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}> --}}
     <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>
+        {{ $slot }}
+    </a>
+@elseif($type == 'href')
+    <a {{ $attributes->merge(['class' => $classes]) }}>
         {{ $slot }}
     </a>
 @else

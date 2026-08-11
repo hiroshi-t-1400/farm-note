@@ -4,6 +4,7 @@ namespace App\Models\Material;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MaterialCategory extends Model
 {
@@ -13,9 +14,9 @@ class MaterialCategory extends Model
         'label',
     ];
 
-    public function materials (): BelongsTo
+    public function material(): HasMany
     {
-        return $this->belongsTo(Material::class, 'type_id');
+        return $this->hasMany(Material::class, 'id','type_id');
     }
 }
 
