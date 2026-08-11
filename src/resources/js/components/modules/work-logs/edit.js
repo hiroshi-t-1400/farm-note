@@ -2,6 +2,7 @@
 
 import { storeFormLogic } from "./form-logic";
 import { generateUUID, objToSnakeCase, strToSnakeCase, tsToDate } from "./utils";
+import { deleteWorkLog } from "./delete";
 
 
 export default (config) => {
@@ -33,6 +34,14 @@ export default (config) => {
         formData: {...targetFormData},
 
         prevUrl,
+
+        async deleteLog() {
+            const ids = this.workLogId;
+            const backUrl = `${location.origin}`;
+
+            const result = await deleteWorkLog(ids, backUrl);
+            return result;
+        },
     }
 }
 

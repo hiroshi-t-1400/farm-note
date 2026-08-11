@@ -10,9 +10,11 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorkLog extends Model
 {
+    use SoftDeletes;
     //
     protected $fillable = [
         'crop_season_id',

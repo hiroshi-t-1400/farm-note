@@ -22,6 +22,8 @@ Route::put('/work-logs/edit/{log}', [WorkController::class, 'update'])->name('wo
 Route::get('/work-logs/create', [WorkController::class, 'create'])->name('create');
 Route::post('/work-logs/create', [WorkController::class, 'store'])->name('store');
 
+Route::delete('/work-logs/delete/{ids}', [WorkController::class, 'destroy'])->name('work-logs.delete');
+
 Route::get('/', [DashboardController::class, 'home'])->name('dashboard');
 // Route::get('/', function () {
 //     return view('dashboard');

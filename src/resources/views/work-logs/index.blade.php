@@ -9,7 +9,7 @@
 
         <div x-data="{ open: true }">
 
-            <span @click="open = true" class="flex items-center w-fit py-0.5 px-1 border border-1 border-gray-100 rounded-sm shadow-md">
+            <span @click="open ? open=false : open=true" class="flex items-center w-fit py-0.5 px-1 border border-1 border-gray-100 rounded-sm shadow-md">
                 作付け一覧
                 <svg :class="open ? 'rotate-180' : ''" class="w-[1em] h-[1em] text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -17,7 +17,7 @@
             </span>
 
             {{-- <div x-show="pathName == '/work-logs/index/'"> --}}
-            <div x-show="open" @click.away="open = false" x-transition>
+            <div x-show="open" x-transition>
                 <x-dashboard.crop-seasons :cropSeasons="$models['cropSeasons']" />
             </div>
 

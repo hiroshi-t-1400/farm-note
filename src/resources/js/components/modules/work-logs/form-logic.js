@@ -42,7 +42,7 @@ export function storeFormLogic (initialData = {}) {
             draftWorkLog: [],
 
             // 呼び出し元が編集ページか
-            isEdit: workLog.id > -1 ? true : false,
+            isEdit: workLog?.id > -1 ? true : false,
 
             // レスポンシブ対応のため
             windowWidth: window.innerWidth,

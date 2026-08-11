@@ -220,6 +220,15 @@ class WorkController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $work_log = WorkLog::find($id);
+        $work_log->delete();
+
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '日誌を削除しました。',
+            'delCount' => $work_log,
+            'redirect_url' => route('dashboard')
+        ]);
     }
 }

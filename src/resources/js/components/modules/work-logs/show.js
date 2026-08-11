@@ -1,6 +1,7 @@
 // src/resources/js/components/modules/work-logs/show.js
 
 import { tsToDate } from "./utils";
+import { deleteWorkLog } from "./delete";
 
 export default (config) => {
 
@@ -41,7 +42,7 @@ export default (config) => {
     }));
 
     const backUrl = `${location.origin}/work-logs/index/${cropSeasonId}`;
-    const editUrl = `${location.origin}/work-logs/edit/${cropSeasonId}`;
+    const editUrl = `${location.origin}/work-logs/edit/${id}`;
     // delete実装したらアクティブにする
     // const editUrl = `${location.origin}/work-logs/edit/${cropSeasonId}`;
 
@@ -66,6 +67,13 @@ export default (config) => {
 
         backUrl,
         editUrl,
+
+        async deleteLog() {
+            const ids = this.id;
+
+            const result = await deleteWorkLog(ids, backUrl);
+            return result;
+        },
 
     }
 }
