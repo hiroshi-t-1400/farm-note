@@ -34,11 +34,11 @@
 
             </div>
 
-            {{-- 下部ボタンエリア --}}
-            <div class="grid sm:grid-cols-3 grid-cols-1 sm:gap-x-10 gap-y-2 pt-10 mb-4 sm:justity-center place-content-start">
+            <x-work-logs.action-buttons >
                 <x-ui.button type="submit" variant="primary" >
                     保存
                 </x-ui.button>
+
                 <x-ui.button
                     type="button"
                     @click="skipDraft()"
@@ -47,7 +47,8 @@
                 >
                     下書きを中止し<br>新規として保存
                 </x-ui.button>
-            </div>
+            </x-work-logs.action-buttons>
+
         </form>
     </div>
 

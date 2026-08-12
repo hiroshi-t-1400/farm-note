@@ -42,7 +42,7 @@ export function storeFormLogic (initialData = {}) {
             draftWorkLog: [],
 
             // 呼び出し元が編集ページか
-            isEdit: workLog.id > -1 ? true : false,
+            isEdit: workLog?.id > -1 ? true : false,
 
             // レスポンシブ対応のため
             windowWidth: window.innerWidth,
@@ -504,13 +504,12 @@ export function storeFormLogic (initialData = {}) {
             deleteSelectedDraft() {
                 if (!this.selectedDraftUuid) return;
 
-                if (confirm('選択した下書きを削除してもよろしいですか？')) {
-                    // コア削除処理を呼び出す
-                    this._deleteDraftByUuid(this.selectedDraftUuid);
+                // コア削除処理を呼び出す
+                this._deleteDraftByUuid(this.selectedDraftUuid);
 
-                    this.selectedDraftUuid = '';
-                    // this.updateData('selectedDraftUuid', '');
-                }
+                this.selectedDraftUuid = '';
+                this.formData.draftUuid = '';
+                // this.updateData('selectedDraftUuid', '');
             },
 
             // ----------------------------------------------------

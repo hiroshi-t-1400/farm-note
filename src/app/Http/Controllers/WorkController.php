@@ -34,10 +34,12 @@ class WorkController extends Controller
         //
         if ($id == '') {
             $work_log = WorkLog::with(['cropSeason', 'createdBy'])
+                ->whereBetween('work_date', ['2026-01-01 00:00:00', '2026-12-31 00:00:00'])
                 ->orderBy('work_date')
                 ->cursorPaginate(15);
         } else {
             $work_log = WorkLog::with(['cropSeason', 'createdBy'])
+                ->whereBetween('work_date', ['2026-01-01 00:00:00', '2026-12-31 00:00:00'])
                 ->where('crop_season_id', $id)
                 ->orderBy('work_date')
                 ->cursorPaginate(15);
@@ -220,6 +222,15 @@ class WorkController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $work_log = WorkLog::find($id);
+        $work_log->delete();
+
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '日誌を削除しました。',
+            'delCount' => $work_log,
+            'redirect_url' => route('dashboard')
+        ]);
     }
 }

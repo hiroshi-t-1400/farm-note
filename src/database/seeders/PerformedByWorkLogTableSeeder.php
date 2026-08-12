@@ -17,7 +17,7 @@ class PerformedByWorkLogTableSeeder extends Seeder
     {
 
 
-        DB::table('performed_by_work_log')->delete();
+        // DB::table('performed_by_work_log')->delete();
 
         DB::table('performed_by_work_log')->insert(array (
             0 =>

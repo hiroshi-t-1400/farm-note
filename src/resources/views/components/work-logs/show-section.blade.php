@@ -58,7 +58,13 @@
             </x-work-logs.details>
         </div>
 
-    <dl class="divide-y divide-gray-200">
+        {{-- 作業詳細 --}}
+        <dl class="divide-y divide-gray-200">
+            <x-ui.description-item label="作業日">
+                <span x-text="workDate"></span>
+                <span x-text="status" class="text-red-400"></span>
+            </x-ui.description-item>
+
             <x-ui.description-item label="作業内容">
                 <div x-show="!content">
                     <x-ui.empty-state>
@@ -129,28 +135,39 @@
                     </div>
                 </template>
             </x-ui.description-item>
-    </dl>
+        </dl>
 
-        {{-- レスポンシブ適用させるボトムボタンエリアのコンポーネントつくる --}}
-        <div class="grid sm:grid-cols-3 grid-cols-1 sm:gap-x-10 gap-y-2 pt-10 mb-4 sm:justity-center place-content-start">
+        {{-- 下部アクションボタン --}}
+        <x-work-logs.action-buttons >
+
+            <x-ui.button
+                type="href"
+                ::href="editUrl"
+                variant="alert-ghost"
+            >
+                編集する
+            </x-ui.button>
+
+            <x-work-logs.window-del-popover confirmEvent="deleteLog()" >
+                <x-ui.button
+                    type="button"
+                    variant="danger"
+                    class="w-full">
+                    削除
+                </x-ui.button>
+            </x-work-logs.window-del-popover>
 
             <x-ui.button
                 type="href"
                 ::href="backUrl"
-                variant="secondary-ghost" class="max-w-3xs">
+                variant="secondary-ghost">
                 作付け一覧へ戻る
             </x-ui.button>
-            <x-ui.button
-                type="href"
-                ::href="editUrl"
-                variant="alert-ghost" class="max-w-3xs">
-                編集する
-            </x-ui.button>
             {{-- スマホでモーダル表示を実装したときのUI --}}
-            {{-- <x-ui.button type="button" variant="secondary-ghost" class="max-w-3xs">
+            {{-- <x-ui.button type="button" variant="secondary-ghost">
                 ｘ 閉じる
             </x-ui.button> --}}
-        </div>
+        </x-work-logs.action-buttons>
 
     </div>
 </div>
