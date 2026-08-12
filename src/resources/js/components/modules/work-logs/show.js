@@ -1,0 +1,81 @@
+// src/resources/js/components/modules/work-logs/show.js
+
+import { tsToDate } from "./utils";
+import { deleteWorkLog } from "./delete";
+
+export default (config) => {
+
+    const debugWorkLog = config?.initialWorkLog;
+
+    const {
+        id,
+        createdBy,
+        updatedBy,
+        title,
+        content,
+        performedBy,
+        cropSeason,
+        material,
+        createdByName,
+        updatedByName,
+        cropSeasonId,
+        ...rest
+    } = config?.initialWorkLog;
+
+    const createdAt = tsToDate(config?.initialWorkLog?.createdAt);
+    const updatedAt = tsToDate(config?.initialWorkLog?.updatedAt);
+    const workDate = tsToDate(config?.initialWorkLog?.workDate);
+    const status = () => {
+        return config?.initialWorkLog?.status ? '実施予定' : ''
+    };
+
+    const materials = material.map((mat, index) => ({
+        ...mat,
+        indexStr: `資材 ${index + 1}` || '',
+        typeLabel: `【${mat.typeLabel}】` || '',
+        defaultDilutionRate: `${mat.defaultDilutionRate}倍` || '',
+        dilutionRate: `${mat.dilutionRate}倍` || '',
+        materialAmount: `${mat.materialAmount}` || ''
+        // logs: {
+        //     defaultDilutionRate: {label: '使用量', value:`${mat.defaultDilutionRate}倍` || ''},
+        //     dilutionRate: {label: '希釈倍率', value:`${mat.dilutionRate}倍` || ''},
+        //     materialAmount: {label: '原液量', value:`${mat.materialAmount}倍` || ''}
+        // }
+    }));
+
+    const backUrl = `${location.origin}/work-logs/index/${cropSeasonId}`;
+    const editUrl = `${location.origin}/work-logs/edit/${id}`;
+    // delete実装したらアクティブにする
+    // const editUrl = `${location.origin}/work-logs/edit/${cropSeasonId}`;
+
+    return {
+        debugWorkLog,
+
+        id,
+        createdAt,
+        createdBy,
+        updatedAt,
+        updatedBy,
+        title,
+        workDate,
+        status,
+        content,
+        performedBy,
+        cropSeason,
+        materials,
+        createdByName,
+        updatedByName,
+        rest,
+
+        backUrl,
+        editUrl,
+
+        async deleteLog() {
+            const ids = this.id;
+
+            const result = await deleteWorkLog(ids, backUrl);
+            return result;
+        },
+
+    }
+}

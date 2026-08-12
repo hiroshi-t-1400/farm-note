@@ -1,0 +1,59 @@
+{
+    "name": "Laravel & Vite Dev Environment",
+    
+    // ルートにある docker-compose.yml を参照
+    "dockerComposeFile": "../docker-compose.yml",
+    
+    // VS Codeがメインで接続するサービス名（質問にあった 'src' を指定）
+    // "service": "src",
+    "service": "src",
+    
+    // コンテナ内の作業ディレクトリ（環境に合わせて変更してください）
+    // "workspaceFolder": "/var/www/html",
+    "workspaceFolder": "/var/www",
+
+    // 明示的にポートフォワードを指定
+    "forwardPorts": [80, 8000, 5173],
+
+    // ポートの自動変更を防ぐ属性指定（オプションですが安全です）
+    "portsAttributes": {
+        "5173": {
+            "label": "Vite Dev Server",
+            "onAutoForward": "notify"
+        }
+    },
+    
+    // VS Code起動（コンテナ接続）時に自動実行するコマンド
+    // "postAttachCommand": "npm run dev",
+
+    // コンテナに接続した際、自動的にコンテナ側（リモート拡張ホスト）へインストールされる
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "porifa.laravel-intelephense",
+                "amiralizadeh9480.laravel-extra-intellisense",
+                "onecentlin.laravel-blade",
+                "shufo.vscode-blade-formatter",
+                "codingyu.laravel-goto-view",
+                "naoray.laravel-goto-components",
+                "glitchbl.laravel-create-view",
+                "ihunte.laravel-blade-wrapper",
+                "xdebug.php-debug",
+                "neilbrayfield.php-docblocker",
+                "adrianwilczynski.alpine-js-intellisense",
+                "dbaeumer.vscode-eslint",
+                "xabikos.javascriptsnippets",
+                "mikestead.dotenv",
+                "EditorConfig.EditorConfig",
+                "oderwat.indent-rainbow",
+                "eamodio.gitlens"
+            ],
+            "settings": {
+                "terminal.integrated.cwd": "/var/www/src",
+                "php.suggest.basic": false
+            }
+        }
+    },
+    "postAttachCommand": "cd /var/www/src && npm run dev"
+}
