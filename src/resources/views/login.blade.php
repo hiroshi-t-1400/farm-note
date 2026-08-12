@@ -2,7 +2,7 @@
 
 <x-layouts.app>
     <x-slot:content>
-        <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <mainclass="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
             <div class="flex flex-col p-10 rounded-md bg-white w-md h-sm justify-self-center justify-center">
 
@@ -15,22 +15,30 @@
                     </h2>
                 </div>
 
-                <x-ui.form-group class="flex flex-col gap-5">
 
-                    <x-ui.input type="text" name="loginId" placeholder="ログインID" />
+                <form x-data="tryAuthForm"
+                    @submit.prevent="submitLogin()">
 
-                    <x-ui.input type="password" name="loginId" placeholder="パスワード" />
+                    <x-ui.form-group class="flex flex-col gap-5">
 
-                    <a href="" class="mx-5 pb-0.5 text-xs font-semibold text-gray-500">パスワードのリセット</a>
+                        <x-ui.input
+                            x-model="email"
+                            type="text" name="loginId" placeholder="ログインID" required />
 
-                    <x-ui.button
-                        href="{{ url('/home') }}"
-                        class="w-[10rem] justify-self-center">
-                        ログイン
-                    </x-ui.button>
+                        <x-ui.input
+                            x-model="password"
+                            type="password" name="loginId" placeholder="パスワード" required />
 
+                        <a href="" class="mx-5 pb-0.5 text-xs font-semibold text-gray-500">パスワードのリセット</a>
 
-                </x-ui.form-group>
+                        <x-ui.button
+                            class="w-[10rem] justify-self-center">
+                            ログイン
+                        </x-ui.button>
+
+                    </x-ui.form-group>
+                </form>
+
             </div>
 
         </main>
