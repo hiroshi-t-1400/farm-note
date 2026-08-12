@@ -37,6 +37,15 @@
 
                 <!-- 右側（クイックアクション等） -->
                 <div>
+                    <button
+                        x-data="tryAuthForm()"
+                        @click="submitLogout()"
+                        class="border-1 border-red-500 bg-red-200 hover:bg-red-500 text-gray-700 hover:text-white text-sm font-bold py-2 px-4 rounded shadow">
+                        ログアウト
+                    </button>
+                </div>
+
+                <div>
                     <a href="{{ route('create') }}" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded shadow">
                         + 新規登録
                     </a>

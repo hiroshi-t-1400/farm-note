@@ -2,6 +2,7 @@ import './bootstrap';
 
 import Alpine from 'alpinejs';
 // import collapse from '@alpinejs/collapse'; // プラグインのインポート
+import tryAuthForm from './components/modules/auth/auth';
 import createWorkLog from './components/modules/work-logs/create';
 import showSingleLog from './components/modules/work-logs/show';
 import indexSimple from './components/modules/work-logs/index';
@@ -17,6 +18,7 @@ registerNetworkStore(Alpine);
 
 
 //コンポーネントの登録
+Alpine.data('tryAuthForm', tryAuthForm);
 Alpine.data('createWorkLog', createWorkLog);
 Alpine.data('showSingleLog', showSingleLog);
 Alpine.data('indexSimple', indexSimple);
