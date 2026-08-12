@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('content')->nullable();
             $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

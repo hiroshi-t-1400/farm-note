@@ -1,6 +1,7 @@
 // src/resources/js/components/modules/work-logs/show.js
 
-import { tsToDate, pagenation } from "./utils";
+import { tsToDate, pagenation, generateUUID } from "./utils";
+import { deleteWorkLog } from "./delete";
 
 export default (config) => {
 
@@ -8,7 +9,7 @@ export default (config) => {
 
     const workLog = config?.initialWorkLog['data'].map(log => {
         return {
-
+            uuid: generateUUID(),
             ...log,
             createdAt: tsToDate(log?.createdAt) || '',
             updatedAt: tsToDate(log?.updatedAt) || '',
@@ -31,8 +32,28 @@ export default (config) => {
 
         get caption () {
             if (pathName == '/work-logs/index/') return '';
-            return this.workLog[0].cropSeason.cropSeasonsNameYear;
+            return this.workLog?.[0]?.cropSeason.cropSeasonsNameYear || '';
         },
+
+        // 一覧画面のまま非同期で１件削除
+        async deleteLog (ids = '') {
+            const mode = 'index';
+            const result = await deleteWorkLog(ids, mode);
+
+            const filterd = this.workLog.filter(log => log.id != ids);
+
+            console.log({'削除後のfilterd': filterd});
+            this.workLog = [...filterd];
+            console.log({'削除後のthis.workLog': this.workLog});
+
+            const hasIds = this.workLog.map(element => {
+                element.id;
+            });
+            console.log({'削除後のthis.workLogが持っている記事のid列挙': hasIds});
+
+            return;
+        },
+
 
     }
 }

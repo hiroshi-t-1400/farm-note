@@ -22,24 +22,27 @@
             <span x-text="showDraftInfo().title"></span>
         </div>
     </div>
-</div>
 
-<div>
-    <x-ui.button
-        variant="primary-ghost"
-        type="button"
-        @click="fillWithDraft()"
-        {{-- class="my-1 px-2 py-1 rounded-md border border-gray-500 bg-blue-300 items-center text-sm font-medium text-white" --}}
-        >
-        下書きを読み込む
-    </x-ui.button>
+    <div class="wrapActionButton flex flex-wrap gap-x-4 gap-y-4">
+        <x-ui.button
+            variant="primary-ghost"
+            type="button"
+            @click="fillWithDraft()"
+            {{-- class="my-1 px-2 py-1 rounded-md border border-gray-500 bg-blue-300 items-center text-sm font-medium text-white" --}}
+            >
+            下書きを読み込む
+        </x-ui.button>
 
-    <x-ui.button
-        variant="alert-ghost"
-        type="button"
-        @click="deleteSelectedDraft()"
-        ::disabled="!selectedDraftUuid"
-        >
-        選択した下書きを削除する
-    </x-ui.button>
+        <x-work-logs.window-del-popover confirmEvent="deleteSelectedDraft()">
+            <x-ui.button
+                variant="alert-ghost"
+                type="button"
+                ::disabled="!selectedDraftUuid"
+                >
+                選択した下書きを削除する
+            </x-ui.button>
+        </x-work-logs.window-del-popover>
+
+    </div>
+
 </div>

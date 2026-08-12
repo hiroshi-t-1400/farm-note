@@ -17,7 +17,7 @@ class MaterialWorkLogTableSeeder extends Seeder
     {
 
 
-        DB::table('material_work_log')->delete();
+        // DB::table('material_work_log')->delete();
 
         DB::table('material_work_log')->insert(array (
             0 =>

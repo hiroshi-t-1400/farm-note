@@ -1,6 +1,7 @@
 // src/resources/js/components/modules/work-logs/show.js
 
 import { tsToDate } from "./utils";
+import { deleteWorkLog } from "./delete";
 
 export default (config) => {
 
@@ -11,7 +12,6 @@ export default (config) => {
         createdBy,
         updatedBy,
         title,
-        status,
         content,
         performedBy,
         cropSeason,
@@ -25,6 +25,9 @@ export default (config) => {
     const createdAt = tsToDate(config?.initialWorkLog?.createdAt);
     const updatedAt = tsToDate(config?.initialWorkLog?.updatedAt);
     const workDate = tsToDate(config?.initialWorkLog?.workDate);
+    const status = () => {
+        return config?.initialWorkLog?.status ? '実施予定' : ''
+    };
 
     const materials = material.map((mat, index) => ({
         ...mat,
@@ -41,7 +44,7 @@ export default (config) => {
     }));
 
     const backUrl = `${location.origin}/work-logs/index/${cropSeasonId}`;
-    const editUrl = `${location.origin}/work-logs/edit/${cropSeasonId}`;
+    const editUrl = `${location.origin}/work-logs/edit/${id}`;
     // delete実装したらアクティブにする
     // const editUrl = `${location.origin}/work-logs/edit/${cropSeasonId}`;
 
@@ -66,6 +69,13 @@ export default (config) => {
 
         backUrl,
         editUrl,
+
+        async deleteLog() {
+            const ids = this.id;
+
+            const result = await deleteWorkLog(ids, backUrl);
+            return result;
+        },
 
     }
 }
