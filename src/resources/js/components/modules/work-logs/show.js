@@ -12,7 +12,6 @@ export default (config) => {
         createdBy,
         updatedBy,
         title,
-        status,
         content,
         performedBy,
         cropSeason,
@@ -26,6 +25,9 @@ export default (config) => {
     const createdAt = tsToDate(config?.initialWorkLog?.createdAt);
     const updatedAt = tsToDate(config?.initialWorkLog?.updatedAt);
     const workDate = tsToDate(config?.initialWorkLog?.workDate);
+    const status = () => {
+        return config?.initialWorkLog?.status ? '実施予定' : ''
+    };
 
     const materials = material.map((mat, index) => ({
         ...mat,

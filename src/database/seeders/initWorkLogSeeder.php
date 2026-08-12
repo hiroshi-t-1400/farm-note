@@ -32,7 +32,7 @@ class initWorkLogSeeder extends Seeder
         $users = User::factory()->count(10)->create();
 
         // 50件の WorkLog を作成し、上記ユーザーから割り当てる
-        for ($i = 0; $i < 50; $i++) {
+        for ($i = 0; $i < 100; $i++) {
             $workLog = WorkLog::factory()->create([
                 // 作成者をランダムに1名割り当て
                 'created_by' => $users->random()->id, // ※実際の外部キーカラム名に合わせてください

@@ -2,21 +2,13 @@
     'confirmEvent' => '',
     ])
 
-
-<div x-data="{ popoverOpen: false }" class="relative flex items-center justify-between">
-
-    <!-- 1. 削除ボタン -->
-    <button
-        type="button"
-        @click="popoverOpen = true"
-        class="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded "
-    >
+{{-- 主に<button>をslotに受けて実装 --}}
+<div x-data="{ popoverOpen: false }" class="relative">
+    <span @click="popoverOpen = true" class="inline-block">
 
         {{ $slot }}
+    </span>
 
-    </button>
-
-    <!-- 2. 近傍に表示されるインライン確認ダイアログ（ポップオーバー） -->
     <div
         x-show="popoverOpen"
         x-cloak
@@ -24,7 +16,7 @@
         x-transition:enter-start="opacity-0 scale-95"
         x-transition:enter-end="opacity-100 scale-100"
         @click.outside="popoverOpen = false"
-        class="absolute right-100% top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-10"
+        class="absolute -top-full left-50% mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-10"
     >
         <p class="text-xs text-gray-600 mb-2">この記事を削除しますか？</p>
 
@@ -44,5 +36,4 @@
             </button>
         </div>
     </div>
-
 </div>

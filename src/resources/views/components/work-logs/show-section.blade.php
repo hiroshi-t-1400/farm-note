@@ -58,7 +58,13 @@
             </x-work-logs.details>
         </div>
 
-    <dl class="divide-y divide-gray-200">
+        {{-- 作業詳細 --}}
+        <dl class="divide-y divide-gray-200">
+            <x-ui.description-item label="作業日">
+                <span x-text="workDate"></span>
+                <span x-text="status" class="text-red-400"></span>
+            </x-ui.description-item>
+
             <x-ui.description-item label="作業内容">
                 <div x-show="!content">
                     <x-ui.empty-state>
@@ -129,66 +135,39 @@
                     </div>
                 </template>
             </x-ui.description-item>
-    </dl>
+        </dl>
 
-        {{-- レスポンシブ適用させるボトムボタンエリアのコンポーネントつくる --}}
-        <div class="grid sm:grid-cols-3 grid-cols-1 sm:gap-x-10 gap-y-2 pt-10 mb-4 sm:justity-center place-content-start">
+        {{-- 下部アクションボタン --}}
+        <x-work-logs.action-buttons >
+
             <x-ui.button
                 type="href"
                 ::href="editUrl"
-                variant="alert-ghost" class="max-w-3xs">
+                variant="alert-ghost"
+            >
                 編集する
             </x-ui.button>
 
-            <div x-data="{ popoverOpen: false }" class="relative w-full">
+            <x-work-logs.window-del-popover confirmEvent="deleteLog()" >
                 <x-ui.button
                     type="button"
-                    @click="popoverOpen = true"
                     variant="danger"
-                    >
+                    class="w-full">
                     削除
                 </x-ui.button>
-
-                <div
-                    x-show="popoverOpen"
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-100"
-                    x-transition:enter-start="opacity-0 scale-95"
-                    x-transition:enter-end="opacity-100 scale-100"
-                    @click.outside="popoverOpen = false"
-                    class="absolute -top-full left-50% mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-10"
-                >
-                    <p class="text-xs text-gray-600 mb-2">この記事を削除しますか？</p>
-
-                    <div class="flex justify-end gap-2">
-                        <button
-                            type="button"
-                            @click="popoverOpen = false"
-                            class="px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded"
-                        >
-                            キャンセル
-                        </button>
-                        <button
-                            type="button"
-                            @click="deleteLog(); popoverOpen = false"
-                            class = 'px-2 py-1 text-xs bg-red-600 text-white hover:bg-red-700 rounded',>
-                            削除する
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </x-work-logs.window-del-popover>
 
             <x-ui.button
                 type="href"
                 ::href="backUrl"
-                variant="secondary-ghost" class="max-w-3xs">
+                variant="secondary-ghost">
                 作付け一覧へ戻る
             </x-ui.button>
             {{-- スマホでモーダル表示を実装したときのUI --}}
-            {{-- <x-ui.button type="button" variant="secondary-ghost" class="max-w-3xs">
+            {{-- <x-ui.button type="button" variant="secondary-ghost">
                 ｘ 閉じる
             </x-ui.button> --}}
-        </div>
+        </x-work-logs.action-buttons>
 
     </div>
 </div>

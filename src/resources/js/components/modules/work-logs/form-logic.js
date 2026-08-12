@@ -504,13 +504,12 @@ export function storeFormLogic (initialData = {}) {
             deleteSelectedDraft() {
                 if (!this.selectedDraftUuid) return;
 
-                if (confirm('選択した下書きを削除してもよろしいですか？')) {
-                    // コア削除処理を呼び出す
-                    this._deleteDraftByUuid(this.selectedDraftUuid);
+                // コア削除処理を呼び出す
+                this._deleteDraftByUuid(this.selectedDraftUuid);
 
-                    this.selectedDraftUuid = '';
-                    // this.updateData('selectedDraftUuid', '');
-                }
+                this.selectedDraftUuid = '';
+                this.formData.draftUuid = '';
+                // this.updateData('selectedDraftUuid', '');
             },
 
             // ----------------------------------------------------
