@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\WorkController;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
+
+Route::get('/', [AuthController::class, 'login'])->name('login');
 
 Route::get('/work-logs/index/{log}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');
 Route::get('/work-logs/index', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
@@ -24,7 +27,7 @@ Route::post('/work-logs/create', [WorkController::class, 'store'])->name('store'
 
 Route::delete('/work-logs/delete/{ids}', [WorkController::class, 'destroy'])->name('work-logs.delete');
 
-Route::get('/', [DashboardController::class, 'home'])->name('dashboard');
+Route::get('/home', [DashboardController::class, 'home'])->name('dashboard');
 // Route::get('/', function () {
 //     return view('dashboard');
 // })->name('dashboard');
