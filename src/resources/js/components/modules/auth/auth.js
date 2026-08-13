@@ -1,11 +1,16 @@
 // src/resources/js/components/modules/auth/login.js
 
-export default () => {
+export default (config = '') => {
 
     return {
         email: '',
         password: '',
+        passwordConfirmed: '',
+        loginId: '',
+        username: '',
         errors: {},
+
+        sentStatus: config?.initialData?.status || '',
 
         // X-XSRF-TOKENをfetchで送るためにcoockieからXSRFの文字列を基準に切り取って取得
         getCookie(name) {
@@ -93,7 +98,7 @@ export default () => {
             }
         },
 
-        
+
         async submitLogout() {
             try {
                 const response = await fetch('/logout', {
@@ -117,6 +122,168 @@ export default () => {
             } catch (e) {
                 console.error('通信エラーが発生しました', e);
                 alert('通信エラーのためログアウトできませんでした。');
+            }
+        },
+
+        async submitRegister () {
+            let timeoutId = null;
+
+            try{
+                // set 5000ms to timeout
+                const controller = new AbortController();
+                timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                let response;
+
+                response = await fetch('/register', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-XSRF-TOKEN': this.getCookie('XSRF-TOKEN')
+                    },
+                    body: JSON.stringify({
+                        email: this.email,
+                        password: this.password,
+                        password_confirmed: this.passwordConfirmed,
+                        login_id: this.loginId,
+                        name: this.username
+                    }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId); // タイマーを解除
+
+
+                // ----------------------------------------------------
+                // 1. バリデーションエラー（422）と422に結び付けた認証情報の誤りのハンドリング
+                // ----------------------------------------------------
+                if (response.status === 422) {
+                    const data = await response.json();
+                    this.errors = data.errors || {};
+
+                    alert('アカウント登録に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
+                    return;
+                }
+
+                // ----------------------------------------------------
+                // 2. 連続送信（429）のハンドリング
+                // ----------------------------------------------------
+                if (response.status === 429) {
+                    const data = await response.json();
+                    this.errors = data.errors || {};
+                    alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
+                    return;
+                }
+
+                // ----------------------------------------------------
+                // 3. その他のサーバーエラー（500系や404など
+                // ----------------------------------------------------
+                if (!response.ok) {
+                    console.error('サーバーエラーが発生しました。');
+                    alert('サーバーエラーが発生しました。');
+
+                    return;
+                }
+
+                // ----------------------------------------------------
+                // 4. 認証成功（200 OK系）
+                // ----------------------------------------------------
+                const data = await response.json();
+
+                // メール認証のメール送信・サジェスト画面
+                return window.location.href = '/email/verify';
+
+            } catch(e) {
+
+                if (timeoutId) clearTimeout(timeoutId);
+
+                // DevToolsにエラー出力
+                if (e.name === 'AbortError') {
+                    console.error('通信エラー： タイムアウト（５秒）が発生しました。', e);
+                } else {
+                    console.error('不明な通信エラー', e);
+                }
+
+                alert('通信エラーのためアカウント登録に失敗しました。')
+            }
+        },
+
+
+        /**
+         * ユーザーの操作による認証メールの再送信
+         * @param {Object} UserEloquentModelObject
+         * @returns
+         */
+        async submitVerifyEmail (user) {
+            let timeoutId = null;
+
+            try{
+                // set 5000ms to timeout
+                const controller = new AbortController();
+                timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                let response;
+
+                response = await fetch('/email/verification-notification', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-XSRF-TOKEN': this.getCookie('XSRF-TOKEN')
+                    },
+                    // Laravelシステムがメールを送信する対象のユーザ情報を渡す
+                    body: JSON.stringify({
+                        user: user
+                    }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId); // タイマーを解除
+
+                // ----------------------------------------------------
+                // 1. 連続送信（429）のハンドリング
+                // ----------------------------------------------------
+                if (response.status === 429) {
+                    const data = await response.json();
+                    this.errors = data.errors || {};
+                    alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
+                    return;
+                }
+
+                // ----------------------------------------------------
+                // 2. その他のサーバーエラー（500系や404など
+                // ----------------------------------------------------
+                if (!response.ok) {
+                    console.error('サーバーエラーが発生しました。');
+                    alert('サーバーエラーが発生しました。');
+
+                    return;
+                }
+
+                // ----------------------------------------------------
+                // 3. 認証成功（200 OK系）
+                // ----------------------------------------------------
+                const data = await response.json();
+
+                // 画面遷移なし、sentSatusのフラグを返し、ユーザーにメールの確認と登録の完了を促す
+                this.sentStatus = data.status;
+                return;
+
+            } catch(e) {
+
+                if (timeoutId) clearTimeout(timeoutId);
+
+                // DevToolsにエラー出力
+                if (e.name === 'AbortError') {
+                    console.error('通信エラー： タイムアウト（５秒）が発生しました。', e);
+                } else {
+                    console.error('不明な通信エラー', e);
+                }
+
+                alert('通信エラーのためログインに失敗しました。')
             }
         },
     }
