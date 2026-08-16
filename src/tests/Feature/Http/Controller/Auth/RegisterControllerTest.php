@@ -48,44 +48,15 @@ class RegisterControllerTest extends TestCase
             'email_verified_at' => null,
         ]);
 
-
         // 登録したユーザー情報を取得し、VerifyEmail::classによる通知が送信されたかを確認
         $user = User::where('email', 'tomatotaro@example.org')->first();
         Notification::assertSentTo($user, VerifyEmail::class);
-
 
         // 認証済みログインユーザーとして'/email/verify'を開けるか確認
         $this->actingAs($user)
             ->get('/email/verify')
             ->assertStatus(200)
             ->assertViewIs('auth.verify-email');
-
-        //////
-        // // 認証メール送信処理を呼び出す
-        //     $user->sendEmailVerificationNotification();
-
-        //     // 送信された通知からURLを取得する変数
-        //     $mailUrl = null;
-
-        //     Notification::assertSentTo(
-        //         $user,
-        //         VerifyEmail::class,
-        //         function (VerifyEmail $notification, $channels) use ($user, &$mailUrl) {
-        //             // メール通知オブジェクトから認証URLを生成・抽出
-        //             $mailMessage = $notification->toMail($user);
-        //             $mailUrl = $mailMessage->actionUrl;
-
-        //             return true;
-        //         }
-        //     );
-
-        // // 抽出したURLへアクセス
-        // $response = $this->actingAs($user)->get($mailUrl);
-
-        // // 検証
-        // // $response->assertRedirect(url('home'));
-        // $this->assertTrue($user->fresh()->hasVerifiedEmail());
-        // }
 
         // メール認証用の署名付きURL
         $verificationUrl = URL::temporarySignedRoute(
@@ -101,14 +72,15 @@ class RegisterControllerTest extends TestCase
         $response = $this->actingAs($user)->get($verificationUrl);
 
         // 設定した画面へリダイレクトされたか
-        $response->assertRedirect('/home?verified=1');
+        $response->assertRedirect('/dashboard?verified=1');
 
         // ユーザーのメール認証フラグ email_verified_atが更新されたか
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
 
-        $response->assertStatus(200);
+        $response->assertStatus(302);
     }
 
+    // ユーザー操作による認証メールの再送信ロジック
     public function test_resend_verification_email(): void
     {
         Notification::fake();

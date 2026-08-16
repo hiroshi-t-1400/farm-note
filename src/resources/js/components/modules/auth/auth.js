@@ -81,7 +81,7 @@ export default (config = '') => {
                 // ----------------------------------------------------
                 const data = await response.json();
 
-                return window.location.href = '/home';
+                return window.location.href = '/dashboard';
 
             } catch(e) {
 

@@ -46,9 +46,9 @@ class DatabaseSeeder extends Seeder
             initMaterialCategorySeeder::class,
             initMaterialSeeder::class,
             initUserSeeder::class,
+            initPerformedByWorkLogSeeder::class,
             initWorkLogSeeder::class,
             initMaterialWorkLogSeeder::class,
-            initPerformedByWorkLogSeeder::class,
         ]);
 
         // by iseed

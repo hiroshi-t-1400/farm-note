@@ -45,7 +45,7 @@ Route::get('/email/verify', function() {
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
 
-    return redirect()->intended('/home?verified=1');
+    return redirect()->intended('/dashboard?verified=1');
     // return response()->view('/dashboard');
 })->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
 
@@ -86,7 +86,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::delete('/work-logs/delete/{ids}', [WorkController::class, 'destroy'])->name('work-logs.delete');
 
-    Route::get('/home', [DashboardController::class, 'home'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 });
 
 Route::get('/test', function () {
