@@ -37,7 +37,8 @@ Route::controller(EmailVerificationController::class)
 */
 
 // 確認メール送信画面を表示する
-Route::get('/email/verify', function() {
+Route::get('/email/verify', function(Request $request) {
+    if ($request->user()->hasVerifiedEmail()) return redirect('/dashboard');
     return view('auth.verify-email');
 })->middleware('auth:sanctum')->name('verification.notice');
 

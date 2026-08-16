@@ -21,7 +21,8 @@
                 x-model="password"
                 type="password" name="password" placeholder="パスワード" required />
 
-            <a href="" class="mx-5 pb-0.5 text-xs font-semibold text-gray-500">パスワードのリセット</a>
+            {{-- <a href="" class="mx-5 pb-0.5 text-xs font-semibold text-gray-500">パスワードのリセット</a> --}}
+            {{-- <a href="" class="mx-5 pb-0.5 text-base font-semibold text-gray-500">アカウントの登録</a> --}}
 
             <x-ui.button
                 class="w-[10rem] justify-self-center">

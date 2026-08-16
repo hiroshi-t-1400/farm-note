@@ -99,6 +99,7 @@ class RegisterControllerTest extends TestCase
             ]);
 
         Notification::assertSentTo($user, VerifyEmail::class);
+
     }
 
     // 認証用メールの承認URLが改ざんされている場合
