@@ -45,7 +45,8 @@ Route::get('/email/verify', function() {
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
 
-    return response()->view('/dashboard');
+    return redirect()->intended('/home?verified=1');
+    // return response()->view('/dashboard');
 })->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
 
 // 確認メールの再送信
@@ -88,9 +89,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/home', [DashboardController::class, 'home'])->name('dashboard');
 });
 
-// Route::get('/', function () {
-//     return view('dashboard');
-// })->name('dashboard');
-// Route::post('/create', function (Request $request) {
-//     dd($request);
-// })->name('store');
+Route::get('/test', function () {
+    return view('/dashboard');
+});

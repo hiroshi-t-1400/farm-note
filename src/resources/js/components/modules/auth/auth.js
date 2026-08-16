@@ -213,10 +213,9 @@ export default (config = '') => {
 
         /**
          * ユーザーの操作による認証メールの再送信
-         * @param {Object} UserEloquentModelObject
          * @returns
          */
-        async submitVerifyEmail (user) {
+        async submitVerifyEmail () {
             let timeoutId = null;
 
             try{
@@ -234,10 +233,6 @@ export default (config = '') => {
                         'Accept': 'application/json',
                         'X-XSRF-TOKEN': this.getCookie('XSRF-TOKEN')
                     },
-                    // Laravelシステムがメールを送信する対象のユーザ情報を渡す
-                    body: JSON.stringify({
-                        user: user
-                    }),
                     signal: controller.signal
                 });
 
@@ -279,11 +274,11 @@ export default (config = '') => {
                 // DevToolsにエラー出力
                 if (e.name === 'AbortError') {
                     console.error('通信エラー： タイムアウト（５秒）が発生しました。', e);
+                    alert('タイムアウトが発生しました。通信環境を確認して再度お試しください。')
                 } else {
                     console.error('不明な通信エラー', e);
+                    alert('通信エラーが発生しました。')
                 }
-
-                alert('通信エラーのためログインに失敗しました。')
             }
         },
     }
