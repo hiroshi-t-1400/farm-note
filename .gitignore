@@ -1,2 +1,3 @@
 .env
 .env.backup
+src/app/Http/Controllers/Auth/EmailVerificationController.php
