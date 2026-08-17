@@ -210,6 +210,10 @@ export default (config = '') => {
             }
         },
 
+        // バリデーションエラーメッセージを返す
+        getError(field) {
+            return this.errors?.[field] || null;
+        },
 
         /**
          * ユーザーの操作による認証メールの再送信

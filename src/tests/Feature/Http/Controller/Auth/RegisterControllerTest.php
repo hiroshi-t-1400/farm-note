@@ -29,8 +29,8 @@ class RegisterControllerTest extends TestCase
             'name' => 'トマト 太郎',
             'email' => 'tomatotaro@example.org',
             'login_id' => 'tomatotaro',
-            'password' => '0123456789',
-            'password_confirmation' => '012345689',
+            'password' => 'tomatot@ro',
+            'password_confirmation' => 'tomatot@ro',
         ]);
 
         // APIレスポンスの検証
@@ -40,6 +40,7 @@ class RegisterControllerTest extends TestCase
             'message' => '登録されたメールを確認して、アカウント登録を完了してください。',
             // 'user' => $user,
         ]);
+
 
         // データベースに登録したユーザーが存在するか
         $this->assertDatabaseHas('users', [

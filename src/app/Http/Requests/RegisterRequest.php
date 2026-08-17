@@ -25,7 +25,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             //
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:2'],
 
             'login_id' => [
                 'required',
@@ -79,6 +79,7 @@ class RegisterRequest extends FormRequest
         $camelErrors = [];
 
         foreach ($errors as $key => $messages) {
+            if ($key == 'name') $key = 'username';
             $camelKey = Str::camel($key);
             $camelErrors[$camelKey] = $messages;
         }
@@ -97,6 +98,7 @@ class RegisterRequest extends FormRequest
         return [
             'password.uncompromised' => '非常に漏洩しやすい:attributeが入力されています。より複雑なパスワードを入力してください。（文字種を増やす。同じ字を連続しない。等）',
             'password.regex' => ':attributeに、使用できない記号等が含まれています。',
+            'password.confirmed' => '確認用パスワードと一致していません。'
         ];
     }
 
@@ -109,6 +111,7 @@ class RegisterRequest extends FormRequest
             'login_id' => 'ログインID',
             'email' => 'メールアドレス',
             'password' => 'パスワード',
+            'password_confirmation' => '確認用パスワード'
         ];
     }
 }
