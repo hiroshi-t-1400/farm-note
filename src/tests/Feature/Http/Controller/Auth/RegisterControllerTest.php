@@ -29,8 +29,8 @@ class RegisterControllerTest extends TestCase
             'name' => 'トマト 太郎',
             'email' => 'tomatotaro@example.org',
             'login_id' => 'tomatotaro',
-            'password' => 'tomato',
-            'password_confirmed' => 'tomato',
+            'password' => '0123456789',
+            'password_confirmation' => '012345689',
         ]);
 
         // APIレスポンスの検証

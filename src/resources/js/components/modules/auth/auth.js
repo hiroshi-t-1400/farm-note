@@ -5,7 +5,7 @@ export default (config = '') => {
     return {
         email: '',
         password: '',
-        passwordConfirmed: '',
+        passwordConfirmation: '',
         loginId: '',
         username: '',
         errors: {},
@@ -146,7 +146,7 @@ export default (config = '') => {
                     body: JSON.stringify({
                         email: this.email,
                         password: this.password,
-                        password_confirmed: this.passwordConfirmed,
+                        password_confirmation: this.passwordConfirmation,
                         login_id: this.loginId,
                         name: this.username
                     }),

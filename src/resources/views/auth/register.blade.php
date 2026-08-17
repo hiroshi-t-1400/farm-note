@@ -47,15 +47,16 @@
                 <x-ui.input type="password"
                     x-model="password"
                     type="password" name="password" placeholder="パスワード" required />
+                <p class="py-1 text-sm text-gray-600 font-semibold">使用できる記号<span class="rounded-md px-4 py-0.5 bg-gray-200">! @ # $ % & * - _ .</span></p>
             </div>
 
             <div class="flex flex-col">
-                <x-ui.form-label for="passwordConfirmed">
+                <x-ui.form-label for="passwordConfirmation">
                     パスワードの確認
                 </x-ui.form-label>
-                <x-ui.input name='passwordConfirmed'
-                    x-model="passwordConfirmed"
-                    type="password" name="passwordConfirmed" placeholder="同じパスワード" required />
+                <x-ui.input name='passwordConfirmation'
+                    x-model="passwordConfirmation"
+                    type="password" name="passwordConfirmation" placeholder="同じパスワード" required />
             </div>
 
 
