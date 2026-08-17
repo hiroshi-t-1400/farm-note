@@ -1,10 +1,13 @@
 <?php
 
 // use App\Http\Controllers\AuthController;
+
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\WorkController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
 use Illuminate\Http\Request;
@@ -14,12 +17,49 @@ use Illuminate\Http\Request;
 // ゲスト向けルート
 // ----------------------------------------------------
 Route::middleware('guest')->group(function (){
+    Route::get('/register', [RegisterController::class, 'show'])->name('show.register');
+    Route::post('/register', [RegisterController::class, 'create']);
+
     Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
     Route::get('/', [LoginController::class, 'showLogin']);
     // login ==> post because of sanctum
     Route::post('/', [LoginController::class, 'authenticate']);
     Route::post('/login', [LoginController::class, 'authenticate']);
 });
+
+// ----------------------------------------------------
+// メール認証ルート
+// ----------------------------------------------------
+/*
+Route::controller(EmailVerificationController::class)
+	->prefix('email')->name('verification.')->group(function () {
+});
+*/
+
+// 確認メール送信画面を表示する
+Route::get('/email/verify', function(Request $request) {
+    if ($request->user()->hasVerifiedEmail()) return redirect('/dashboard');
+    return view('auth.verify-email');
+})->middleware('auth:sanctum')->name('verification.notice');
+
+// 確認メールの承認リンクをクリックしてアクセスしたとき
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect()->intended('/dashboard?verified=1');
+    // return response()->view('/dashboard');
+})->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
+
+// 確認メールの再送信
+//   登録情報に不備がなければ、まず１回自動的に呼び出される
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+        return response()->json([
+        'status' => 'verification-link-sent',
+        'message' => 'メールを送信しました。確認してください。'
+    ]);
+})->middleware(['auth:sanctum', 'throttle:6,1'])->name('verification.send');
+
 
 
 // ----------------------------------------------------
@@ -47,12 +87,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::delete('/work-logs/delete/{ids}', [WorkController::class, 'destroy'])->name('work-logs.delete');
 
-    Route::get('/home', [DashboardController::class, 'home'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 });
 
-// Route::get('/', function () {
-//     return view('dashboard');
-// })->name('dashboard');
-// Route::post('/create', function (Request $request) {
-//     dd($request);
-// })->name('store');
+Route::get('/test', function () {
+    return view('/dashboard');
+});
