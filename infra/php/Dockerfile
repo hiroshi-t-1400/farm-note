@@ -23,7 +23,19 @@ RUN apk update && apk add --no-cache \
     nodejs \
     npm \
     # よく使われるユーティリティ
-    bash
+    bash \
+
+# Laravel Duskテスト用
+    chromium \
+    chromium-chromedriver \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+# --- Chromiumの環境変数指定（Duskがシステム標準のバイナリを参照できるようにする） ---
+ENV CHROME_BIN=/usr/bin/chromium-browser \
+    CHROME_PATH=/usr/lib/chromium/
 
 # Laravelに必要なPHP拡張機能の有効化
 # pdo_mysql: データベース接続

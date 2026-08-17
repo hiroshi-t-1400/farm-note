@@ -37,7 +37,8 @@ Route::controller(EmailVerificationController::class)
 */
 
 // 確認メール送信画面を表示する
-Route::get('/email/verify', function() {
+Route::get('/email/verify', function(Request $request) {
+    if ($request->user()->hasVerifiedEmail()) return redirect('/dashboard');
     return view('auth.verify-email');
 })->middleware('auth:sanctum')->name('verification.notice');
 
@@ -45,7 +46,8 @@ Route::get('/email/verify', function() {
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
 
-    return response()->view('/dashboard');
+    return redirect()->intended('/dashboard?verified=1');
+    // return response()->view('/dashboard');
 })->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
 
 // 確認メールの再送信
@@ -85,12 +87,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::delete('/work-logs/delete/{ids}', [WorkController::class, 'destroy'])->name('work-logs.delete');
 
-    Route::get('/home', [DashboardController::class, 'home'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 });
 
-// Route::get('/', function () {
-//     return view('dashboard');
-// })->name('dashboard');
-// Route::post('/create', function (Request $request) {
-//     dd($request);
-// })->name('store');
+Route::get('/test', function () {
+    return view('/dashboard');
+});

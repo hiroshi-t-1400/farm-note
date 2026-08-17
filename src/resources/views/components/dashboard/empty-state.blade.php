@@ -15,9 +15,9 @@
                 {{ $alertMessage }}
             </h3>
 
-            <p class="mt-1 text-sm text-amber-700">
+            <div class="mt-1 text-sm text-amber-700">
                 {{ $alertGuide }}
-            </p>
+            </div>
 
             <div class="mt-4">
                 {{ $alertButton }}
