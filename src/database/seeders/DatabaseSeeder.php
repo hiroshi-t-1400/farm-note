@@ -51,10 +51,12 @@ class DatabaseSeeder extends Seeder
             initMaterialWorkLogSeeder::class,
         ]);
 
-        // by iseed
+        // by iseed 既存のデータベースからseederを生成するライブラリから取得したseeder
         // $this->call(WorkLogsTableSeeder::class);
         // $this->call(MaterialWorkLogTableSeeder::class);
         // $this->call(PerformedByWorkLogTableSeeder::class);
+
+        $this->call(RolesAndPermissionsSeeder::class);
 
         // 外部キー制約を有効に戻す
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');

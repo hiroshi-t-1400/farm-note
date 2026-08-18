@@ -31,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'login_id',
         'email',
         'password',
+        'status' // active, pending, disabled
     ];
 
     /**
@@ -80,5 +81,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isManager(): bool
     {
         return $this->hasRole('manager');
+    }
+
+    // 自分が出した申請の一覧
+    public function changeRequests(): HasMany
+    {
+        return $this->hasMany(UserChangeRequest::class, 'requested_by');
     }
 }
