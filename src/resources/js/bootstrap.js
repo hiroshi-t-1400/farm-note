@@ -12,7 +12,7 @@ const rawAxios = axios.create({
 })
 
 // axios-case-converterを適用
-const http = applyCaseMiddleware(rawAxios);
+const http = applyCaseMiddleware(rawAxios, { ignoreHeaders:true });
 
 // Alpine.jsや他のファイルから use できるようグローバル化
 window.http = http;

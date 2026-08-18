@@ -2,6 +2,7 @@
 
 // use App\Http\Controllers\AuthController;
 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
@@ -93,3 +94,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::get('/test', function () {
     return view('/dashboard');
 });
+
+
+Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
+Route::post('/admin/users/create', [UserController::class, 'store'])->name('admin.users.store');
