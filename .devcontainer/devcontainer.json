@@ -47,7 +47,8 @@
                 "mikestead.dotenv",
                 "EditorConfig.EditorConfig",
                 "oderwat.indent-rainbow",
-                "eamodio.gitlens"
+                "eamodio.gitlens",
+                "aprilandjan.ascii-tree-generator"
             ],
             "settings": {
                 "terminal.integrated.cwd": "/var/www/src",
