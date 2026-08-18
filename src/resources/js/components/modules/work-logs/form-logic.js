@@ -459,7 +459,7 @@ export function storeFormLogic (initialData = {}) {
 
                     // 呼び出し元が編集ページなら下書きに保存したら遷移元のページに遷移
                     if (this.isEdit) {
-                        return window.location.replace(document.referrer || '/');
+                        return window.location.replace(document.referrer || '/dashboard');
                     }
                     this.resetFormData();
 
