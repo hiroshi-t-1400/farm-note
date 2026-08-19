@@ -73,7 +73,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Aplinejsから Auth::user()メソッドによるユーザー情報の取得ができないのを補完するため
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        $user = $request->user();
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'roles' => $user->getRoleNames(), // ['owner'] や ['worker'] などを返す
+            'permissions' => $user->getAllPermissions()->pluck('name'), // 付与されている全パーミッション名
+        ];
     });
 
     Route::middleware(['role:manager'])->group(function () {
