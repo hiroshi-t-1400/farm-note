@@ -14,10 +14,11 @@ import indexLog from './components/modules/dashboard/index';
 import recentLog from './components/modules/dashboard/recent';
 
 import { registerNetworkStore } from './components/debug/debug';
+import { registerAuthStore } from './stores/authStore';
 
 // ストアの登録
 registerNetworkStore(Alpine);
-
+registerAuthStore(Alpine);
 
 //コンポーネントの登録
 Alpine.data('tryAuthForm', tryAuthForm);

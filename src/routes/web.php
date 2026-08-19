@@ -76,6 +76,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         return $request->user();
     });
 
+    Route::middleware(['role:manager'])->group(function () {
+        Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
+        Route::post('/admin/users/create', [UserController::class, 'store'])->name('admin.users.store');
+    });
+
+
     Route::get('/work-logs/index/{log}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');
     Route::get('/work-logs/index', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
 
@@ -96,5 +102,3 @@ Route::get('/test', function () {
 });
 
 
-Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
-Route::post('/admin/users/create', [UserController::class, 'store'])->name('admin.users.store');

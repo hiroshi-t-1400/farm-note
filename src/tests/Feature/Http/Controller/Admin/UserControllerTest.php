@@ -7,20 +7,68 @@ use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\initUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class UserControllerTest extends TestCase
 {
     use RefreshDatabase;
-    // 全部seedしてから開始
-    protected bool $seed = true;
 
-    /**
-     * A basic feature test example.
-     */
-    public function test_admin_request_create_user(): void
+    public function test_owner_cannot_access_user_create_page(): void
     {
-        $user = User::where('login_id', 'kosaku1010')->first();
+        $role = Role::create(['name' => 'owner']);
+        $owner = User::factory()->create();
+        $owner->assignRole($role);
+
+        $response = $this
+            ->actingAs($owner)
+            ->get('/admin/users/create');
+
+        $response->assertStatus(403);
+
+        $this->assertEquals(
+            'User does not have the right roles.',
+            $response->exception?->getMessage()
+        );
+    }
+
+    public function test_worker_cannot_access_user_create_page(): void
+    {
+        $role = Role::create(['name' => 'woker']);
+        $owner = User::factory()->create();
+        $owner->assignRole($role);
+
+        $response = $this
+            ->actingAs($owner)
+            ->get('/admin/users/create');
+
+        $response->assertStatus(403);
+
+        $this->assertEquals(
+            'User does not have the right roles.',
+            $response->exception?->getMessage()
+        );
+    }
+
+    public function test_manager_can_access_user_create_page(): void
+    {
+        $role = Role::create(['name' => 'manager']);
+        $manager = User::factory()->create();
+        $manager->assignRole($role);
+
+        $response = $this
+            ->actingAs($manager)
+            ->get('/admin/users/create');
+
+        $response->assertStatus(200);
+    }
+
+    public function test_manager_request_create_user(): void
+    {
+        $role = Role::create(['name' => 'manager']);
+        // $role = Role::create(['name' => 'owner']);
+        $user = User::factory()->create();
+        $user->assignRole($role);
 
         $response = $this
             ->actingAs($user)
@@ -39,7 +87,5 @@ class UserControllerTest extends TestCase
                 'status' => 'pending',
                 'message' => 'ユーザー登録の申請を送信しました。'
             ]);
-
-        $response->assertStatus(200);
     }
 }
