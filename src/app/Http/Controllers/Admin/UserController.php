@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\Admin\StoreUserRequest;
 use App\Models\UserChangeRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,7 +31,7 @@ class UserController extends Controller
         return response()->view('/admin.users.create');
     }
 
-    public function store(RegisterRequest $request): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
         $validated = $request->validated();
 

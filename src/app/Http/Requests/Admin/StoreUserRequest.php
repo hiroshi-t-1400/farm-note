@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Override;
 
-class UserStoreRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,7 @@ class UserStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:2'],
+            'name' => ['required', 'string', 'max:255'],
 
             'login_id' => [
                 'required',
@@ -51,7 +51,6 @@ class UserStoreRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                'confirmed',
                 Password::min(10)
                 ->uncompromised(3),
                 'regex:/^[a-zA-Z0-9!@#$%&*\-_.]+$/',
