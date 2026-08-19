@@ -14,11 +14,11 @@ export default (config) => {
 
         resultData: '',
 
-        // 現在操作しているユーザー情報を取得
-        async init() {
-            const response = await window.http.get('/user');
-            this.userData = response?.data || '';
-        },
+        // // 現在操作しているユーザー情報を取得
+        // async init() {
+        //     const response = await window.http.get('/user');
+        //     this.userData = response?.data || '';
+        // },
 
         async submitStore() {
             this.errors = {};

@@ -2,11 +2,9 @@
 
 export default (config) => {
 
-    
 
     return {
-
-        userData: '', // 操作中のユーザー
+        userData, // 申請待ちのユーザーデータ
 
         email: '',
         password: '',
@@ -16,31 +14,25 @@ export default (config) => {
 
         resultData: '',
 
-        // 現在操作しているユーザー情報を取得
-        async init() {
-            const response = await window.http.get('/user');
-            this.userData = response?.data || '';
-        },
+        async submitApprove(targetId) {
+            if (!confirm('申請を承認し、ユーザーの登録を行ってよろしいですか？')) {
+                return;
+            }
 
-        async submitCreate() {
             this.errors = {};
 
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const response = await window.http.post('/admin/users/create', {
-                    name: this.username,
-                    email: this.email,
-                    password: this.password,
-                    loginId: this.loginId
-                });
+                const response = await window.http.patch(`/admin/approvals/${targetId}/users`);
 
                 // ----------------------------------------------------
                 // 認証成功（200 OK系）
                 // ----------------------------------------------------
-                // 申請したユーザーデータを返す。申請画面に通信リザルトとしてレンダする
-                this.resultData = response.data;
                 alert('アカウント登録申請が完了しました。');
+
+                // 一覧画面へ移動する
+                // return window.location.href() redirect?
 
             } catch (e) {
                 if (e.response) {
@@ -48,16 +40,7 @@ export default (config) => {
                     const data = e.response.data;
 
                     // ----------------------------------------------------
-                    // 1. バリデーションエラー（422）
-                    // ----------------------------------------------------
-                    if (response.status === 422) {
-                        this.errors = data.errors || {};
-                        alert('アカウント登録に失敗しました。 : ' + (response.data.message || '入力内容を確認してください。'));
-                        return;
-                    }
-
-                    // ----------------------------------------------------
-                    // 2. 連続送信（429）のハンドリング
+                    // 1. 連続送信（429）のハンドリング
                     // ----------------------------------------------------
                     if (response.status === 429) {
                         this.errors = data.errors || {};
@@ -66,7 +49,7 @@ export default (config) => {
                     }
 
                     // ----------------------------------------------------
-                    // 3. その他のサーバーエラー（500系や404など
+                    // 2. その他のサーバーエラー（500系や404など
                     // ----------------------------------------------------
                     // 個別ハンドリング以外
                     console.error('サーバーエラーが発生しました。', status, data);
@@ -83,13 +66,6 @@ export default (config) => {
                     alert('通信エラーが発生しました。');
                 }
             }
-        },
-
-        // バリデーションエラーメッセージを返す
-        getError(field) {
-            // bladeの属性はusernameとしているためここで変換する
-            if (field === 'username') return this.errors?.['name'] || null;
-            return this.errors?.[field] || null;
         },
     }
 }

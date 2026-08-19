@@ -11,21 +11,31 @@ class UserApprovalController extends Controller
     // 一覧
     public function index()
     {
-        $user_request = UserChangeRequest::with(['targetUser', 'requester'])->get();
+        $requested_users = UserChangeRequest::with(['targetUser', 'requester'])->get();
 
-        return response()->view('/admin/users/approve', compact('user_request'));
+        return response()->view('/admin/approvals/index', compact('requested_users'));
     }
 
     // 承認操作画面表示
-    public function show()
+    public function show(Request $request, UserChangeRequest $changeRequest)
     {
-
+        return response()->view('/admin/approvals/users', compact('changeRequest'));
     }
 
     // 承認ロジック
-    public function approve()
+    public function approve(Request $request, UserChangeRequest $changeRequest)
     {
+        // policyで認可の設定
+        // $this->authorize('approve', $request);
 
+        $approver = $request->user();
+
+        $changeRequest->approve($approver);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '登録申請を承認し、ユーザー登録を完了しました。',
+        ]);
     }
 
     // 棄却ロジック

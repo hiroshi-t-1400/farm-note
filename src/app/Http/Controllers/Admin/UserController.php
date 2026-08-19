@@ -23,7 +23,7 @@ class UserController extends Controller
     //
     public function show()
     {
-        return response()->view(/* 登録画面 */);
+
     }
 
     public function create()

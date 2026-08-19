@@ -83,7 +83,7 @@ export function registerAuthStore(Alpine) {
             try {
                 const response = await window.http.get('/user');
                 this.setUser(response.data);
-                console.log({'受け取ったuser': this.user});
+                // console.log({'受け取ったuser': this.user});
             } catch (error) {
                 // 401未認証などの場合は null をセット
                 this.setUser(null);
