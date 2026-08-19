@@ -12,16 +12,28 @@
                         🌱 農作業日誌
                     </a>
 
+                    <!-- ユーザー表示 -->
+                    <div x-data class="grid grid-cols-1 text-gray-700 font-semibold">
+                        <span class="text-sm">ログイン中</span>
+                        <template x-if="!$store.auth.loading" >
+                            <a class="px-3 rounded-md text-sm font-medium ">
+                                <span x-text="$store.auth.user.name"
+                                class="text-base text-gray-700 font-semibold"
+                                ></span>
+                            </a>
+                        </template>
+                    </div>
+
                     <!-- ナビゲーションリンク -->
                     <nav class="hidden md:flex space-x-4">
                         <a href="{{ route('dashboard') }}"
                             class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('dashboard') ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100' }}">
                             ダッシュボード
                         </a>
-                        <a href="{{ route('create') }}"
+                        {{-- <a href="{{ route('create') }}"
                             class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('create') ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100' }}">
                             作業登録
-                        </a>
+                        </a> --}}
                         <a href="{{ route('work-logs.indexSimpleAll') }}"
                             class="px-3 py-2 rounded-md text-sm font-medium {{ (request()->is('work-logs/index*') || request()->is('work-logs/show*')) ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100' }}">
                             日誌閲覧

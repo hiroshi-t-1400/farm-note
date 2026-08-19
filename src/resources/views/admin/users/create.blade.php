@@ -9,7 +9,7 @@
 
     <form
         x-data="adminUser()"
-        @submit.prevent="submitRegister()"
+        @submit.prevent="submitStore()"
     >
 
         <div class="p-4">
