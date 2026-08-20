@@ -2,7 +2,7 @@
 
 export default (config) => {
 
-    let {payload, requester, ...rest} = config?.initialModels || '';
+    let {payload, requester, id, ...rest} = config?.initialModels || '';
 
     const roleLabel = {
         owner: 'オーナー',
@@ -11,6 +11,7 @@ export default (config) => {
     };
 
     return {
+        targetId: id,
 
         payload: {
             name: payload.name,
@@ -36,7 +37,7 @@ export default (config) => {
             return roleLabel[role];
         },
 
-        async submitApprove(targetId) {
+        async submitApprove() {
             if (!confirm('申請を承認し、ユーザーの登録を行ってよろしいですか？')) {
                 return;
             }
@@ -46,7 +47,7 @@ export default (config) => {
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const response = await window.http.patch(`/admin/approvals/${targetId}/users`);
+                const response = await window.http.patch(`/admin/approvals/users/${this.targetId}/approve`);
 
                 // ----------------------------------------------------
                 // 認証成功（200 OK系）
@@ -80,7 +81,7 @@ export default (config) => {
                 }
 
                 // axiosのタイムアウトエラーハンドリング
-                if (error.code === 'ECONNABORTED') {
+                if (e.code === 'ECONNABORTED') {
                     console.error('通信エラー： タイムアウトが発生しました。', e);
                     alert('通信タイムアウトしました。接続状態をご確認の上、再度お試しください。');
                 } else {

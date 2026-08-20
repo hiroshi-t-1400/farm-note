@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\UserChangeRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -13,28 +14,63 @@ class UserApprovalControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    private User $owner;
+    private User $manager;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // ロールの準備
+        $ownerRole = Role::create(['name' => 'owner']);
+        $managerRole = Role::create(['name' => 'manager']);
+        $workerRole = Role::create(['name' => 'worker']);
+
+        // オーナーと管理者の作成
+        $this->owner = User::factory()->create();
+        $this->owner->assignRole($ownerRole);
+
+        $this->manager = User::factory()->create();
+        $this->manager->assignRole($managerRole);
+    }
+
     public function test_owner_approve_user_create_request(): void
     {
-        $changeRequest = UserChangeRequest::factory()->actionCreate()->create();
+        $changeRequest = UserChangeRequest::factory()->actionCreate()->create([
+            'status' => 'pending',
+            'payload' => [
+                'name' => '新規 太郎',
+                'email' => 'new_user@example.com',
+                'login_id' => 'sinki.taroh',
+                'role' => 'worker',
+                'password' => Hash::make('passowrd'),
+            ],
+        ]);
 
-        $role = Role::create(['name' => 'owner']);
-        $user = User::factory()->create();
-        $user->assignRole($role);
-
-        $response = $this->actingAs($user)
+        $response = $this->actingAs($this->owner)
             ->get(route('admin.approvals.users.show', $changeRequest));
 
         $response->assertStatus(200);
 
-        // 画面に申請内容が描画されているかチェック
-        $response->assertSee($changeRequest->payload['name']);
-        $response->assertSee($changeRequest->payload['email']);
+        $response = $this->actingAs($this->owner)
+            ->patchJson(route('admin.approvals.users.approve', $changeRequest));
 
-        // ビューに渡されたデータ（Model）の不整合がないか確認
-        $response->assertViewHas('changeRequest', function ($viewChangeRequest) use ($changeRequest) {
-            return $viewChangeRequest->id === $changeRequest->id
-                && $viewChangeRequest->action_type === 'create';
-        });
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => '変更申請を承認し、ユーザー情報を反映しました。'
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'name' => '新規 太郎',
+            'email' => 'new_user@example.com',
+        ]);
+
+        // 2. user_change_requests テーブルの状態が「approved」に更新されているか
+        $this->assertDatabaseHas('user_change_requests', [
+            'id' => $changeRequest->id,
+            'status' => 'approved',
+            'approved_by' => $this->owner->id,
+        ]);
     }
 
 }

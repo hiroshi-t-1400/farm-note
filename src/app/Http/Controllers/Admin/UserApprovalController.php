@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\UserChangeRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UserApprovalController extends Controller
 {
@@ -28,14 +29,33 @@ class UserApprovalController extends Controller
         // policyで認可の設定
         // $this->authorize('approve', $request);
 
-        $approver = $request->user();
+        try {
+            // モデルにカプセル化されたビジネスロジックの実行
+            $changeRequest->approve($request->user());
 
-        $changeRequest->approve($approver);
+            return response()->json([
+                'message' => '変更申請を承認し、ユーザー情報を反映しました。'
+            ], 200);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => '登録申請を承認し、ユーザー登録を完了しました。',
-        ]);
+        } catch (\LogicException $e) {
+            // 「既に処理済み」「ステータスが不整合」などの業務エラー ➔ 422
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+
+        } catch (\Throwable $e) {
+            // その他のエラーをLogを保存、messegeとして読み出せるように
+            Log::error('ユーザー承認処理エラー', [
+                'change_request_id' => $changeRequest->id,
+                'user_id' => $request->user()->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'システムエラーが発生しました。管理者にお問い合わせください。'
+            ], 500);
+        }
     }
 
     // 棄却ロジック

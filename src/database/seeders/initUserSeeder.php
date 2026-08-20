@@ -36,6 +36,7 @@ class initUserSeeder extends Seeder
             'password' => Hash::make('owner12345'),
             'created_at' => now(),
             'updated_at' => now(),
+            'status' => 'active',
             'remember_token' => Str::random(10),
         ]);
         $owner->assignRole($ownerRole);
@@ -49,6 +50,7 @@ class initUserSeeder extends Seeder
             'password' => Hash::make('kosaku0000'),
             'created_at' => now(),
             'updated_at' => now(),
+            'status' => 'active',
             'remember_token' => Str::random(10),
         ]);
         $manager01->assignRole($managerRole);
@@ -61,6 +63,7 @@ class initUserSeeder extends Seeder
             'password' => Hash::make('ueko012345'),
             'created_at' => now(),
             'updated_at' => now(),
+            'status' => 'active',
             'remember_token' => Str::random(10),
         ]);
         $manager02->assignRole($managerRole);

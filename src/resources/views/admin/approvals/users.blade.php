@@ -40,7 +40,7 @@
 
         <div class="flex py-5 justify-center">
             <x-ui.button
-                @click="submitApprove(id)"
+                @click="submitApprove()"
                 name="submit" dusk="submit-button"
                 class="w-[10rem]">
                 登録
