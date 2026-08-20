@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UserApprovalRequest;
 use App\Models\UserChangeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -59,8 +60,32 @@ class UserApprovalController extends Controller
     }
 
     // 棄却ロジック
-    public function reject()
+    public function reject(UserApprovalRequest $request, UserChangeRequest $changeRequest)
     {
+        $validated = $request->validated();
 
+        try {
+            $changeRequest->reject($request->user(), $validated['rejection_reason'] ?? null);
+
+            return response()->json([
+                'message' => '変更申請を却下しました。'
+            ], 200);
+        } catch (\LogicException $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        } catch (\Throwable $e) {
+            // その他のエラーをLogを保存、messegeとして読み出せるように
+            Log::error('ユーザー登録棄却処理エラー', [
+                'change_request_id' => $changeRequest->id,
+                'user_id' => $request->user()->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'システムエラーが発生しました。管理者にお問い合わせください。'
+            ], 500);
+        }
     }
 }

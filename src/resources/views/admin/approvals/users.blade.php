@@ -43,7 +43,7 @@
                 @click="submitApprove()"
                 name="submit" dusk="submit-button"
                 class="w-[10rem]">
-                登録
+                承認する
             </x-ui.button>
         </div>
 
@@ -52,6 +52,7 @@
             label="棄却理由"
         >
             <x-ui.textarea
+                x-model="rejection_reason"
                 name="rejection_reason"
             />
 
@@ -59,9 +60,13 @@
 
 
         <div class="flex py-5 justify-center">
-            <x-ui.button name="submit" dusk="submit-button"
+            <x-ui.button
+                variant="danger"
+                type="button"
+                @click="submitReject()"
+                name="submit" dusk="submit-button"
                 class="w-[10rem]">
-                登録
+                却下する
             </x-ui.button>
         </div>
 

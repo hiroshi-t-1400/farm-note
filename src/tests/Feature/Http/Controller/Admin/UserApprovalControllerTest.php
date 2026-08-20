@@ -65,7 +65,7 @@ class UserApprovalControllerTest extends TestCase
             'email' => 'new_user@example.com',
         ]);
 
-        // 2. user_change_requests テーブルの状態が「approved」に更新されているか
+        // user_change_requests テーブルの状態が「approved」に更新されているか
         $this->assertDatabaseHas('user_change_requests', [
             'id' => $changeRequest->id,
             'status' => 'approved',
@@ -73,4 +73,46 @@ class UserApprovalControllerTest extends TestCase
         ]);
     }
 
+
+    public function test_owner_reject_user_create_request(): void
+    {
+        $changeRequest = UserChangeRequest::factory()->actionCreate()->create([
+            'status' => 'pending',
+            'payload' => [
+                'name' => '新規 太郎',
+                'email' => 'new_user@example.com',
+                'login_id' => 'sinki.taroh',
+                'role' => 'worker',
+                'password' => Hash::make('passowrd'),
+            ],
+        ]);
+
+        $response = $this->actingAs($this->owner)
+            ->get(route('admin.approvals.users.show', $changeRequest));
+
+        $response->assertStatus(200);
+
+        $response = $this->actingAs($this->owner)
+            ->patchJson(route('admin.approvals.users.reject', $changeRequest), [
+                'rejection_reason' => '入力内容に不備があります。',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => '変更申請を却下しました。'
+            ]);
+
+        $this->assertDatabaseMissing('users', [
+            'name' => '新規 太郎',
+            'email' => 'new_user@example.com',
+        ]);
+
+        // 申請テーブルの状態が変更されているか
+        $this->assertDatabaseHas('user_change_requests', [
+            'id' => $changeRequest->id,
+            'status' => 'rejected',
+            'approved_by' => $this->owner->id,
+            'rejection_reason' => '入力内容に不備があります。',
+        ]);
+    }
 }
