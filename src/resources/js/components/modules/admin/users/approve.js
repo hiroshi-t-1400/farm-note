@@ -2,17 +2,39 @@
 
 export default (config) => {
 
+    let {payload, requester, ...rest} = config?.initialModels || '';
+
+    const roleLabel = {
+        owner: 'オーナー',
+        manager: '管理者',
+        worker: '一般ユーザー'
+    };
 
     return {
-        userData, // 申請待ちのユーザーデータ
 
-        email: '',
-        password: '',
-        loginId: '',
-        username: '',
+        payload: {
+            name: payload.name,
+            loginId: payload.login_id,
+            email: payload.email,
+            password: payload.password,
+            role: payload.role
+        },
+
+        requester: {
+            id: requester.id,
+            name: requester.name,
+            role: requester?.role || 'worker'
+        },
+
+        ...rest,
+
         errors: {},
 
         resultData: '',
+
+        getRoleLabel(role) {
+            return roleLabel[role];
+        },
 
         async submitApprove(targetId) {
             if (!confirm('申請を承認し、ユーザーの登録を行ってよろしいですか？')) {
@@ -42,7 +64,7 @@ export default (config) => {
                     // ----------------------------------------------------
                     // 1. 連続送信（429）のハンドリング
                     // ----------------------------------------------------
-                    if (response.status === 429) {
+                    if (status === 429) {
                         this.errors = data.errors || {};
                         alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
                         return;
@@ -66,6 +88,10 @@ export default (config) => {
                     alert('通信エラーが発生しました。');
                 }
             }
+        },
+        // バリデーションエラーメッセージを返す
+        getError(field) {
+            return this.errors?.[field] || null;
         },
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Crop\CropSeason;
 use App\Models\Material\Material;
 use App\Models\Material\MaterialCategory;
 use App\Models\User;
+use App\Models\UserChangeRequest;
 use App\Models\WorkLog\Field;
 use App\Models\WorkLog\WorkLog;
 
@@ -58,6 +59,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(PerformedByWorkLogTableSeeder::class);
 
         $this->call(RolesAndPermissionsSeeder::class);
+        UserChangeRequest::factory()->actionCreate()->create();
 
         // 外部キー制約を有効に戻す 廃止
         // DB::statement('SET FOREIGN_KEY_CHECKS=1;');

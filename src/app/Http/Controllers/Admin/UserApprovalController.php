@@ -19,7 +19,7 @@ class UserApprovalController extends Controller
     // 承認操作画面表示
     public function show(Request $request, UserChangeRequest $changeRequest)
     {
-        return response()->view('/admin/approvals/users', compact('changeRequest'));
+        return response()->view('admin.approvals.users', compact('changeRequest'));
     }
 
     // 承認ロジック

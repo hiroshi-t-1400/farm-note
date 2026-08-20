@@ -29,6 +29,11 @@
                 ログイン
             </x-ui.button>
         </x-ui.form-group>
+        <div class="bg-gray-300">
+            <x-ui.button type="button" @click="loginAsOwner">
+                オーナー
+            </x-ui.button>
+        </div>
     </form>
 
 </x-layouts.guest>

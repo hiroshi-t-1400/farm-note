@@ -285,5 +285,37 @@ export default (config = '') => {
                 }
             }
         },
+
+
+        // ----------------------
+        // デバッグ
+        // ----------------------
+        async loginAsOwner() {
+            try {
+                await window.http.get('/sanctum/csrf-cookie');
+
+                const response = await window.http.post('/login', {
+                        email: 'owner@example.org',
+                        password: 'owner12345'
+                });
+
+                alert('[デバッグモード] オーナーでログインしました。');
+                return window.location.href = '/dashboard';
+            } catch(e) {
+                const data = e.response.data;
+                const status = e.response.status;
+
+                if (status === 422) {
+                    this.errors = data.errors || {};
+                    alert('ログインに失敗しました : ' + (data.message || '入力内容を確認してください。'));
+                    return;
+                }
+
+                console.error('サーバーエラーが発生しました。');
+                alert('サーバーエラーが発生しました。');
+
+                return;
+            }
+        },
     }
 }

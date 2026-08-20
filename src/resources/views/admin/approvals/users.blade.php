@@ -8,8 +8,9 @@
 
 
     <form
-        x-data=""
-        {{-- @submit.prevent="submitApprove()" --}}
+        x-data="approveUser({
+            initialModels: @js($changeRequest)
+        })"
     >
 
         @csrf
@@ -17,27 +18,30 @@
         <div class="result-area py-2 px-4 sm:w-[20rem] sm:y-[7rem] mb-4 border-1 border-gray-500 rounded-lg">
             <h3 class="text-base text-gray-700 font-semibold ">申請内容</h3>
             <dl class="px-1">
-                <div class="py-0.5 flex flex-wrap justify-between">
-                    <dt class="text-base font-medium text-gray-600">氏名：</dt>
-                    <dd class="text-base text-gray-800 sm:mt-0 sm:col-span-1">トマト 太郎</dd>
-                </div>
-                <div class="py-0.5 flex flex-wrap justify-between">
-                    <dt class="text-base font-medium text-gray-600">メールアドレス：</dt>
-                    <dd class="text-base text-gray-800 sm:mt-0 sm:col-span-1">tomato@example.org</dd>
-                </div>
-                <div class="py-0.5 flex flex-wrap justify-between">
-                    <dt class="text-base font-medium text-gray-600">ログインID：</dt>
-                    <dd class="text-base text-gray-800 sm:mt-0 sm:col-span-1">tomatotaro</dd>
-                </div>
-                <div class="py-0.5 flex flex-wrap justify-between">
-                    <dt class="text-base font-medium text-gray-600">権限細目：</dt>
-                    <dd class="text-base text-gray-800 sm:mt-0 sm:col-span-1">一般ユーザー</dd>
-                </div>
+                <x-ui.description-request label="氏名：">
+                    <span x-text="payload['name']"></span>
+                </x-ui.description-request>
+
+                <x-ui.description-request label="メールアドレス：">
+                    <span x-text="payload['email']"></span>
+                </x-ui.description-request>
+
+                <x-ui.description-request label="ログインID：">
+                    <span x-text="payload.loginId"></span>
+                </x-ui.description-request>
+
+                <x-ui.description-request label="役職：">
+                    <span x-text="getRoleLabel(payload.role)"></span>
+                </x-ui.description-request>
+
+
             </dl>
         </div>
 
         <div class="flex py-5 justify-center">
-            <x-ui.button name="submit" dusk="submit-button"
+            <x-ui.button
+                @click="submitApprove(id)"
+                name="submit" dusk="submit-button"
                 class="w-[10rem]">
                 登録
             </x-ui.button>
