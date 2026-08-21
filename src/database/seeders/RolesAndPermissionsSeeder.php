@@ -21,6 +21,9 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // 1.パーミッション（権限細目）の作成
+        // アプリ管理メニューへのアクセス
+        Permission::firstOrCreate(['name' => 'admin-menu.show']);
+
         // ユーザー管理関連
         Permission::firstOrCreate(['name' => 'user-change.request']); // ユーザー情報の変更申請権限
         Permission::firstOrCreate(['name' => 'user-change.approve']); // ユーザー情報の変更承認権限
@@ -36,20 +39,22 @@ class RolesAndPermissionsSeeder extends Seeder
         $roleWorker = Role::firstOrCreate(['name' => 'worker']);
         $roleWorker->givePermissionTo(['work-logs.manage']);
 
-        // Manager: 日誌 + 実務マスター操作 + ユーザー操作申請
+        // Manager: 日誌 + 実務マスター操作 + ユーザー操作申請、申請の承認は不可
         $roleManager = Role::firstOrCreate(['name' => 'manager']);
         $roleManager->givePermissionTo([
             'work-logs.manage',
             'master-data.manage',
             'user-change.request',
+            'admin-menu.show',
         ]);
 
-        // Owner: 全ての権限 + ユーザー変更承認
+        // Owner: ユーザー登録申請以外の全権、申請承認を含む
         $roleOwner = Role::firstOrCreate(['name' => 'owner']);
         $roleOwner->givePermissionTo([
             'work-logs.manage',
             'master-data.manage',
             'user-change.approve',
+            'admin-menu.show',
         ]);
         // $roleManager->givePermissionTo([Permission::all()]); // Ownerに全権を付与する場合
     }

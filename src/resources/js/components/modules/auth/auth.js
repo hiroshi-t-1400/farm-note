@@ -317,5 +317,63 @@ export default (config = '') => {
                 return;
             }
         },
+
+        async loginAsManager() {
+            try {
+                await window.http.get('/sanctum/csrf-cookie');
+
+                const response = await window.http.post('/login', {
+                        email: 'kokosaku0000@example.org',
+                        password: 'kosaku0000'
+                });
+
+                alert('[デバッグモード] 管理者でログインしました。');
+                return window.location.href = '/dashboard';
+            } catch(e) {
+                const data = e.response.data;
+                const status = e.response.status;
+
+                if (status === 422) {
+                    this.errors = data.errors || {};
+                    alert('ログインに失敗しました : ' + (data.message || '入力内容を確認してください。'));
+                    return;
+                }
+
+                console.error('サーバーエラーが発生しました。');
+                alert('サーバーエラーが発生しました。');
+
+                return;
+            }
+        },
+
+        async loginAsWorker() {
+            try {
+                await window.http.get('/sanctum/csrf-cookie');
+
+                const response = await window.http.post('/login', {
+                        email: 'worker12345@example.org',
+                        password: 'worker12345'
+                });
+
+                alert('[デバッグモード] 一般ユーザーでログインしました。');
+                return window.location.href = '/dashboard';
+            } catch(e) {
+                const data = e.response.data;
+                const status = e.response.status;
+
+                if (status === 422) {
+                    this.errors = data.errors || {};
+                    alert('ログインに失敗しました : ' + (data.message || '入力内容を確認してください。'));
+                    return;
+                }
+
+                console.error('サーバーエラーが発生しました。');
+                alert('サーバーエラーが発生しました。');
+
+                return;
+            }
+        },
+
+
     }
 }

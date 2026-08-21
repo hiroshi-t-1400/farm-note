@@ -6,6 +6,35 @@
         <!-- 共通ナビゲーションバー -->
         <header class="bg-white shadow-sm border-b border-gray-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+
+                {{-- 管理用サイドバー引き出しハンバーガーボタン --}}
+                @can('admin-menu.show')
+
+                    <div x-data="{ sideOpen: false }">
+
+                        <button
+                            type="button"
+                            @click="sideOpen = !sideOpen"
+                            class="dads-hamburger-menu-button">
+                            <svg class="dads-hamburger-menu-button__icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 18V16H21V18H3ZM3 13V11H21V13H3ZM3 8V6H21V8H3Z" fill="currentcolor"/>
+                            </svg>
+                            メニュー
+                        </button>
+
+                        <div
+                            x-show="sideOpen"
+                            x-transition
+                            @click.outside="sideOpen = false"
+                            class="fixed left-0 top-0 bottom-0 w-[240px] z-100"
+                        >
+                            {{-- <x-layouts.admin-sidebar activeMenu=""> --}}
+                                <x-layouts.admin-sidebar />
+                        </div>
+                    </div>
+                @endcan
+
+
                 <!-- アプリロゴ・タイトル -->
                 <div class="flex items-center space-x-8">
                     <a href="{{ route('dashboard') }}" class="text-xl font-bold text-green-700 hover:text-green-800">
