@@ -1,14 +1,16 @@
-// /var/www/src/resources/js/components/modules/admin/users/users
+// src/resources/js/components/modules/admin/approvals/approve.js
 
 export default (config) => {
-
-    let {payload, requester, id, ...rest} = config?.initialModels || '';
 
     const roleLabel = {
         owner: 'オーナー',
         manager: '管理者',
         worker: '一般ユーザー'
     };
+
+    let {payload, requester, id, ...rest} = config?.initialModels || '';
+
+    const backUrl = `${location.origin}/admin/approvals/users`;
 
     return {
         targetId: id,
@@ -34,6 +36,7 @@ export default (config) => {
         errors: {},
 
         resultData: '',
+        backUrl,
 
         getRoleLabel(role) {
             return roleLabel[role];
@@ -54,10 +57,9 @@ export default (config) => {
                 // ----------------------------------------------------
                 // 認証成功（200 OK系）
                 // ----------------------------------------------------
-                alert('アカウント登録申請が完了しました。');
 
                 // 一覧画面へ移動する
-                // return window.location.href() redirect?
+                window.location.replace(this.backUrl);
 
             } catch (e) {
                 if (e.response) {
@@ -120,10 +122,9 @@ export default (config) => {
                 // ----------------------------------------------------
                 // 認証成功（200 OK系）
                 // ----------------------------------------------------
-                alert('アカウント登録申請を却下しました。');
 
                 // 一覧画面へ移動する
-                // return window.location.href() redirect?
+                window.location.replace(backUrl);
 
             } catch (e) {
                 if (e.response) {

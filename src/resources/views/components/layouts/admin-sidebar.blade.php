@@ -4,6 +4,9 @@
     'activeMenu' => '',
 ])
 
+@aware(['requestCount' => ''])
+
+
 <div x-data x-cloak>
     <template x-if="$store.auth.loading">
         <div>読み込み中...</div>
@@ -29,10 +32,10 @@
             <nav class="flex-1 space-y-4">
 
                 <!-- 2. 【owner専用】承認待ち一覧 -->
-                <template x-if="$store.auth.isOwner">
+                <template x-if="$store.auth.isOwner()">
                     <div class="space-y-1">
                         <p class="px-2 text-2xs font-semibold text-slate-500 uppercase tracking-wider">オーナー専用</p>
-                        <a href="#" {{-- {{ route('admin.approvals.index') }} --}}
+                        <a href="{{ route('admin.approvals.users.index') }}"
                             class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'approvals' ? 'bg-slate-800 text-amber-500' : '' }}"
                         >
                             <div class="flex items-center">
@@ -42,7 +45,7 @@
                                 <span>承認待ち一覧</span>
                             </div>
                             <!-- 未処理件数バッジ（動的。必要に応じてバックエンドからバインド） -->
-                            <span class="px-2 py-0.5 text-2xs font-bold text-slate-900 bg-amber-500 rounded-full">3</span>
+                            {{-- <span class="px-2 py-0.5 text-2xs font-bold text-slate-900 bg-amber-500 rounded-full">{{ $requestCount }}</span> --}}
                         </a>
                     </div>
                 </template>
@@ -74,7 +77,7 @@
                         </a>
 
                         <!-- 【manager専用】ユーザー新規登録申請画面 -->
-                        <template x-if="$store.auth.isManager">
+                        <template x-if="$store.auth.isManager()">
                             <a href="#" {{-- {{ route('admin.users.create-request') }} --}}
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >

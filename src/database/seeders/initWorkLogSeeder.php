@@ -15,19 +15,19 @@ class initWorkLogSeeder extends Seeder
      */
     public function run(): void
     {
-        //
-        DB::table('work_logs')->insert([
-            'crop_season_id' => '1',
-            'created_by' => '1',
-            // 'performed_by' => '1',
-            'work_date' => now(),
-            'status' => 'completed',
-            'title' => '草刈り',
-            'content' => '圃場周りの草刈り、今年１回目',
-            'updated_by' => '1',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // //
+        // DB::table('work_logs')->insert([
+        //     'crop_season_id' => '1',
+        //     'created_by' => '1',
+        //     // 'performed_by' => '1',
+        //     'work_date' => now(),
+        //     'status' => 'completed',
+        //     'title' => '草刈り',
+        //     'content' => '圃場周りの草刈り、今年１回目',
+        //     'updated_by' => '1',
+        //     'created_at' => now(),
+        //     'updated_at' => now(),
+        // ]);
 
         $users = User::factory()->count(10)->create();
 
@@ -42,25 +42,5 @@ class initWorkLogSeeder extends Seeder
             // 作業実施者をランダムに2名割り当て（重複しないよう random(2)）
             $workLog->performedBy()->attach($users->random(2));
         }
-            // WorkLog::factory()
-        //     ->count(50)
-        //     ->afterMaking(function (WorkLog $workLog) {
-        //         // 保存前に「作成者(createdBy)」となる User を1名生成してセット
-        //         $creator = User::factory()->create();
-        //         $workLog->created_by = $creator->id; // ※実際の外部キーカラム名に合わせて変更してください
-        //     })
-        //     ->afterMaking(function (WorkLog $workLog) {
-        //         $updater = User::factory()->create();
-        //         $workLog->updated_by = $updater->id; // ※実際の外部キーカラム名に合わせて変更してください
-        //     })
-        //     ->afterCreating(function (WorkLog $workLog) {
-        //         // 保存後に「作業実施者(performedBy)」となる User を2名生成してアタッチ
-        //         $performers = User::factory()->count(2)->create();
-        //         $workLog->performedBy()->attach($performers);
-        //     })
-        //     ->create();
-
-
-
     }
 }
