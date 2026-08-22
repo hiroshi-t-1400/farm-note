@@ -2,21 +2,14 @@
 @props([
     // 必要に応じて親からアクティブなメニュー名などを受け取る場合はここに定義します
     'activeMenu' => '',
+    'requestCount' => '',
 ])
 
-@aware(['requestCount' => ''])
+                @can('admin-menu.show')
 
+<div class="rounded-md border border-slate-700">
 
-<div x-data x-cloak>
-    <template x-if="$store.auth.loading">
-        <div>読み込み中...</div>
-    </template>
-
-    <template x-if="!$store.auth.loading">
-
-        <aside class="flex flex-col w-64 h-screen px-4 py-8 overflow-y-auto bg-slate-900 border-r border-slate-800 text-slate-300">
-            <!-- 1. 管理用メニューであることが一目でわかるヘッダーエリア -->
-            <div class="flex items-center px-2 py-3 mb-6 bg-slate-800 rounded-md border border-slate-700">
+            <div class="flex items-center px-2 py-3 mb-6 bg-slate-800 rounded-t-sm border border-slate-700">
                 <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
@@ -34,7 +27,7 @@
                 <!-- 2. 【owner専用】承認待ち一覧 -->
                 <template x-if="$store.auth.isOwner()">
                     <div class="space-y-1">
-                        <p class="px-2 text-2xs font-semibold text-slate-500 uppercase tracking-wider">オーナー専用</p>
+                        <p class="px-2 text-sm font-medium text-gray-600 uppercase tracking-wider">オーナー専用</p>
                         <a href="{{ route('admin.approvals.users.index') }}"
                             class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'approvals' ? 'bg-slate-800 text-amber-500' : '' }}"
                         >
@@ -44,15 +37,15 @@
                                 </svg>
                                 <span>承認待ち一覧</span>
                             </div>
-                            <!-- 未処理件数バッジ（動的。必要に応じてバックエンドからバインド） -->
-                            {{-- <span class="px-2 py-0.5 text-2xs font-bold text-slate-900 bg-amber-500 rounded-full">{{ $requestCount }}</span> --}}
+                            {{-- 未承認件数バッジ --}}
+                            <x-admin.approvals.approval-badge />
                         </a>
                     </div>
                 </template>
 
                 <!-- 3. ユーザー情報（ユーザー一覧、新規登録申請） -->
                 <div class="space-y-1" x-data="{ open: @js($activeMenu === 'users' || $activeMenu === 'user-registration') }">
-                    <p class="px-2 text-2xs font-semibold text-slate-500 uppercase tracking-wider">ユーザー管理</p>
+                    <p class="px-2 text-sm font-medium text-gray-600 uppercase tracking-wider">ユーザー管理</p>
 
                     <!-- アコーディオンのトリガーボタン (Alpine.js) -->
                     <button @click="open = !open"
@@ -89,7 +82,7 @@
 
                 <!-- 4. マスター管理（農作業日誌用各種マスター） -->
                 <div class="space-y-1" x-data="{ open: @js(in_array($activeMenu, ['crops', 'crops-seasons', 'fields', 'materials'])) }">
-                    <p class="px-2 text-2xs font-semibold text-slate-500 uppercase tracking-wider">アプリデータ管理</p>
+                    <p class="px-2 text-sm font-medium text-gray-600 uppercase tracking-wider">マスターデータ管理</p>
 
                     <button @click="open = !open"
                             class="flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100">
@@ -127,7 +120,7 @@
 
                 <!-- 5. その他アプリ全体の設定 -->
                 <div class="space-y-1">
-                    <p class="px-2 text-2xs font-semibold text-slate-500 uppercase tracking-wider">システム</p>
+                    <p class="px-2 text-sm font-medium text-gray-600 uppercase tracking-wider">システム</p>
                     <a href="#" {{-- {{ route('admin.settings.index') }} --}}
                     class="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'settings' ? 'bg-slate-800 text-amber-500' : '' }}">
                         <svg class="w-5 h-5 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,17 +132,18 @@
                 </div>
 
             </nav>
-
-            <!-- フッター（マイページへのクイック戻り） -->
-            <div class="pt-4 border-t border-slate-800">
-                <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 text-xs font-medium rounded-md transition-colors hover:bg-slate-800 text-slate-400 hover:text-slate-100">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    <span>通常ダッシュボードへ</span>
-                </a>
-            </div>
-        </aside>
-
-    </template>
 </div>
+
+@endcan
+
+            <!-- footer -->
+            <div class="sm:hidden flex flex-col items-center gap-y-4">
+                <div>
+                    <button
+                        x-data="tryAuthForm()"
+                        @click="submitLogout()"
+                        class="border-1 border-red-500 bg-red-200 hover:bg-red-500 text-gray-700 hover:text-white text-sm font-bold py-2 px-4 rounded shadow">
+                        ログアウト
+                    </button>
+                </div>
+            </div>
