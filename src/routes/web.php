@@ -2,6 +2,9 @@
 
 // use App\Http\Controllers\AuthController;
 
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserApprovalController;
+
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
@@ -72,8 +75,44 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Aplinejsから Auth::user()メソッドによるユーザー情報の取得ができないのを補完するため
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        $user = $request->user();
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'roles' => $user->getRoleNames(), // ['owner'] や ['worker'] などを返す
+            'permissions' => $user->getAllPermissions()->pluck('name'), // 付与されている全パーミッション名
+        ];
     });
+
+    Route::middleware(['role:manager'])->group(function () {
+        Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
+        Route::post('/admin/users/create', [UserController::class, 'store'])->name('admin.users.store');
+    });
+
+// オーナー専用グループ
+Route::middleware(['auth:sanctum', 'role:owner'])
+    ->prefix('admin/approvals')
+    ->name('admin.approvals.')
+    ->group(function () {
+
+        // 1. 承認待ち一覧表示画面
+        Route::get('/users', [UserApprovalController::class, 'index'])
+            ->name('users.index');
+
+        // 2. 申請内容の詳細確認画面
+        Route::get('/users/{changeRequest}', [UserApprovalController::class, 'show'])
+            ->name('users.show');
+
+        // 3. 承認実行（usersテーブルへ反映）
+        Route::patch('/users/{changeRequest}/approve', [UserApprovalController::class, 'approve'])
+            ->name('users.approve');
+
+        // 4. 却下実行
+        Route::patch('/users/{changeRequest}/reject', [UserApprovalController::class, 'reject'])
+            ->name('users.reject');
+    });
+
+
 
     Route::get('/work-logs/index/{log}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');
     Route::get('/work-logs/index', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
@@ -93,3 +132,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::get('/test', function () {
     return view('/dashboard');
 });
+
+
