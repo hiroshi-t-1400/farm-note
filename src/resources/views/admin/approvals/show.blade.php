@@ -39,12 +39,26 @@
         </div>
 
         <div class="flex py-5 justify-center">
-            <x-ui.button
-                @click="submitApprove()"
-                name="submit" dusk="submit-button"
-                class="w-[10rem]">
-                承認する
-            </x-ui.button>
+            <div class="flex gap-x-4 gap-y-2">
+                <x-ui.button
+                    type="button"
+                    @click="submitApprove()"
+                    name="submit" dusk="submit-button"
+                    class="w-[10rem]"
+                >
+                    承認する
+                </x-ui.button>
+
+                <x-ui.button
+                    type="href"
+                    variant="secondary-ghost"
+                    ::href="`${backUrl}`"
+                    name="cancel"
+                    class="w-[10rem]"
+                >
+                    キャンセル
+                </x-ui.button>
+            </div>
         </div>
 
         <x-ui.form-group
@@ -61,8 +75,8 @@
 
         <div class="flex py-5 justify-center">
             <x-ui.button
-                variant="danger"
                 type="button"
+                variant="danger"
                 @click="submitReject()"
                 name="submit" dusk="submit-button"
                 class="w-[10rem]">

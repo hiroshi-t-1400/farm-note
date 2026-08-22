@@ -9,7 +9,8 @@ import indexSimple from './components/modules/work-logs/index';
 import editWorkLog from './components/modules/work-logs/edit';
 
 import adminUser from './components/modules/admin/users/users';
-import approveUser from './components/modules/admin/users/approve';
+import approveUser from './components/modules/admin/approvals/approve';
+import indexApprovals from './components/modules/admin/approvals/index';
 
 import indexLog from './components/modules/dashboard/index';
 import recentLog from './components/modules/dashboard/recent';
@@ -30,6 +31,7 @@ Alpine.data('editWorkLog', editWorkLog);
 
 Alpine.data('adminUser', adminUser);
 Alpine.data('approveUser', approveUser);
+Alpine.data('indexApprovals', indexApprovals);
 
 Alpine.data('indexLog', indexLog);
 Alpine.data('recentLog', recentLog);

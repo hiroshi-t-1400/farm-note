@@ -29,10 +29,25 @@
                 ログイン
             </x-ui.button>
         </x-ui.form-group>
-        <div class="bg-gray-300">
-            <x-ui.button type="button" @click="loginAsOwner">
-                オーナー
-            </x-ui.button>
+
+        {{-- デバッグ用エリア --}}
+        <div class="flex flex-wrap gap-1">
+
+            <div class="bg-gray-300">
+                <x-ui.button type="button" @click="loginAsOwner">
+                    オーナー
+                </x-ui.button>
+            </div>
+            <div class="bg-gray-300">
+                <x-ui.button type="button" @click="loginAsManager">
+                    管理者：田中 耕作
+                </x-ui.button>
+            </div>
+            <div class="bg-gray-300">
+                <x-ui.button type="button" @click="loginAsWorker">
+                    一般ユーザー
+                </x-ui.button>
+            </div>
         </div>
     </form>
 

@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
             initMaterialSeeder::class,
             initUserSeeder::class,
             initWorkLogSeeder::class,
-            initPerformedByWorkLogSeeder::class,
+            // initPerformedByWorkLogSeeder::class,
             initMaterialWorkLogSeeder::class,
         ]);
 
@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(PerformedByWorkLogTableSeeder::class);
 
         $this->call(RolesAndPermissionsSeeder::class);
-        UserChangeRequest::factory()->actionCreate()->create();
+        UserChangeRequest::factory()->actionCreate()->count(20)->create();
 
         // 外部キー制約を有効に戻す 廃止
         // DB::statement('SET FOREIGN_KEY_CHECKS=1;');
