@@ -13,15 +13,21 @@ class UserApprovalController extends Controller
     // 一覧
     public function index()
     {
-        $requested_users = UserChangeRequest::with(['targetUser', 'requester'])->get();
+        $changeRequests = UserChangeRequest::where('status', 'pending')
+            ->with(['targetUser', 'requester'])
+            ->orderBy('created_at')
+            ->cursorPaginate(15);
 
-        return response()->view('/admin/approvals/index', compact('requested_users'));
+        return response()->view('/admin/approvals/index', compact('changeRequests'));
     }
 
     // 承認操作画面表示
     public function show(Request $request, UserChangeRequest $changeRequest)
     {
-        return response()->view('admin.approvals.users', compact('changeRequest'));
+        return response()->view('admin.approvals.show', compact('changeRequest'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
     }
 
     // 承認ロジック
@@ -34,9 +40,10 @@ class UserApprovalController extends Controller
             // モデルにカプセル化されたビジネスロジックの実行
             $changeRequest->approve($request->user());
 
-            return response()->json([
-                'message' => '変更申請を承認し、ユーザー情報を反映しました。'
-            ], 200);
+            session()->flash('success', '申請を承認しました。');
+
+            // 成功ステータス（JSON）を返す
+            return response()->json(['message' => 'success'], 200);
 
         } catch (\LogicException $e) {
             // 「既に処理済み」「ステータスが不整合」などの業務エラー ➔ 422
@@ -57,6 +64,8 @@ class UserApprovalController extends Controller
                 'message' => 'システムエラーが発生しました。管理者にお問い合わせください。'
             ], 500);
         }
+
+
     }
 
     // 棄却ロジック
@@ -67,9 +76,11 @@ class UserApprovalController extends Controller
         try {
             $changeRequest->reject($request->user(), $validated['rejection_reason'] ?? null);
 
-            return response()->json([
-                'message' => '変更申請を却下しました。'
-            ], 200);
+            session()->flash('success', '申請を却下しました。');
+
+            // 成功ステータス（JSON）を返す
+            return response()->json(['message' => 'success'], 200);
+
         } catch (\LogicException $e) {
             return response()->json([
                 'message' => $e->getMessage()
