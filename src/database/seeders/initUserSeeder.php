@@ -25,7 +25,7 @@ class initUserSeeder extends Seeder
 
         $ownerRole   = Role::firstOrCreate(['name' => 'owner']);
         $managerRole = Role::firstOrCreate(['name' => 'manager']);
-        Role::firstOrCreate(['name' => 'worker']); // 一般作業者ロールも合わせて用意
+        $wokerRole = Role::firstOrCreate(['name' => 'worker']); // 一般作業者ロールも合わせて用意
 
         // オーナーroleのユーザー
         $owner = User::create([
@@ -36,6 +36,7 @@ class initUserSeeder extends Seeder
             'password' => Hash::make('owner12345'),
             'created_at' => now(),
             'updated_at' => now(),
+            'status' => 'active',
             'remember_token' => Str::random(10),
         ]);
         $owner->assignRole($ownerRole);
@@ -49,6 +50,7 @@ class initUserSeeder extends Seeder
             'password' => Hash::make('kosaku0000'),
             'created_at' => now(),
             'updated_at' => now(),
+            'status' => 'active',
             'remember_token' => Str::random(10),
         ]);
         $manager01->assignRole($managerRole);
@@ -61,6 +63,20 @@ class initUserSeeder extends Seeder
             'password' => Hash::make('ueko012345'),
             'created_at' => now(),
             'updated_at' => now(),
+            'status' => 'active',
+            'remember_token' => Str::random(10),
+        ]);
+        $manager02->assignRole($managerRole);
+
+        $worker = User::create([
+            'name' => '一般 ユーザー',
+            'login_id' => 'worker12345',
+            'email' => 'worker12345@example.org',
+            'email_verified_at' => now(),
+            'password' => Hash::make('worker12345'),
+            'created_at' => now(),
+            'updated_at' => now(),
+            'status' => 'active',
             'remember_token' => Str::random(10),
         ]);
         $manager02->assignRole($managerRole);

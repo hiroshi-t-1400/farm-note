@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 
 class UserChangeRequest extends Model
 {
+    use HasFactory;
+
     // 状態定数
     public const STATUS_PENDING = 'pending';
     public const STATUS_ACTIVE = 'active';
@@ -30,6 +33,11 @@ class UserChangeRequest extends Model
     protected $casts = [
         'payload' => 'array',
         'approved_at' => 'datetime',
+    ];
+
+    protected $with = [
+        'targetUser',
+        'requester',
     ];
 
     public function targetUser(): BelongsTo
