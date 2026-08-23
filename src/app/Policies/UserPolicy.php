@@ -7,28 +7,29 @@ use Illuminate\Auth\Access\Response;
 
 class UserPolicy
 {
-    public function before(User $user, string $ability): ?bool
-    {
-        if ($user->role === 'admin') {
-            return true;
-        }
-        return null;
-    }
 
     /**
-     * Determine whether the user can view any models.
+     * ユーザー全体の閲覧は管理者のみ
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user): ?bool
     {
-        return false;
+        // if ($user->can('users.view')) {
+        //     return true;
+        // }
+        // return false;
+        return $user->hasRole('manager');
     }
 
     /**
-     * Determine whether the user can view the model.
+     * 自身のユーザー情報の閲覧はゲスト以外全員可
      */
     public function view(User $user, User $model): bool
     {
-        return false;
+        if ($user->hasRole('manager')) {
+            return true;
+        }
+
+        return $user->id === $model->id;
     }
 
     /**
@@ -44,7 +45,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $user->id === $model->id;
+        return false;
     }
 
     /**

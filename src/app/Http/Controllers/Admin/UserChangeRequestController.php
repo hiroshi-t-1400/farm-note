@@ -9,22 +9,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-class UserController extends Controller
+class UserChangeRequestController extends Controller
 {
-    // Manager roleが操作するユーザー登録用のコントローラー
-    //
-
-    // ユーザーの閲覧
-    public function index()
-    {
-
-    }
-
-    //
-    public function show()
-    {
-
-    }
 
     public function create()
     {
@@ -50,5 +36,4 @@ class UserController extends Controller
             'message' => 'ユーザー登録の申請を送信しました。'
         ]);
     }
-
 }

@@ -27,6 +27,9 @@ class RolesAndPermissionsSeeder extends Seeder
         // ユーザー管理関連
         Permission::firstOrCreate(['name' => 'user-change.request']); // ユーザー情報の変更申請権限
         Permission::firstOrCreate(['name' => 'user-change.approve']); // ユーザー情報の変更承認権限
+        Permission::firstOrCreate(['name' => 'user-change.viewAny']);
+        Permission::firstOrCreate(['name' => 'user-change.update']);
+        Permission::firstOrCreate(['name' => 'users.view']);
 
         // 圃場・作物・資材等の実務マスター関連
         Permission::firstOrCreate(['name' => 'master-data.manage']); // Manager以上がマスターを作成・編集・削除
@@ -45,6 +48,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'work-logs.manage',
             'master-data.manage',
             'user-change.request',
+            'user-change.viewAny',
+            'user-change.update',
+            'users.view',
             'admin-menu.show',
         ]);
 
@@ -54,6 +60,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'work-logs.manage',
             'master-data.manage',
             'user-change.approve',
+            'user-change.viewAny',
+            'user-change.update',
             'admin-menu.show',
         ]);
         // $roleManager->givePermissionTo([Permission::all()]); // Ownerに全権を付与する場合

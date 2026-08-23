@@ -4,7 +4,7 @@
 
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserApprovalController;
-
+use App\Http\Controllers\Admin\UserChangeRequestController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
@@ -85,8 +85,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::middleware(['role:manager'])->group(function () {
-        Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
-        Route::post('/admin/users/create', [UserController::class, 'store'])->name('admin.users.store');
+        Route::get('/admin/users/create', [UserChangeRequestController::class, 'create'])->name('admin.users.create');
+        Route::post('/admin/users/create', [UserChangeRequestController::class, 'store'])->name('admin.users.store');
     });
 
 // オーナー専用グループ
