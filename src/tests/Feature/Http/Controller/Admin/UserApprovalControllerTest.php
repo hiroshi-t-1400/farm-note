@@ -43,7 +43,7 @@ class UserApprovalControllerTest extends TestCase
                 'email' => 'new_user@example.com',
                 'login_id' => 'sinki.taroh',
                 'role' => 'worker',
-                'password' => Hash::make('passowrd'),
+                'password' => 'passowrd',
             ],
         ]);
 
@@ -83,7 +83,7 @@ class UserApprovalControllerTest extends TestCase
                 'email' => 'new_user@example.com',
                 'login_id' => 'sinki.taroh',
                 'role' => 'worker',
-                'password' => Hash::make('passowrd'),
+                'password' => 'passowrd',
             ],
         ]);
 

@@ -26,7 +26,7 @@ class UserChangeRequestFactory extends Factory
                 'name' => fake()->name(),
                 'login_id' => fake()->unique()->userName(),
                 'email' => fake()->unique()->safeEmail(),
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'role' => 'worker',
             ],
             'status' => fake()->randomElement(['pending', 'active', 'disabled', 'approved', 'rejected']),

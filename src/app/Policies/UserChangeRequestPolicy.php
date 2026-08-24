@@ -37,7 +37,7 @@ class UserChangeRequestPolicy
      */
     public function update(User $user, UserChangeRequest $userChangeRequest): bool
     {
-        return $user->hasRole('user-change.update');
+        return $user->id === $userChangeRequest->requester->id;
     }
 
     /**

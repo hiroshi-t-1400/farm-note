@@ -9,6 +9,8 @@ import indexSimple from './components/modules/work-logs/index';
 import editWorkLog from './components/modules/work-logs/edit';
 
 import adminUser from './components/modules/admin/users/users';
+// import storeUserChangeRequest from './components/modules/admin/users/store'; // adminUserをこちらに差し替える
+import editUserChangeRequest from './components/modules/admin/users/edit';
 import approveUser from './components/modules/admin/approvals/approve';
 import indexApprovals from './components/modules/admin/approvals/index';
 
@@ -30,6 +32,8 @@ Alpine.data('indexSimple', indexSimple);
 Alpine.data('editWorkLog', editWorkLog);
 
 Alpine.data('adminUser', adminUser);
+// Alpine.data('storeUserChangeRequest', storeUserChangeRequest); // adminUser をこちらに差し替える
+Alpine.data('editUserChangeRequest', editUserChangeRequest);
 Alpine.data('approveUser', approveUser);
 Alpine.data('indexApprovals', indexApprovals);
 

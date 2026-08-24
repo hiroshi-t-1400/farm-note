@@ -71,7 +71,7 @@
 
                         <!-- 【manager専用】ユーザー新規登録申請画面 -->
                         <template x-if="$store.auth.isManager()">
-                            <a href="#" {{-- {{ route('admin.users.create-request') }} --}}
+                            <a href="{{ route('admin.users.create') }}"
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 新規登録申請

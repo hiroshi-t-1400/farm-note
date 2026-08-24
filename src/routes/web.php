@@ -84,33 +84,38 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ];
     });
 
+
+    // 管理者専用グループ
     Route::middleware(['role:manager'])->group(function () {
+        Route::get('/admin/users/index', [UserChangeRequestController::class, 'index'])->name('admin.users.index');
         Route::get('/admin/users/create', [UserChangeRequestController::class, 'create'])->name('admin.users.create');
         Route::post('/admin/users/create', [UserChangeRequestController::class, 'store'])->name('admin.users.store');
+        Route::get('/admin/users/{changeRequest}', [UserChangeRequestController::class, 'edit'])->name('admin.users.edit');
+        Route::patch('/admin/users/{changeRequest}/update', [UserChangeRequestController::class, 'update'])->name('admin.users.update');
     });
 
-// オーナー専用グループ
-Route::middleware(['auth:sanctum', 'role:owner'])
-    ->prefix('admin/approvals')
-    ->name('admin.approvals.')
-    ->group(function () {
+    // オーナー専用グループ
+    Route::middleware(['role:owner'])
+        ->prefix('admin/approvals')
+        ->name('admin.approvals.')
+        ->group(function () {
 
-        // 1. 承認待ち一覧表示画面
-        Route::get('/users', [UserApprovalController::class, 'index'])
-            ->name('users.index');
+            // 1. 承認待ち一覧表示画面
+            Route::get('/users', [UserApprovalController::class, 'index'])
+                ->name('users.index');
 
-        // 2. 申請内容の詳細確認画面
-        Route::get('/users/{changeRequest}', [UserApprovalController::class, 'show'])
-            ->name('users.show');
+            // 2. 申請内容の詳細確認画面
+            Route::get('/users/{changeRequest}', [UserApprovalController::class, 'show'])
+                ->name('users.show');
 
-        // 3. 承認実行（usersテーブルへ反映）
-        Route::patch('/users/{changeRequest}/approve', [UserApprovalController::class, 'approve'])
-            ->name('users.approve');
+            // 3. 承認実行（usersテーブルへ反映）
+            Route::patch('/users/{changeRequest}/approve', [UserApprovalController::class, 'approve'])
+                ->name('users.approve');
 
-        // 4. 却下実行
-        Route::patch('/users/{changeRequest}/reject', [UserApprovalController::class, 'reject'])
-            ->name('users.reject');
-    });
+            // 4. 却下実行
+            Route::patch('/users/{changeRequest}/reject', [UserApprovalController::class, 'reject'])
+                ->name('users.reject');
+        });
 
 
 
