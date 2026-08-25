@@ -27,8 +27,9 @@ class UserChangeRequestController extends Controller implements HasMiddleware
     public function index(): Response
     {
         $changeRequests = UserChangeRequest::query()
-            ->defaultSort() // モデルにカプセル化したScopeを呼び出す
-            ->cursorPaginate(15);
+            ->defaultSort()
+            // ->get();
+            ->paginate(15);  // モデルにカプセル化したScopeを呼び出す
 
         return response()->view('admin.users.index', compact('changeRequests'));
     }

@@ -117,7 +117,7 @@ class UserChangeRequest extends Model
 
     public function scopeDefaultSort(Builder $query): Builder
     {
-        $statusOrder = ['pending', 'rejected', 'approved', 'active', 'disabled'];
+        $statusOrder = ['rejected', 'pending', 'approved', 'active', 'disabled'];
 
         // Laravel TESTコントローラーSQliteへの対応
         $driver = $query->getConnection()->getDriverName(); // データベースの種類を取得
@@ -137,6 +137,6 @@ class UserChangeRequest extends Model
             $query->orderByRaw("FIELD(status, '" . implode("','", $statusOrder) . "')");
         }
 
-        return $query->latest('updated_at');
+        return $query->latest('updated_at')->orderby('id', 'desc');
     }
 }

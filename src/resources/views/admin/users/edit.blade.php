@@ -161,10 +161,20 @@
                     />
                 </template>
 
-                <div class="flex py-5 justify-center">
+                {{-- bottom --}}
+                <div class="flex py-5 justify-center gap-x-4">
                     <x-ui.button name="submit" dusk="submit-button"
                         class="w-[10rem]">
                         更新する
+                    </x-ui.button>
+                    <x-ui.button
+                        type="href"
+                        name="cancel"
+                        ::href="backUrl"
+                        variant="secondary-ghost"
+                        dusk="cancel-button"
+                        class="w-[10rem]">
+                        キャンセル
                     </x-ui.button>
                 </div>
             </div>

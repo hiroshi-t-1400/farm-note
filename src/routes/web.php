@@ -87,7 +87,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // 管理者専用グループ
     Route::middleware(['role:manager'])->group(function () {
-        Route::get('/admin/users/index', [UserChangeRequestController::class, 'index'])->name('admin.users.index');
+        Route::get('/admin/users', [UserChangeRequestController::class, 'index'])->name('admin.users.index');
         Route::get('/admin/users/create', [UserChangeRequestController::class, 'create'])->name('admin.users.create');
         Route::post('/admin/users/create', [UserChangeRequestController::class, 'store'])->name('admin.users.store');
         Route::get('/admin/users/{changeRequest}', [UserChangeRequestController::class, 'edit'])->name('admin.users.edit');

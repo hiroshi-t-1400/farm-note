@@ -16,7 +16,6 @@ class initMaterialWorkLogSeeder extends Seeder
     public function run(): void
     {
         //
-        DB::table('material_work_log')->delete();
 
         DB::table('material_work_log')->insert([
             'work_log_id' => 1,

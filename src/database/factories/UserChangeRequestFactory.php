@@ -6,12 +6,16 @@ use App\Models\User;
 use App\Models\UserChangeRequest;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @extends Factory<UserChangeRequest>
  */
 class UserChangeRequestFactory extends Factory
 {
+
+    protected static ?array $managerIds = null;
+
     /**
      * Define the model's default state.
      *
@@ -26,11 +30,18 @@ class UserChangeRequestFactory extends Factory
                 'name' => fake()->name(),
                 'login_id' => fake()->unique()->userName(),
                 'email' => fake()->unique()->safeEmail(),
-                'password' => 'password',
+                'password' => bcrypt('password'),
                 'role' => 'worker',
             ],
             'status' => fake()->randomElement(['pending', 'active', 'disabled', 'approved', 'rejected']),
-            'requested_by' => User::factory(),
+            'requested_by' => function () {
+                if (is_null(static::$managerIds)) {
+                    static::$managerIds = User::role('manager')->pluck('id')->toArray();
+                }
+                return !empty(static::$managerIds)
+                    ? fake()->randomElement(static::$managerIds)
+                    : null;
+            },
             'approved_by' => null,
             'approved_at' => null,
             'rejection_reason' => null,

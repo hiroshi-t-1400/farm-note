@@ -64,7 +64,7 @@
 
                     <!-- サブメニュー -->
                     <div x-show="open" x-transition class="pl-8 space-y-1 mt-1">
-                        <a href="#" {{-- {{ route('admin.users.index') }} --}}
+                        <a href="#" {{ route('admin.users.index') }}
                         class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'users' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}">
                             ユーザー一覧
                         </a>
@@ -75,6 +75,13 @@
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 新規登録申請
+                            </a>
+                        </template>
+                        <template x-if="$store.auth.isManager()">
+                            <a href="{{ route('admin.users.index') }}"
+                                class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
+                            >
+                                申請一覧
                             </a>
                         </template>
                     </div>
