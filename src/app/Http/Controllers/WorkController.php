@@ -29,22 +29,16 @@ class WorkController extends Controller
 
     }
 
-    public function indexSimple(WorkLog $workLogs)
+    public function indexSimple(?CropSeason $cropSeason = null)
     // public function indexSimple(string $id = '')
     {
-        //
-        if ($workLogs === null) {
-            $work_log = WorkLog::with(['cropSeason', 'createdBy'])
-                ->whereBetween('work_date', ['2026-01-01 00:00:00', '2026-12-31 00:00:00'])
-                ->orderBy('work_date')
-                ->cursorPaginate(15);
-        } else {
-            $work_log = WorkLog::with(['cropSeason', 'createdBy'])
-                ->whereBetween('work_date', ['2026-01-01 00:00:00', '2026-12-31 00:00:00'])
-                ->where('crop_season_id', $workLogs->id)
-                ->orderBy('work_date')
-                ->cursorPaginate(15);
+        $query = WorkLog::with(['cropSeason', 'createdBy'])
+            ->whereBetween('work_date', ['2026-01-01 00:00:00', '2026-12-31 00:00:00'])
+            ->orderBy('work_date');
+        if ($cropSeason !== null) {
+            $query->where('crop_season_id', $cropSeason->id);
         }
+        $work_log = $query->cursorPaginate(15);
 
         $crop_seasons = CropSeason::with('crop', 'field')
             ->get();
@@ -55,7 +49,7 @@ class WorkController extends Controller
         ];
         // $cropSeasons = CropSeasonResource::collection($crop_seasons)->resolve();
 
-        return response()->view('/work-logs.index', compact('models'));
+        return response()->view('work-logs.index', compact('models'));
     }
 
     /**
@@ -75,7 +69,7 @@ class WorkController extends Controller
             'matTypes' => MaterialCategoryResource::collection($mat_types)->resolve()
         ];
 
-        return response()->view('/work-logs.create', compact('models'));
+        return response()->view('work-logs.create', compact('models'));
     }
 
     /**
@@ -96,7 +90,8 @@ class WorkController extends Controller
 
         $workLog = WorkLog::create([
             'crop_season_id' => $validated['crop_season_id'],
-            'created_by' => $validated['created_by'],
+            // 'created_by' => $validated['created_by'],
+            'created_by' => $request->user()->id,
             'work_date' => $validated['work_date'],
             'status' => $status,
             'title' => $validated['title'],
@@ -133,17 +128,24 @@ class WorkController extends Controller
     public function show(Request $request, WorkLog $workLog)
     // public function show(string $id)
     {
-        $work_log = WorkLog::with([
-                'material',
-                'cropSeason',
-                'createdBy',
-                'performedBy',
-                'updatedBy'])
-            ->find($workLog->id);
+        $work_log = $workLog->load([
+            'material',
+            'cropSeason',
+            'createdBy',
+            'performedBy',
+            'updatedBy'
+        ]);
+        // $work_log = WorkLog::with([
+        //         'material',
+        //         'cropSeason',
+        //         'createdBy',
+        //         'performedBy',
+        //         'updatedBy'])
+        //     ->find($workLog->id);
 
         $workLog = new WorkLogResource($work_log)->resolve();
 
-            return response()->view('/work-logs.show', compact('workLog'));
+            return response()->view('work-logs.show', compact('workLog'));
     }
 
     /**
@@ -154,11 +156,15 @@ class WorkController extends Controller
     {
         Gate::authorize('update', $workLog);
 
-        //
-        $work_log = WorkLog::with([
-                'material',
-                'performedBy'])
-            ->find($workLog->id);
+        $work_log = $workLog->load([
+            'material',
+            'performedBy'
+        ]);
+        // ])
+        // $work_log = WorkLog::with([
+        //         'material',
+        //         'performedBy'])
+        //     ->find($workLog->id);
 
         $crop_seasons = CropSeason::with('crop')->get();
         $users = User::all();
@@ -173,7 +179,7 @@ class WorkController extends Controller
             'workLog' => new WorkLogResource($work_log)->resolve()
         ];
 
-        return response()->view('/work-logs.edit', compact('models'));
+        return response()->view('work-logs.edit', compact('models'));
     }
 
     /**
@@ -189,7 +195,8 @@ class WorkController extends Controller
         // 登録する作業が予定plan、完了completed、下書きdraftで分岐
         $status = $validated['status'] ? 'plan' : 'completed';
 
-        $target_log = WorkLog::find($workLog->id);
+        $target_log = $workLog;
+        // $target_log = WorkLog::find($workLog->id);
 
         $target_log->update([
                 'crop_season_id' => $validated['crop_season_id'],
@@ -227,18 +234,17 @@ class WorkController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Request $request, WorkLog $workLog)
-    // public function destroy(string $id)
     {
         Gate::authorize('delete', $workLog);
 
-        $work_log = WorkLog::find($workLog->id);
-        $work_log->delete();
+        // $work_log = WorkLog::find($workLog->id);
+        $workLog->delete();
 
 
         return response()->json([
             'status' => 'success',
             'message' => '日誌を削除しました。',
-            'delCount' => $work_log,
+            'delCount' => $workLog,
             'redirect_url' => route('dashboard')
         ]);
     }

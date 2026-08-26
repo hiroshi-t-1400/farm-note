@@ -164,7 +164,7 @@
                 type="href"
                 ::href="backUrl"
                 variant="secondary-ghost">
-                作付け一覧へ戻る
+                戻る
             </x-ui.button>
             {{-- スマホでモーダル表示を実装したときのUI --}}
             {{-- <x-ui.button type="button" variant="secondary-ghost">

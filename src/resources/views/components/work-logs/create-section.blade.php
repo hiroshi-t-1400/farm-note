@@ -7,21 +7,23 @@
     <h2 class="text-lg font-bold text-gray-800 mb-2">📝 作業の登録</h2>
 
     <div class="input-form-wrapper">
+{{-- <div x-data x-cloak> --}}
 
+        {{-- <template x-if="$store.auth.loading">
+            読み込み中...
+        </template> --}}
+
+        {{-- <template x-if="!$store.auth.loading"> --}}
         <form
             x-data="createWorkLog({
                 initialModels: @js($models)
             })"
             @submit.prevent="submitForm"
+            x-cloak
         >
 
             {{-- デバッグ用のネットワーク状態インジケータ --}}
             <x-debug.network />
-
-            {{-- 操作しているユーザー情報 --}}
-            <div class="block text-sm font-medium text-gray-700 mb-2" >
-                作業登録者：　<span x-text="allUsers[0].name"></span>
-            </div>
 
             {{-- 下書き用のUI・アラート --}}
             <x-work-logs.draft-ui />
@@ -50,6 +52,9 @@
             </x-work-logs.action-buttons>
 
         </form>
+        {{-- </template> --}}
+{{-- </div> --}}
+
     </div>
 
 

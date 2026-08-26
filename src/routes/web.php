@@ -122,8 +122,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-    Route::get('/work-logs/index', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
-    Route::get('/work-logs/index/{workLogs}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');
+    // Route::get('/work-logs/index', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
+    Route::get('/work-logs/index/{cropSeason?}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');
 
     Route::get('/work-logs/show/{workLog}', [WorkController::class, 'show'])->name('work-logs.show');
     Route::get('/work-logs/edit/{workLog}', [WorkController::class, 'edit'])->name('work-logs.edit');
@@ -138,7 +138,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 Route::get('/test', function () {
-    return view('/dashboard');
+    return view('dashboard');
 });
 
 

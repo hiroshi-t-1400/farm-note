@@ -10,7 +10,11 @@ class WorkLogPolicy
 {
     public function before(User $user): ?bool
     {
-        return $user->hasPermissionTo('master-data.manage');
+        if ($user->hasPermissionTo('work-logs.manage')){
+            return true;
+        }
+
+        return null;
     }
 
     /**
@@ -52,7 +56,7 @@ class WorkLogPolicy
      */
     public function delete(User $user, WorkLog $workLog): bool
     {
-        return $user->id === $workLog->createdBy; // createdBy: int
+        return $user->id === $workLog->created_by; // createdBy: int
     }
 
     /**
