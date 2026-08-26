@@ -2,3 +2,4 @@
 .env.backup
 src/app/Http/Controllers/Auth/EmailVerificationController.php
 src/.env.dusk.local
+.vscode

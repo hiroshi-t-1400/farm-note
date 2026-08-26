@@ -48,7 +48,9 @@
                 "EditorConfig.EditorConfig",
                 "oderwat.indent-rainbow",
                 "eamodio.gitlens",
-                "aprilandjan.ascii-tree-generator"
+                "aprilandjan.ascii-tree-generator",
+                "shd101wyy.markdown-preview-enhanced",
+                "nacn.markdown-previewer-in-extension-panel"
             ],
             "settings": {
                 "terminal.integrated.cwd": "/var/www/src",
