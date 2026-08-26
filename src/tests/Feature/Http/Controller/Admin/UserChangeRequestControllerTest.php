@@ -33,6 +33,14 @@ class UserChangeRequestControllerTest extends TestCase
         $this->manager->assignRole($managerRole);
     }
 
+    public function test_access_user_change_index(): void
+    {
+        $response = $this->actingAs($this->manager)
+            ->get(route('admin.requests.users.index'));
+
+        $response->assertStatus(200);
+    }
+
     public function test_manager_can_edit_own_user_change_request(): void
     {
         $changeRequest = UserChangeRequest::factory()->actionCreate()->create([
@@ -56,7 +64,7 @@ class UserChangeRequestControllerTest extends TestCase
         ];
 
         $response = $this->actingAs($this->manager)
-            ->patchJson(route('admin.users.update', $changeRequest));
+            ->patchJson(route('admin.requests.users.update', $changeRequest));
 
         $response->assertStatus(200)
             ->assertJson([

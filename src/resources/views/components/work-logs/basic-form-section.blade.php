@@ -14,7 +14,9 @@
         </template>
     </x-ui.select>
     {{-- 作付マスターに遷移 --}}
-    <a href="" class="mx-5 text-bold">＋作付けを新規に追加する</a>
+    @can('master-data.manage')
+        <a href="" class="mx-5 text-bold">＋作付けを新規に追加する</a>
+    @endcan
 </x-ui.form-group>
 
 {{-- 作業名称 --}}
@@ -45,7 +47,9 @@
         </x-ui.select>
 
         {{-- ユーザ登録に遷移 --}}
-        <a href="" class="mx-5 text-bold">＋作業者を新規に追加する</a>
+        @can('user-change.request')
+            <a href="" class="mx-5 text-bold">＋作業者を新規に追加する</a>
+        @endcan
     </x-ui.form-group>
 
 {{-- 作業内容 --}}

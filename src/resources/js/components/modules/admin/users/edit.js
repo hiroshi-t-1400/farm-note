@@ -25,7 +25,7 @@ export default (config) => {
 
     const createdAt = tsToDate(created_at);
 
-    const backUrl = `${location.origin}/admin/users`; // 戻る遷移先はindexページ
+    const backUrl = `${location.origin}/admin/requests/users`; // 戻る遷移先はindexページ
 
     return {
         targetId: id,

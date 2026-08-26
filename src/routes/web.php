@@ -86,12 +86,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     // 管理者専用グループ
-    Route::middleware(['role:manager'])->group(function () {
-        Route::get('/admin/users', [UserChangeRequestController::class, 'index'])->name('admin.users.index');
-        Route::get('/admin/users/create', [UserChangeRequestController::class, 'create'])->name('admin.users.create');
-        Route::post('/admin/users/create', [UserChangeRequestController::class, 'store'])->name('admin.users.store');
-        Route::get('/admin/users/{changeRequest}', [UserChangeRequestController::class, 'edit'])->name('admin.users.edit');
-        Route::patch('/admin/users/{changeRequest}/update', [UserChangeRequestController::class, 'update'])->name('admin.users.update');
+    Route::middleware(['role:manager'])
+        ->prefix('admin/requests')
+        ->name('admin.requests.')
+        ->group(function () {
+            Route::get('/users', [UserChangeRequestController::class, 'index'])->name('users.index');
+            Route::get('/users/create', [UserChangeRequestController::class, 'create'])->name('users.create');
+            Route::post('/users/create', [UserChangeRequestController::class, 'store'])->name('users.store');
+            Route::get('/users/{changeRequest}', [UserChangeRequestController::class, 'edit'])->name('users.edit');
+            Route::patch('/users/{changeRequest}/update', [UserChangeRequestController::class, 'update'])->name('users.update');
     });
 
     // オーナー専用グループ

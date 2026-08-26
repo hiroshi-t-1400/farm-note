@@ -9,21 +9,10 @@ use App\Models\UserChangeRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Hash;
 
-class UserChangeRequestController extends Controller implements HasMiddleware
+class UserChangeRequestController extends Controller
 {
-    public static function middleware(): array
-    {
-        return [
-            new Middleware('permission:user-change.request', only: ['create', 'store']),
-            new Middleware('permission:user-change.viewAny', only: ['index']),
-        ];
-    }
-
-
     public function index(): Response
     {
         $changeRequests = UserChangeRequest::query()
