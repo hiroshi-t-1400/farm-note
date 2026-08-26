@@ -47,7 +47,6 @@ export function registerAuthStore(Alpine) {
         // --------------------------------
         can(permission, resource = null) {
             if (!this.check) return false;
-
             // Spatieによる直接パーミッションDirect Permissionsを持っている場合の処理
             // ex) manage work logs
             if (this.user.permissions) {
@@ -66,7 +65,7 @@ export function registerAuthStore(Alpine) {
             // リソースの作成者チェック
             // 作成者であれば操作を認可される箇所に適用
             if (resource) {
-                const creatorId = resource.created_by ?? resource.user_id ?? resource.author_id;
+                const creatorId = resource?.created_by ?? resource?.user_id ?? resource?.author_id ?? resource?.requested_by ?? resource.requesterId ?? resource.createdBy;
 
                 if (creatorId !== undefined) {
                     if (permission === 'update' || permission === 'delete') {

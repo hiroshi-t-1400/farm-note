@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -68,7 +69,7 @@ class UserChangeRequest extends Model
                     'name' => $this->payload['name'],
                     'email' => $this->payload['email'],
                     'login_id' => $this->payload['login_id'],
-                    'password' => Hash::make($this->payload['password'] ?? 'default_password'),
+                    'password' => $this->payload['password'] ?? 'default_password',
                     'status' => self::STATUS_ACTIVE,
                 ]);
 
@@ -112,5 +113,30 @@ class UserChangeRequest extends Model
             'approved_by' => $approver->id,
             'rejection_reason' => $reason,
         ]);
+    }
+
+    public function scopeDefaultSort(Builder $query): Builder
+    {
+        $statusOrder = ['rejected', 'pending', 'approved', 'active', 'disabled'];
+
+        // Laravel TESTコントローラーSQliteへの対応
+        $driver = $query->getConnection()->getDriverName(); // データベースの種類を取得
+
+        if ($driver === 'sqlite') {
+            // SQLite用の CASE 式
+            $cases = [];
+            foreach ($statusOrder as $index => $status) {
+                $order = $index + 1;
+                $cases[] = "WHEN '{$status}' THEN {$order}";
+            }
+            $caseSql = "CASE status " . implode(' ', $cases) . " ELSE " . (count($statusOrder) + 1) . " END";
+
+            $query->orderByRaw($caseSql);
+        } else {
+            // MySql MariaDb用のFILED関数
+            $query->orderByRaw("FIELD(status, '" . implode("','", $statusOrder) . "')");
+        }
+
+        return $query->latest('updated_at')->orderby('id', 'desc');
     }
 }

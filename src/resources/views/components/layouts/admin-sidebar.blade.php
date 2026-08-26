@@ -25,7 +25,7 @@
             <nav class="flex-1 space-y-4">
 
                 <!-- 2. 【owner専用】承認待ち一覧 -->
-                <template x-if="$store.auth.isOwner()">
+                @can('user-change.approve')
                     <div class="space-y-1">
                         <p class="px-2 text-sm font-medium text-gray-600 uppercase tracking-wider">オーナー専用</p>
                         <a href="{{ route('admin.approvals.users.index') }}"
@@ -41,7 +41,7 @@
                             <x-admin.approvals.approval-badge />
                         </a>
                     </div>
-                </template>
+                @endcan
 
                 <!-- 3. ユーザー情報（ユーザー一覧、新規登録申請） -->
                 <div class="space-y-1" x-data="{ open: @js($activeMenu === 'users' || $activeMenu === 'user-registration') }">
@@ -64,19 +64,24 @@
 
                     <!-- サブメニュー -->
                     <div x-show="open" x-transition class="pl-8 space-y-1 mt-1">
-                        <a href="#" {{-- {{ route('admin.users.index') }} --}}
+                        <a href="#" {{-- {{   route('admin.users.index')  }} --}}
                         class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'users' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}">
                             ユーザー一覧
                         </a>
 
                         <!-- 【manager専用】ユーザー新規登録申請画面 -->
-                        <template x-if="$store.auth.isManager()">
-                            <a href="#" {{-- {{ route('admin.users.create-request') }} --}}
+                        @can('user-change.request')
+                            <a href="{{ route('admin.requests.users.create') }}"
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 新規登録申請
                             </a>
-                        </template>
+                            <a href="{{ route('admin.requests.users.index') }}"
+                                class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
+                            >
+                                申請一覧
+                            </a>
+                        @endcan
                     </div>
                 </div>
 

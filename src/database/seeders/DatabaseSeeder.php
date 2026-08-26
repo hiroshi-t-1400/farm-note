@@ -28,18 +28,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 外部キー制約を一時的に無効化 // TESTクラスで用いられるSQliteで使用できないので廃止
-        // 同時にseederの依存関係の順番を整理して正規の方法で解決しました。
-        // DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        // seed == テーブルリセットであるならば php artisan migrate:fresh --seed を実行しましょう
-        // テーブルのデータを初期化（truncate）
-        // WorkLog::truncate();
-        // User::truncate();
-        // Material::truncate();
-        // MaterialCategory::truncate();
-        // CropSeason::truncate();
-        // Field::truncate();
-        // Crop::truncate();
+        $this->call(RolesAndPermissionsSeeder::class);
 
         $this->call([
             initCropSeeder::class,
@@ -58,8 +47,51 @@ class DatabaseSeeder extends Seeder
         // $this->call(MaterialWorkLogTableSeeder::class);
         // $this->call(PerformedByWorkLogTableSeeder::class);
 
-        $this->call(RolesAndPermissionsSeeder::class);
         UserChangeRequest::factory()->actionCreate()->count(20)->create();
+
+        UserChangeRequest::factory()->count(5)->create([
+            'action_type' => 'create',
+            'status' => 'rejected',
+        ]);
+
+        UserChangeRequest::factory()->count(5)->create([
+            'action_type' => 'create',
+            'status' => 'approved',
+        ]);
+
+        UserChangeRequest::factory()->count(5)->create([
+            'action_type' => 'create',
+            'status' => 'active',
+        ]);
+
+        UserChangeRequest::factory()->count(5)->create([
+            'action_type' => 'create',
+            'status' => 'disabled',
+        ]);
+
+        UserChangeRequest::factory()->count(5)->create([
+                'action_type' => 'update',
+                'status' => 'pending',
+        ]);
+
+        UserChangeRequest::factory()->count(5)->create([
+            'action_type' => 'update',
+            'status' => 'rejected',
+        ]);
+        UserChangeRequest::factory()->count(5)->create([
+            'action_type' => 'delete',
+            'status' => 'pending',
+        ]);
+
+        UserChangeRequest::factory()->count(5)->create([
+            'action_type' => 'delete',
+            'status' => 'rejected',
+        ]);
+
+        UserChangeRequest::factory()->count(5)->create([
+            'action_type' => 'create',
+            'status' => 'approved',
+        ]);
 
         // 外部キー制約を有効に戻す 廃止
         // DB::statement('SET FOREIGN_KEY_CHECKS=1;');

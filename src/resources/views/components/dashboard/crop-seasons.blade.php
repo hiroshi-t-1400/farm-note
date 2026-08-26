@@ -24,11 +24,14 @@
                         作付けマスターに栽培中の作物を登録してください。
                     </x-slot>
 
-                    <x-slot:alertButton>
-                        <x-ui.button variant="alert" href="/master/crop-seasons/create" >
-                            作付マスターを作成する
-                        </x-ui.button>
-                    </x-slot>
+                    @can('master-data.manage')
+                        <x-slot:alertButton>
+                            <x-ui.button variant="alert" href="/master/crop-seasons/create" >
+                                作付マスターを作成する
+                            </x-ui.button>
+                        </x-slot>
+                    @endcan
+
             </x-dashboard.empty-state>
 
         </div>
@@ -57,11 +60,13 @@
                 </template>
             </div>
 
-            <div class="justify-self-end">
-                <x-ui.button variant="primary" href="" class="mt-3">
-                    作付けマスターを追加する
-                </x-ui.button>
-            </div>
+            @can('master-data.manage')
+                <div class="justify-self-end">
+                    <x-ui.button variant="primary" href="" class="mt-3">
+                        作付けマスターを追加する
+                    </x-ui.button>
+                </div>
+            @endcan
 
         </div>
     </x-dashboard.card>

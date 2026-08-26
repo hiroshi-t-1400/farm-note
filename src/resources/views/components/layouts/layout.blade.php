@@ -98,7 +98,7 @@
                                 <a href="{{ route('dashboard') }}" class="block px-4 py-2 rounded-md bg-green-50 text-green-800 font-semibold text-sm">
                                     ダッシュボード
                                 </a>
-                                <a href="{{ route('work-logs.indexSimpleAll') }}"
+                                <a href="{{ route('work-logs.indexSimple') }}"
                                     class="px-3 py-2 rounded-md text-sm font-medium {{ (request()->is('work-logs/index*') || request()->is('work-logs/show*')) ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100' }}">
                                     日誌閲覧
                                 </a>

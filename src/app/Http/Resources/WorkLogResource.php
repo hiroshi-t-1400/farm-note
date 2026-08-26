@@ -74,6 +74,9 @@ class WorkLogResource extends JsonResource
                 });
             }),
 
+            // 認可を生成して組み込む
+            'canUpdate' => $request->user()?->can('update', $this->resource),
+            'canDelete' => $request->user()?->can('delete', $this->resource),
         ];
     }
 }

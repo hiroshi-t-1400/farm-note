@@ -43,7 +43,9 @@ export default (config) => {
         // }
     }));
 
-    const backUrl = `${location.origin}/work-logs/index/${cropSeasonId}`;
+    // const backUrl = `${location.origin}/work-logs/index/${cropSeasonId}`;
+    const backUrl = document.referrer;
+
     const editUrl = `${location.origin}/work-logs/edit/${id}`;
     // delete実装したらアクティブにする
     // const editUrl = `${location.origin}/work-logs/edit/${cropSeasonId}`;

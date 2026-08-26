@@ -17,12 +17,15 @@ export function storeFormLogic (initialData = {}) {
 
     const warnedKeys = new Set();
 
+
+
         return {
 
             allUsers,
             allMaterials,
             allCropSeasons,
             matTypes,
+            createdBy: '',
 
             formData: {},
 
@@ -69,7 +72,7 @@ export function storeFormLogic (initialData = {}) {
 
                     cropSeasonId: '',
                     cropSeasonsNameYear: '不明',
-                    createdBy: 1,
+                    createdBy: '',
                     performedBy: [{}], // 暫定措置
                     workDate: tsToDate(Date()),
                     status: false,
@@ -83,6 +86,19 @@ export function storeFormLogic (initialData = {}) {
             // ----------------------------------------------------
             // ここまで初期化
             // ----------------------------------------------------
+
+            async getAuthor() {
+                try {
+                    const response = await window.http.get('/user');
+                    this.setUser(response.data);
+                    // console.log({'受け取ったuser': this.user});
+                } catch (error) {
+                    // 401未認証などの場合は null をセット
+                    this.setUser(null);
+                } finally {
+                    this.loading = false;
+                }
+            },
 
             changeCropSeasons() {
                 const id = this.formData.cropSeasonId;

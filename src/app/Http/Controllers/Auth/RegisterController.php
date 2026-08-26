@@ -30,7 +30,7 @@ class RegisterController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'login_id' => $validated['login_id'],
-                'password' => Hash::make($validated['password'])
+                'password' => $validated['password'],
             ]);
 
         // 1,メール認証発火

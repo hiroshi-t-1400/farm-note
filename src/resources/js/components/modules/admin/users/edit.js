@@ -1,32 +1,57 @@
 // /var/www/src/resources/js/components/modules/admin/users/users
 
+import { tsToDate } from "../../dashboard/utils";
+
 export default (config) => {
 
+    const roleLabel = {
+        owner: 'オーナー',
+        manager: '管理者',
+        worker: '一般ユーザー'
+    };
+
+    let {payload, id, created_at, rejection_reason} = config?.initialModel || '';
+
+    payload = {
+            username: payload.name,
+            loginId: payload.login_id,
+            email: payload.email,
+            password: '',
+            role: payload.role
+        };
+
+    let old = {...payload};
+    old.roleLabel = roleLabel[old.role];
+
+    const createdAt = tsToDate(created_at);
+
+    const backUrl = `${location.origin}/admin/requests/users`; // 戻る遷移先はindexページ
+
     return {
+        targetId: id,
 
-        userData: '', // 操作中のユーザー
+        payload,
+        old,
+        createdAt,
 
-        email: '',
-        password: '',
-        loginId: '',
-        username: '',
+        rejection_reason,
+
         errors: {},
 
         resultData: '',
+        backUrl,
 
-        // // 現在操作しているユーザー情報を取得
-        // async init() {
-        //     const response = await window.http.get('/user');
-        //     this.userData = response?.data || '';
-        // },
+        getRoleLabel(role) {
+            return roleLabel[role];
+        },
 
-        async submitStore() {
+        async submitUpdate() {
             this.errors = {};
 
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const response = await window.http.post('/admin/users/create', {
+                const response = await window.http.patch(`/admin/users/${this.targetId}/update`, {
                     name: this.username,
                     email: this.email,
                     password: this.password,
@@ -38,7 +63,7 @@ export default (config) => {
                 // ----------------------------------------------------
                 // 申請したユーザーデータを返す。申請画面に通信リザルトとしてレンダする
                 this.resultData = response.data;
-                alert('アカウント登録申請が完了しました。');
+                alert('申請内容を変更しました。');
 
             } catch (e) {
                 if (e.response) {
@@ -50,7 +75,7 @@ export default (config) => {
                     // ----------------------------------------------------
                     if (response.status === 422) {
                         this.errors = data.errors || {};
-                        alert('アカウント登録に失敗しました。 : ' + (response.data.message || '入力内容を確認してください。'));
+                        alert('申請内容の変更に失敗しました。 : ' + (response.data.message || '入力内容を確認してください。'));
                         return;
                     }
 
