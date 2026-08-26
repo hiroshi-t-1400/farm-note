@@ -1,43 +1,58 @@
 // /var/www/src/resources/js/components/modules/admin/users/users
+import { ROLES } from "../../../../constants/roles";
 
 export default (config) => {
 
-    return {
+    const backUrl = `${location.origin}/dashboard`; // 戻る遷移先はdashboard
 
-        userData: '', // 操作中のユーザー
-
+    const formData = {
         email: '',
         password: '',
         loginId: '',
         username: '',
+        role: 'worker',
+    };
+
+    const roleLabel = '一般ユーザー';
+
+    return {
+
+        formData,
+        roleLabel,
         errors: {},
 
-        resultData: '',
+        resultData: {},
 
-        // // 現在操作しているユーザー情報を取得
-        // async init() {
-        //     const response = await window.http.get('/user');
-        //     this.userData = response?.data || '';
-        // },
+        backUrl,
+
+        buildPayload () {
+            return {
+                name: this.formData.username,
+                email: this.formData.email,
+                password: this.formData.password,
+                loginId: this.formData.loginId,
+                role: this.formData.role,
+                roleLabel: ROLES[this.formData.role]
+            }
+        },
 
         async submitStore() {
             this.errors = {};
+            const payload = this.buildPayload ();
 
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const response = await window.http.post('/admin/users/create', {
-                    name: this.username,
-                    email: this.email,
-                    password: this.password,
-                    loginId: this.loginId
-                });
+                const response = await window.http.post('/admin/users/create',
+                    payload);
 
                 // ----------------------------------------------------
                 // 認証成功（200 OK系）
                 // ----------------------------------------------------
                 // 申請したユーザーデータを返す。申請画面に通信リザルトとしてレンダする
-                this.resultData = response.data;
+                this.resultData = payload;
+                this.formData = {};
+
                 alert('アカウント登録申請が完了しました。');
 
             } catch (e) {
@@ -48,16 +63,16 @@ export default (config) => {
                     // ----------------------------------------------------
                     // 1. バリデーションエラー（422）
                     // ----------------------------------------------------
-                    if (response.status === 422) {
+                    if (data.status === 422) {
                         this.errors = data.errors || {};
-                        alert('アカウント登録に失敗しました。 : ' + (response.data.message || '入力内容を確認してください。'));
+                        alert('アカウント登録に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
                         return;
                     }
 
                     // ----------------------------------------------------
                     // 2. 連続送信（429）のハンドリング
                     // ----------------------------------------------------
-                    if (response.status === 429) {
+                    if (data.status === 429) {
                         this.errors = data.errors || {};
                         alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
                         return;
@@ -73,7 +88,7 @@ export default (config) => {
                 }
 
                 // axiosのタイムアウトエラーハンドリング
-                if (error.code === 'ECONNABORTED') {
+                if (e.code === 'ECONNABORTED') {
                     console.error('通信エラー： タイムアウトが発生しました。', e);
                     alert('通信タイムアウトしました。接続状態をご確認の上、再度お試しください。');
                 } else {

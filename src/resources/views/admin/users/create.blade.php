@@ -8,34 +8,30 @@
 
 
     <form
-        x-data="adminUser()"
+        x-data="createUserChangeRequest()"
         @submit.prevent="submitStore()"
+        x-cloak
     >
 
-        <div class="p-4">
-            ログイン中：
-            <span x-text="userData.name || 'デバッグ(unknown)'"></span>
-        </div>
-
-        <template x-if="resultData">
+        <template x-if="resultData" x-transition>
             <div class="result-area py-2 px-4 sm:w-[20rem] sm:y-[7rem] mb-4 border-1 border-gray-500 rounded-lg">
-                <h3 class="text-base text-gray-700 font-semibold ">申請内容</h3>
+                <h3 class="text-base text-gray-700 font-semibold ">申請した内容</h3>
                 <dl class="px-1">
                     <div class="py-0.5 flex flex-wrap justify-between">
                         <dt class="text-base font-medium text-gray-600">氏名：</dt>
-                        <dd class="text-base text-gray-800 sm:mt-0 sm:col-span-1">トマト 太郎</dd>
+                        <dd x-text="resultData.name" class="text-base text-gray-800 sm:mt-0 sm:col-span-1"></dd>
                     </div>
                     <div class="py-0.5 flex flex-wrap justify-between">
                         <dt class="text-base font-medium text-gray-600">メールアドレス：</dt>
-                        <dd class="text-base text-gray-800 sm:mt-0 sm:col-span-1">tomato@example.org</dd>
+                        <dd x-text="resultData.email" class="text-base text-gray-800 sm:mt-0 sm:col-span-1"></dd>
                     </div>
                     <div class="py-0.5 flex flex-wrap justify-between">
                         <dt class="text-base font-medium text-gray-600">ログインID：</dt>
-                        <dd class="text-base text-gray-800 sm:mt-0 sm:col-span-1">tomatotaro</dd>
+                        <dd x-text="resultData.loginId" class="text-base text-gray-800 sm:mt-0 sm:col-span-1"></dd>
                     </div>
                     <div class="py-0.5 flex flex-wrap justify-between">
-                        <dt class="text-base font-medium text-gray-600">権限細目：</dt>
-                        <dd class="text-base text-gray-800 sm:mt-0 sm:col-span-1">一般ユーザー</dd>
+                        <dt class="text-base font-medium text-gray-600">役職：</dt>
+                        <dd x-text="resultData.roleLabel" class="text-base text-gray-800 sm:mt-0 sm:col-span-1"></dd>
                     </div>
                 </dl>
             </div>
@@ -50,7 +46,7 @@
             <x-ui.input
                 type="text"
                 name="username"
-                x-model="username"
+                x-model="formData.username"
                 placeholder="例：アグリ 太郎"
                 required
             />
@@ -63,7 +59,7 @@
             <x-ui.input
                 type="text"
                 name="loginId"
-                x-model="loginId"
+                x-model="formData.loginId"
                 placeholder="例：nihon_taro"
                 required
             />
@@ -76,7 +72,7 @@
             <x-ui.input
                 type="email"
                 name="email"
-                x-model="email"
+                x-model="formData.email"
                 placeholder="例：farm_taro@example.org"
                 required
             />
@@ -92,7 +88,7 @@
                     <x-ui.input
                         ::type="show ? 'text' : 'password'"
                         name="password"
-                        x-model="password"
+                        x-model="formData.password"
                         placeholder="パスワード"
                         class="w-full"
                         required
@@ -142,22 +138,30 @@
             >
                 <x-ui.select
                     name="role"
-                    x-model="role"
+                    x-model="formData.role"
                     required
                 >
-                    <option value="worker">一般ユーザー</option>
+                    <option value="worker" selected>一般ユーザー</option>
                     <option value="manager">管理者</option>
-                    {{-- <option value="owner">オーナー</option> --}}
                 </x-ui.select>
 
             </x-ui.form-group>
 
         </div>
 
-        <div class="flex py-5 justify-center">
+        <div class="flex py-5 justify-center gap-x-4">
             <x-ui.button name="submit" dusk="submit-button"
                 class="w-[10rem]">
                 登録
+            </x-ui.button>
+            <x-ui.button
+                type="href"
+                name="cancel"
+                ::href="backUrl"
+                variant="secondary-ghost"
+                dusk="cancel-button"
+                class="w-[10rem]">
+                キャンセル
             </x-ui.button>
         </div>
 
