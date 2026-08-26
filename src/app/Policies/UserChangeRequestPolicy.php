@@ -13,7 +13,7 @@ class UserChangeRequestPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('user-change.viewAny');
+        return $user->hasPermissionTo('user-change.viewAny');
     }
 
     /**
@@ -21,7 +21,7 @@ class UserChangeRequestPolicy
      */
     public function view(User $user, UserChangeRequest $userChangeRequest): bool
     {
-        return $user->hasRole('user-change.viewAny');
+        return $user->hasPermissionTo('user-change.viewAny');
     }
 
     /**
@@ -29,7 +29,7 @@ class UserChangeRequestPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('manager');
+        return $user->hasPermissionTo('user-change.request');
     }
 
     /**
@@ -45,7 +45,7 @@ class UserChangeRequestPolicy
      */
     public function delete(User $user, UserChangeRequest $userChangeRequest): bool
     {
-        return $user->hasRole('manager');
+        return $user->id === $userChangeRequest->requester->id;
     }
 
     /**
@@ -53,7 +53,7 @@ class UserChangeRequestPolicy
      */
     public function restore(User $user, UserChangeRequest $userChangeRequest): bool
     {
-        return $user->hasRole('manager');
+        return $user->hasPermissionTo('user-change.request');
     }
 
     /**

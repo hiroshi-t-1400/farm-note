@@ -1,10 +1,12 @@
 @props([
-    'workLog' => '',
+    'workLog' => null,
     ])
 
 <div x-data="indexSimple({
         'initialWorkLog': @js($workLog)
-    })">
+    })"
+    x-cloak
+>
 
 
     {{-- 記事がない場合のフォールバック --}}

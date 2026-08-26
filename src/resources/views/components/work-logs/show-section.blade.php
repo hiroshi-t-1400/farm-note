@@ -7,7 +7,7 @@
 <div
     x-data="showSingleLog({
         'initialWorkLog': @js($workLog)
-        })">
+    })">
 
     <div class="main grid grid-cols-1">
         {{-- header --}}
@@ -136,26 +136,29 @@
                 </template>
             </x-ui.description-item>
         </dl>
-
         {{-- 下部アクションボタン --}}
         <x-work-logs.action-buttons >
-
-            <x-ui.button
-                type="href"
-                ::href="editUrl"
-                variant="alert-ghost"
-            >
-                編集する
-            </x-ui.button>
-
-            <x-work-logs.window-del-popover confirmEvent="deleteLog()" >
+            @if($workLog['canUpdate'])
+                {{-- JsonResourceを通しているためbladeがモデルデータを持つことができないのでJsonResourceで認可情報を組み込んでおく --}}
                 <x-ui.button
-                    type="button"
-                    variant="danger"
-                    class="w-full">
-                    削除
+                    type="href"
+                    ::href="editUrl"
+                    variant="alert-ghost"
+                >
+                    編集する
                 </x-ui.button>
-            </x-work-logs.window-del-popover>
+            @endif
+
+            @if ($workLog['canDelete'])
+                <x-work-logs.window-del-popover confirmEvent="deleteLog()" >
+                    <x-ui.button
+                        type="button"
+                        variant="danger"
+                        class="w-full">
+                        削除
+                    </x-ui.button>
+                </x-work-logs.window-del-popover>
+            @endif
 
             <x-ui.button
                 type="href"

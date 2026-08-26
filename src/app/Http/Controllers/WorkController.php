@@ -17,22 +17,23 @@ use App\Models\Material\MaterialCategory;
 use App\Models\WorkLog\WorkLog;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
 class WorkController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * タイムライン表示の実装を検討
      */
     public function index()
     {
 
-
     }
 
-    public function indexSimple(string $id = '')
+    public function indexSimple(WorkLog $workLogs)
+    // public function indexSimple(string $id = '')
     {
         //
-        if ($id == '') {
+        if ($workLogs === null) {
             $work_log = WorkLog::with(['cropSeason', 'createdBy'])
                 ->whereBetween('work_date', ['2026-01-01 00:00:00', '2026-12-31 00:00:00'])
                 ->orderBy('work_date')
@@ -40,13 +41,12 @@ class WorkController extends Controller
         } else {
             $work_log = WorkLog::with(['cropSeason', 'createdBy'])
                 ->whereBetween('work_date', ['2026-01-01 00:00:00', '2026-12-31 00:00:00'])
-                ->where('crop_season_id', $id)
+                ->where('crop_season_id', $workLogs->id)
                 ->orderBy('work_date')
                 ->cursorPaginate(15);
         }
 
         $crop_seasons = CropSeason::with('crop', 'field')
-            ->withCount('workLog')
             ->get();
 
         $models = [
@@ -85,9 +85,11 @@ class WorkController extends Controller
      * @return JsonResponse
      *
      */
-    public function store(StoreWorkLogRequest $request): JsonResponse
+    public function store(Request $request, StoreWorkLogRequest $workLog): JsonResponse
+    // public function store(StoreWorkLogRequest $request): JsonResponse
     {
-        $validated = $request->validated();
+        $validated = $workLog->validated();
+        // $validated = $request->validated();
 
         // 登録する作業が予定plan、完了completed、下書きdraftで分岐
         $status = $validated['status'] ? 'plan' : 'completed';
@@ -105,8 +107,6 @@ class WorkController extends Controller
         foreach ($validated['performed_by'] as $pu) {
             $workLog->performedBy()->sync($pu['id']);
         };
-        // $workLog->performedBy()->sync($validated['performed_by']);
-        // $workLog->performedBy()->sync($validated['performed_by']);
 
         // 登録された作業記録のなかで使用資材が記録されていれば登録を行う
         // 資材が複数あればすべて中間テーブルに登録する
@@ -130,7 +130,8 @@ class WorkController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, WorkLog $workLog)
+    // public function show(string $id)
     {
         $work_log = WorkLog::with([
                 'material',
@@ -138,7 +139,7 @@ class WorkController extends Controller
                 'createdBy',
                 'performedBy',
                 'updatedBy'])
-            ->find($id);
+            ->find($workLog->id);
 
         $workLog = new WorkLogResource($work_log)->resolve();
 
@@ -148,14 +149,16 @@ class WorkController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Request $request, WorkLog $workLog)
+    // public function edit(string $id)
     {
+        Gate::authorize('update', $workLog);
 
         //
         $work_log = WorkLog::with([
                 'material',
                 'performedBy'])
-            ->find($id);
+            ->find($workLog->id);
 
         $crop_seasons = CropSeason::with('crop')->get();
         $users = User::all();
@@ -176,14 +179,17 @@ class WorkController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreWorkLogRequest $request, string $id): JsonResponse
+    public function update(Request $request, StoreWorkLogRequest $workLog): JsonResponse
+    // public function update(StoreWorkLogRequest $request, string $id): JsonResponse
     {
-        $validated = $request->validated();
+        Gate::authorize('update', $workLog);
+
+        $validated = $workLog->validated();
 
         // 登録する作業が予定plan、完了completed、下書きdraftで分岐
         $status = $validated['status'] ? 'plan' : 'completed';
 
-        $target_log = WorkLog::find($id);
+        $target_log = WorkLog::find($workLog->id);
 
         $target_log->update([
                 'crop_season_id' => $validated['crop_season_id'],
@@ -220,9 +226,12 @@ class WorkController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, WorkLog $workLog)
+    // public function destroy(string $id)
     {
-        $work_log = WorkLog::find($id);
+        Gate::authorize('delete', $workLog);
+
+        $work_log = WorkLog::find($workLog->id);
         $work_log->delete();
 
 

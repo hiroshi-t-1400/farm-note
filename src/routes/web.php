@@ -122,17 +122,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-    Route::get('/work-logs/index/{log}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');
     Route::get('/work-logs/index', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
+    Route::get('/work-logs/index/{workLogs}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');
 
-    Route::get('/work-logs/show/{log}', [WorkController::class, 'show'])->name('work-logs.show');
-    Route::get('/work-logs/edit/{log}', [WorkController::class, 'edit'])->name('work-logs.edit');
-    Route::put('/work-logs/edit/{log}', [WorkController::class, 'update'])->name('work-logs.update');
+    Route::get('/work-logs/show/{workLog}', [WorkController::class, 'show'])->name('work-logs.show');
+    Route::get('/work-logs/edit/{workLog}', [WorkController::class, 'edit'])->name('work-logs.edit');
+    Route::put('/work-logs/edit/{workLog}', [WorkController::class, 'update'])->name('work-logs.update');
 
     Route::get('/work-logs/create', [WorkController::class, 'create'])->name('create');
     Route::post('/work-logs/create', [WorkController::class, 'store'])->name('store');
 
-    Route::delete('/work-logs/delete/{ids}', [WorkController::class, 'destroy'])->name('work-logs.delete');
+    Route::delete('/work-logs/delete/{workLog}', [WorkController::class, 'destroy'])->name('work-logs.delete');
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 });

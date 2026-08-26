@@ -7,7 +7,7 @@
             日誌の一覧
         </x-slot>
 
-        <div x-data="{ open: true }">
+        <div x-data="{ open: true }" x-cloak>
 
             <span @click="open ? open=false : open=true" class="flex items-center w-fit py-0.5 px-1 border border-1 border-gray-100 rounded-sm shadow-md">
                 作付け一覧
