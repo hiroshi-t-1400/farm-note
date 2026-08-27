@@ -11,31 +11,60 @@
         x-cloak
     >
 
-        <div class="flex flex-col ">
+        <x-presentation.index-item>
 
-            <div class="hidden sm:grid sm:grid-cols-[10rem_10rem_8rem_4rem] gap-x-4 items-center pb-2 mb-2 border-b-2 border-gray-200 text-xs font-bold text-gray-500 tracking-wider">
+            <x-slot:label>
                 <div>氏名</div>
                 <div>管理権限</div>
                 <div>登録・承認日</div>
                 <div>ステータス</div>
-            </div>
+            </x-slot>
 
-            <template x-for="data in indexData" :key="data.userId">
-                <div class="grid grid-cols-1 sm:grid-cols-[10rem_10rem_8rem_4rem] gap-x-4 gap-y-2 items-center py-3 border-b border-gray-100 relative hover:bg-blue-50/40 transition-colors group">
-                    <a :href="data.showUrl"
-                        class="absolute inset-0 z-10"
-                        :aria-label="`${data.username}さんの申請詳細を確認する`"
-                    ></a>
+            <x-slot:show_link>
+                <a :href="data.showUrl"
+                    class="absolute inset-0 z-10"
+                    :aria-label="`${data.username}さんの申請詳細を確認する`"
+                ></a>
+            </x-slot>
 
-                    <span x-text="data.username" class="min-w-0 truncate font-semibold text-gray-800 group-hover:text-blue-600 transition-colors"></span>
-                    <span x-text="data.roleLabel" class="min-w-0 truncate font-semibold text-gray-700"></span>
-                    <span x-text="data.createdAt" class="min-w-0 text-gray-500 text-sm"></span>
-                    <span x-text="data.statusLabel" ></span>
+            <x-slot:large_values>
+                <span x-text="data.username" class="min-w-0 truncate font-semibold text-gray-700 group-hover:text-blue-600 transition-colors"></span>
+                <span x-text="data.roleLabel" class="min-w-0 truncate font-semibold text-gray-700"></span>
+                <span x-text="data.createdAt" class="min-w-0 text-gray-700 text-sm"></span>
+                <span x-text="data.statusLabel" ></span>
+            </x-slot>
+
+            <x-slot:small_values>
+                <div class="grid grid-cols-[5rem_1fr]">
+                    <span class="text-xs text-gray-500 font-bold tracking-wider">
+                        名前：
+                    </span>
+                    <span x-text="data.username" class="min-w-0 truncate font-semibold text-gray-700 group-hover:text-blue-600 transition-colors"></span>
                 </div>
-            </template>
-        </div>
 
-        <x-ui.pagenation />
+                <div class="grid grid-cols-[5rem_1fr]">
+                    <span class="text-xs text-gray-500 font-bold tracking-wider ">
+                        管理権限：
+                    </span>
+                    <span x-text="data.roleLabel" class="min-w-0 truncate font-semibold text-gray-700"></span>
+                </div>
+
+                <div class="grid grid-cols-[5rem_1fr]">
+                    <span class="text-xs text-gray-500 font-bold tracking-wider">
+                        登録日：
+                    </span>
+                    <span x-text="data.createdAt" class="min-w-0 text-gray-700 text-sm"></span>
+                </div>
+
+                <div class="grid grid-cols-[5rem_1fr]">
+                    <span class="text-xs text-gray-500 font-bold tracking-wider">
+                        ステータス：
+                    </span>
+                    <span x-text="data.statusLabel" class="min-w-0 text-gray-700"></span>
+                </div>
+            </x-slot>
+
+        </x-presentation.index-item>
 
     </div>
 
