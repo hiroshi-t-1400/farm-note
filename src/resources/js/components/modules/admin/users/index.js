@@ -1,50 +1,32 @@
-// /var/www/src/resources/js/components/modules/admin/users/users
+// /var/www/src/resources/js/components/modules/admin/users/index.js
+
 import { tsToDate } from "../../dashboard/utils";
 import { offsetPagenation } from "../../../../api/transformers/pagenation";
 
 import { ROLES } from "../../../../constants/roles";
-import { REQUEST_STATUS } from "../../../../constants/requestStatus";
-import { ACTION_LABELS } from "../../../../constants/actions";
+import { USER_STATUS } from "../../../../constants/userStatus";
 
 export default (config) => {
-console.log(config?.initialModels);
     const data = config?.initialModels?.data;
-    const path = config?.initialModels?.path;
 
-    const statusClass = {
-        default: 'text-gray-500 text-sm',
-        rejected: 'font-bold text-amber-800',
-        pending: 'font-bold text-blue-500',
-    };
+    const indexData = data.map(u => ({
+        userId: u.id,
+        username: u.name,
+        role: u.roles[0]?.['name'],
+        roleLabel: ROLES[u.roles[0]?.['name']],
+        showUrl: `${window.location.origin}/users/${u.id}`,
 
-    const indexData = data.map(r => ({
-        id: r.id,
-        targetUserId: r.target_user_id,
-        actionType: r.action_type,
-        actionLabel: ACTION_LABELS[r.action_type],
-        username: r.payload.name,
-        createdAt: tsToDate(r.created_at),
-        role: r.payload.role,
-        roleLabel: ROLES[r.payload.role],
-        rejectionReason: r.rejection_reason,
-        showUrl: `${path}/${r.id}`,
-
-        status: r.status,
-        statusLabel: REQUEST_STATUS[r.status],
-        statusCss: statusClass[r.status],
-
-        requesterId: r.requester.id,
-        requesterName: r.requester.name
+        status: u.status,
+        statusLabel: USER_STATUS[u.status],
+        createdAt: tsToDate(u.created_at),
+        updatedAt: tsToDate(u.updated_at),
+        // statusCss: statusClass[r.status],
     }));
-
+    
     return {
         indexData: indexData,
 
         ...offsetPagenation(config?.initialModels),
-
-        hasRejected() {
-            return this.indexData.find(d => d.status === 'rejected');
-        }
     }
 }
 

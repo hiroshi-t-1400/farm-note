@@ -25,7 +25,7 @@ class initUserSeeder extends Seeder
 
         $ownerRole   = Role::firstOrCreate(['name' => 'owner']);
         $managerRole = Role::firstOrCreate(['name' => 'manager']);
-        $wokerRole = Role::firstOrCreate(['name' => 'worker']); // 一般作業者ロールも合わせて用意
+        $workerRole = Role::firstOrCreate(['name' => 'worker']); // 一般作業者ロールも合わせて用意
 
         // オーナーroleのユーザー
         $owner = User::create([
@@ -79,6 +79,6 @@ class initUserSeeder extends Seeder
             'status' => 'active',
             'remember_token' => Str::random(10),
         ]);
-        $manager02->assignRole($managerRole);
+        $worker->assignRole($workerRole);
     }
 }

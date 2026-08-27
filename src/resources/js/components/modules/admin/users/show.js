@@ -11,7 +11,7 @@ export default (config) => {
     const createdAt = tsToDate(created_at);
     const updatedAt = tsToDate(updated_at);
 
-    const roleLabel = ROLES[roles[0].name];
+    const roleLabel = ROLES[roles[0]?.['name']];
     const statusLabel = USER_STATUS[status];
     const isActive = checkStatus();
     let statusClass = '';
@@ -48,7 +48,7 @@ export default (config) => {
         statusClass,
 
         backUrl,
-        editUrl,
+        // editUrl,
 
         errors: {},
 

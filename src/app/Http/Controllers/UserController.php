@@ -14,7 +14,8 @@ class UserController extends Controller
     {
         Gate::authorize('viewAny', User::class);
 
-        $users = User::quey()
+        $users = User::query()
+        ->with('roles')
             ->defaultSort()
             ->paginate(15);
 

@@ -73,7 +73,7 @@
                 <x-ui.button
                     type="button"
                     variant="danger"
-                    @click="submitDelete()"
+                    {{-- @click="submitDelete()" --}}
                     name="delete" dusk="submit-delete"
                     class="w-[10rem]"
                 >

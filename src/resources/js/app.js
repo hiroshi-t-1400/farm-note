@@ -8,6 +8,7 @@ import showSingleLog from './components/modules/work-logs/show';
 import indexSimple from './components/modules/work-logs/index';
 import editWorkLog from './components/modules/work-logs/edit';
 
+import indexUser from './components/modules/admin/users/index';
 import showUser from './components/modules/admin/users/show';
 import createUserChangeRequest from './components/modules/admin/users/requests/create';
 import editUserChangeRequest from './components/modules/admin/users/requests/edit';
@@ -33,6 +34,7 @@ Alpine.data('indexSimple', indexSimple);
 Alpine.data('editWorkLog', editWorkLog);
 
 // ユーザー情報
+Alpine.data('indexUser', indexUser);
 Alpine.data('showUser', showUser);
 Alpine.data('createUserChangeRequest', createUserChangeRequest);
 Alpine.data('editUserChangeRequest', editUserChangeRequest);

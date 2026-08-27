@@ -29,14 +29,17 @@ class initWorkLogSeeder extends Seeder
         //     'updated_at' => now(),
         // ]);
 
-        $users = User::factory()->count(10)->create();
+        $users = User::factory()->count(20)->create();
+        foreach($users as $user) {
+            $user->assignRole('worker');
+        };
 
-        // 50件の WorkLog を作成し、上記ユーザーから割り当てる
+        // 100件の WorkLog を作成し、上記ユーザーから割り当てる
         for ($i = 0; $i < 100; $i++) {
             $workLog = WorkLog::factory()->create([
                 // 作成者をランダムに1名割り当て
-                'created_by' => $users->random()->id, // ※実際の外部キーカラム名に合わせてください
-                'updated_by' => $users->random()->id, // ※実際の外部キーカラム名に合わせてください
+                'created_by' => $users->random()->id,
+                'updated_by' => $users->random()->id,
             ]);
 
             // 作業実施者をランダムに2名割り当て（重複しないよう random(2)）

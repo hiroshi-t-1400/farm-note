@@ -5,7 +5,6 @@
     'requestCount' => '',
 ])
 
-                @can('admin-menu.show')
 
 <div class="rounded-md border border-slate-700">
 
@@ -64,10 +63,20 @@
 
                     <!-- サブメニュー -->
                     <div x-show="open" x-transition class="pl-8 space-y-1 mt-1">
-                        <a href="#" {{-- {{   route('admin.users.index')  }} --}}
-                        class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'users' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}">
-                            ユーザー一覧
-                        </a>
+                        @can('user-change.request')
+                            <a href="{{ route('users.index') }}"
+                                class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'users' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
+                            >
+                                ユーザー一覧
+                            </a>
+                        @else
+                            <a href="{{ route('users.show', Auth::user()) }}"
+                                class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'users' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
+                            >
+                                あなたの登録情報
+                            </a>
+                            <span class="text-xs text-amber-900 font-semibold">＊ユーザー一覧は管理者限定です</span>
+                        @endcan
 
                         <!-- 【manager専用】ユーザー新規登録申請画面 -->
                         @can('user-change.request')
@@ -139,7 +148,6 @@
             </nav>
 </div>
 
-@endcan
 
             <!-- footer -->
             <div class="sm:hidden flex flex-col items-center gap-y-4">

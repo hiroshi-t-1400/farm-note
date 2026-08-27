@@ -46,15 +46,14 @@
                             </div>
 
                             <!-- ユーザー表示 -->
-                            <div x-data class="grid grid-cols-1 text-gray-700 font-semibold">
+                            <div class="flex flex-col p-0.5 px-2 rounded text-gray-700 font-semibold hover:bg-gray-100 hover:shadow relative">
                                 <span class="text-sm">ログイン中</span>
-                                <template x-if="!$store.auth.loading" >
-                                    <a class="px-3 rounded-md text-sm font-medium ">
-                                        <span x-text="$store.auth.user.name"
-                                        class="text-base text-gray-700 font-semibold"
-                                        ></span>
-                                    </a>
-                                </template>
+                                <a href="{{ route('users.show', Auth::user()) }}"
+                                    class="absolute inset-0"
+                                ></a>
+                                <span x-text="$store.auth.user.name"
+                                    class="px-3 text-base text-gray-700 font-semibold"
+                                ></span>
                             </div>
 
                             <!-- 右側（クイックアクション等） -->
@@ -107,8 +106,18 @@
                                     作業登録
                                 </a>
 
-
-                                <x-layouts.admin-sidebar />
+                                {{-- 管理情報 --}}
+                                @can('admin-menu.show')
+                                    {{-- 管理者・オーナー用メニュー --}}
+                                    <x-layouts.admin-sidebar />
+                                @else
+                                    {{-- 一般ユーザー用 自分のアカウント情報へのリンク --}}
+                                    <hr>
+                                    <a href="{{ route('users.show', Auth::user()) }}"
+                                        class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('users.show') ? 'bg-green-100 text-green-800' : 'text-gray-600 hover:bg-gray-100' }}">
+                                        あなたの登録情報
+                                    </a>
+                                @endcan
 
                             </nav>
                         </div>
