@@ -90,19 +90,24 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //------------------------------
     // 登録・変更申請 管理者専用グループ
     Route::middleware(['role:manager'])
-        ->prefix('admin/requests')
-        ->name('admin.requests.')
+        ->prefix('admin/requests/users')
+        ->name('admin.requests.users.')
         ->group(function () {
-            Route::get('/users', [UserChangeRequestController::class, 'index'])
-                ->name('users.index');
-            Route::get('/users/create', [UserChangeRequestController::class, 'create'])
-                ->name('users.create');
-            Route::post('/users/create', [UserChangeRequestController::class, 'store'])
-                ->name('users.store');
-            Route::get('/users/{changeRequest}', [UserChangeRequestController::class, 'edit'])
-                ->name('users.edit');
-            Route::patch('/users/{changeRequest}/update', [UserChangeRequestController::class, 'update'])
-                ->name('users.update');
+
+            Route::get('/{actionType}/{targetUser?}', [UserChangeRequestController::class, 'create'])
+                ->name('create');
+
+            Route::get('/index', [UserChangeRequestController::class, 'index'])
+                ->name('index');
+            Route::post('/{actionType}/{targetUser?}', [UserChangeRequestController::class, 'store'])
+                ->name('store');
+            // Route::delete('/{changeRequest}/delete', [UserChangeRequestController::class, 'destroy'])
+            //     ->name('destroy');
+            // 申請内容の更新
+            Route::get('/{changeRequest}', [UserChangeRequestController::class, 'edit'])
+                ->name('edit');
+            Route::patch('/{changeRequest}/update', [UserChangeRequestController::class, 'update'])
+                ->name('update');
     });
     // 承認 オーナー専用グループ
     Route::middleware(['role:owner'])

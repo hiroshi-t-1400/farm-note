@@ -27,7 +27,7 @@
                 @can('user-change.approve')
                     <div class="space-y-1">
                         <p class="px-2 text-sm font-medium text-gray-600 uppercase tracking-wider">オーナー専用</p>
-                        <a href="{{ route('admin.approvals.users.index') }}"
+                        {{-- <a href="{{ route('admin.approvals.users.index') }}" --}}
                             class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'approvals' ? 'bg-slate-800 text-amber-500' : '' }}"
                         >
                             <div class="flex items-center">
@@ -80,7 +80,7 @@
 
                         <!-- 【manager専用】ユーザー新規登録申請画面 -->
                         @can('user-change.request')
-                            <a href="{{ route('admin.requests.users.create') }}"
+                            {{-- <a href="{{ route('admin.requests.users.create') }}"
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 新規登録申請
@@ -89,7 +89,7 @@
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 申請一覧
-                            </a>
+                            </a> --}}
                         @endcan
                     </div>
                 </div>

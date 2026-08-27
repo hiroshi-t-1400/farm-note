@@ -1,19 +1,7 @@
-{{-- /var/www/src/resources/views/admin/users/register.blade.php --}}
-
-<x-layouts.layout title="ユーザー登録 - 農作業日誌">
-
-    <x-slot:header>
-        ユーザーの登録
-    </x-slot>
+{{-- /var/www/src/resources/views/components/admin/requests/users/create.blade.php --}}
 
 
-    <form
-        x-data="createUserChangeRequest()"
-        @submit.prevent="submitStore()"
-        x-cloak
-    >
-
-        <template x-if="resultData" x-transition>
+        <template x-if="resultData == {}" x-transition>
             <div class="result-area py-2 px-4 sm:w-[20rem] sm:y-[7rem] mb-4 border-1 border-gray-500 rounded-lg">
                 <h3 class="text-base text-gray-700 font-semibold ">申請した内容</h3>
                 <dl class="px-1">
@@ -36,8 +24,6 @@
                 </dl>
             </div>
         </template>
-
-        @csrf
 
         <x-ui.form-group
             name="username"
@@ -149,22 +135,3 @@
 
         </div>
 
-        <div class="flex py-5 justify-center gap-x-4">
-            <x-ui.button name="submit" dusk="submit-button"
-                class="w-[10rem]">
-                登録
-            </x-ui.button>
-            <x-ui.button
-                type="href"
-                name="cancel"
-                ::href="backUrl"
-                variant="secondary-ghost"
-                dusk="cancel-button"
-                class="w-[10rem]">
-                キャンセル
-            </x-ui.button>
-        </div>
-
-    </form>
-
-</x-layouts.layout>

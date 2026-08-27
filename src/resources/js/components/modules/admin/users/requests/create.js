@@ -3,25 +3,32 @@ import { ROLES } from "../../../../../constants/roles";
 
 export default (config) => {
 
+    const actionType = config?.initialModel?.['actionType'];
+    const targetUser = config?.initialModel?.['targetUser'] || '';
+    const targetUserId = targetUser.id || '';
+
     const backUrl = `${location.origin}/dashboard`; // 戻る遷移先はdashboard
 
-    const formData = {
-        email: '',
-        password: '',
-        loginId: '',
-        username: '',
-        role: 'worker',
+    const formData = loadUser();
+
+    const resultData = {};
+
+    function loadUser() {
+        return {
+            email: targetUser?.email || '',
+            password: '',
+            loginId: targetUser?.login_id || '',
+            username: targetUser?.name || '',
+            role: targetUser?.roles?.[0]?.['name'] || 'worker',
+        }
     };
 
-    const roleLabel = '一般ユーザー';
-
     return {
-
         formData,
-        roleLabel,
+        // roleLabel,
         errors: {},
 
-        resultData: {},
+        resultData,
 
         backUrl,
 
@@ -32,25 +39,24 @@ export default (config) => {
                 password: this.formData.password,
                 loginId: this.formData.loginId,
                 role: this.formData.role,
-                roleLabel: ROLES[this.formData.role]
             }
         },
 
         async submitStore() {
             this.errors = {};
-            const payload = this.buildPayload ();
+            const requestData = this.buildPayload ();
 
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const response = await window.http.post('/admin/users/create',
-                    payload);
+                const response = await window.http.post(`/admin/requests/users/${actionType}/${targetUserId}`,
+                    requestData);
 
                 // ----------------------------------------------------
                 // 認証成功（200 OK系）
                 // ----------------------------------------------------
                 // 申請したユーザーデータを返す。申請画面に通信リザルトとしてレンダする
-                this.resultData = payload;
+                this.resultData = requestData;
                 this.formData = {};
 
                 alert('アカウント登録申請が完了しました。');
