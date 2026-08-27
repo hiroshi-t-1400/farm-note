@@ -1,6 +1,6 @@
 // /var/www/src/resources/js/components/modules/admin/users/users
 
-import { tsToDate } from "../../dashboard/utils";
+import { tsToDate } from "../../../../../utils/date";
 
 export default (config) => {
 

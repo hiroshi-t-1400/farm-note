@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\UserController as ControllersUserController;
 use App\Http\Controllers\WorkController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
@@ -84,43 +85,48 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ];
     });
 
-
-    // 管理者専用グループ
+    // -----------------------------
+    // ユーザー情報
+    //------------------------------
+    // 登録・変更申請 管理者専用グループ
     Route::middleware(['role:manager'])
         ->prefix('admin/requests')
         ->name('admin.requests.')
         ->group(function () {
-            Route::get('/users', [UserChangeRequestController::class, 'index'])->name('users.index');
-            Route::get('/users/create', [UserChangeRequestController::class, 'create'])->name('users.create');
-            Route::post('/users/create', [UserChangeRequestController::class, 'store'])->name('users.store');
-            Route::get('/users/{changeRequest}', [UserChangeRequestController::class, 'edit'])->name('users.edit');
-            Route::patch('/users/{changeRequest}/update', [UserChangeRequestController::class, 'update'])->name('users.update');
+            Route::get('/users', [UserChangeRequestController::class, 'index'])
+                ->name('users.index');
+            Route::get('/users/create', [UserChangeRequestController::class, 'create'])
+                ->name('users.create');
+            Route::post('/users/create', [UserChangeRequestController::class, 'store'])
+                ->name('users.store');
+            Route::get('/users/{changeRequest}', [UserChangeRequestController::class, 'edit'])
+                ->name('users.edit');
+            Route::patch('/users/{changeRequest}/update', [UserChangeRequestController::class, 'update'])
+                ->name('users.update');
     });
-
-    // オーナー専用グループ
+    // 承認 オーナー専用グループ
     Route::middleware(['role:owner'])
         ->prefix('admin/approvals')
         ->name('admin.approvals.')
         ->group(function () {
-
-            // 1. 承認待ち一覧表示画面
             Route::get('/users', [UserApprovalController::class, 'index'])
                 ->name('users.index');
-
-            // 2. 申請内容の詳細確認画面
             Route::get('/users/{changeRequest}', [UserApprovalController::class, 'show'])
                 ->name('users.show');
-
-            // 3. 承認実行（usersテーブルへ反映）
             Route::patch('/users/{changeRequest}/approve', [UserApprovalController::class, 'approve'])
                 ->name('users.approve');
-
-            // 4. 却下実行
             Route::patch('/users/{changeRequest}/reject', [UserApprovalController::class, 'reject'])
                 ->name('users.reject');
         });
-
-
+    // ユーザー情報閲覧
+    Route::prefix('users')
+        ->name('users.')
+        ->group(function () {
+        Route::get('/index', [ControllersUserController::class, 'index'])
+            ->name('index');
+        Route::get('/{user}', [ControllersUserController::class, 'show'])
+            ->name('show');
+    });
 
     // Route::get('/work-logs/index', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
     Route::get('/work-logs/index/{cropSeason?}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');

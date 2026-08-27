@@ -1,5 +1,5 @@
 // /var/www/src/resources/js/components/modules/admin/users/users
-import { ROLES } from "../../../../constants/roles";
+import { ROLES } from "../../../../../constants/roles";
 
 export default (config) => {
 

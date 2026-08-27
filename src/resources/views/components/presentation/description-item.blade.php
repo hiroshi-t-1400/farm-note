@@ -1,10 +1,8 @@
-{{-- /var/www/src/resources/views/components/ui/description-request.blade.php --}}
-
+{{-- /var/www/src/resources/views/components/presentation/description-item.blade.php --}}
 
 @props([
     'label' => '',
 ])
-
 
 <div class="py-0.5 flex flex-wrap justify-between">
     <dt class="text-base font-medium text-gray-600">{{ $label }}</dt>
