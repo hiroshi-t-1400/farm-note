@@ -27,9 +27,10 @@ class UserChangeApplicationController extends Controller
             ->defaultSort()
             ->paginate(15);  // モデルにカプセル化したScopeを呼び出す
 
-        return response()->view('admin.users.index', compact('changeRequests'));
+        return response()->view('admin.requests.users.index', compact('changeRequests'));
     }
 
+    // show と editを兼用
     public function edit(Request $request, UserChangeApplication $changeRequest): Response
     {
         Gate::authorize('update', $changeRequest);
@@ -37,7 +38,7 @@ class UserChangeApplicationController extends Controller
 
         $changeRequest->load(['targetUser', 'requester']);
 
-        return response()->view('admin.users.edit', compact('changeRequest'));
+        return response()->view('admin.requests.users.edit', compact('changeRequest'));
     }
 
     // 申請作成画面
@@ -170,6 +171,10 @@ class UserChangeApplicationController extends Controller
     public function update(UpdateSubmitRequest $request, UserChangeApplication $changeRequest): JsonResponse
     {
         $validated = $request->validated();
+
+        if (!$request->filled('password')) {
+            unset($validated['password']);
+        }
 
         $changeRequest->update($validated);
 

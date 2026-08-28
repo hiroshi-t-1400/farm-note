@@ -7,7 +7,7 @@ import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 import { ACTION_LABELS } from "../../../../../constants/actions";
 
 export default (config) => {
-console.log(config?.initialModels);
+
     const data = config?.initialModels?.data;
     const path = config?.initialModels?.path;
 

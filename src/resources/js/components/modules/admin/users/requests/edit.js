@@ -2,6 +2,7 @@
 
 import { tsToDate } from "../../../../../utils/date";
 import { ROLES } from "../../../../../constants/roles";
+import { getBackUrl } from "../../../../../utils";
 
 export default (config) => {
 
@@ -19,8 +20,7 @@ export default (config) => {
     old.roleLabel = ROLES[old.role];
 
     const createdAt = tsToDate(created_at);
-
-    const backUrl = `${location.origin}/admin/requests/users`; // 戻る遷移先はindexページ
+    const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
 
     return {
         targetId: id,
@@ -42,19 +42,25 @@ export default (config) => {
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const response = await window.http.patch(`/admin/requests/users/${this.targetId}/update`, {
-                    name: this.username,
-                    email: this.email,
-                    password: this.password,
-                    loginId: this.loginId
-                });
+                const payload = {
+                    name: this.payload.username,
+                    loginId: this.payload.loginId,
+                    email: this.payload.email,
+                    password: this.payload.password,
+                    role: this.payload.role
+                };
+                console.log(payload);
+
+                const response = await window.http.patch(
+                    `/admin/requests/users/${this.targetId}/update`,
+                    payload
+                );
 
                 // ----------------------------------------------------
                 // 認証成功（200 OK系）
                 // ----------------------------------------------------
-                // 申請したユーザーデータを返す。申請画面に通信リザルトとしてレンダする
-                this.resultData = response.data;
-                alert('申請内容を変更しました。');
+                alert(response.data.message);
+                window.location.replace(backUrl);
 
             } catch (e) {
                 if (e.response) {
@@ -66,7 +72,7 @@ export default (config) => {
                     // ----------------------------------------------------
                     if (status === 422) {
                         this.errors = data.errors || {};
-                        alert('申請内容の変更に失敗しました。 : ' + (response.data.message || '入力内容を確認してください。'));
+                        alert('申請内容の変更に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
                         return;
                     }
 
