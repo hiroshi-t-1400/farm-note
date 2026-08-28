@@ -2,7 +2,7 @@
 
 namespace App\View\Components\Admin\Approvals;
 
-use App\Models\UserChangeRequest;
+use App\Models\Admin\UserChange\UserChangeApplication;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -15,7 +15,7 @@ class ApprovalBadge extends Component
      */
     public function __construct()
     {
-        $this->pendingCount = UserChangeRequest::where('status', 'pending')->count();
+        $this->pendingCount = UserChangeApplication::where('status', 'pending')->count();
     }
 
     /**

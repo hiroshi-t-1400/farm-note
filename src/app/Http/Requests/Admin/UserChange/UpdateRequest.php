@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Admin\UserChange;
 
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Override;
 
-class StoreUserRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,6 +26,8 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $targetUser = User::where('email', $this->input('email'));
+
         return [
             'name' => ['required', 'string', 'max:255'],
 
@@ -36,7 +38,7 @@ class StoreUserRequest extends FormRequest
                 'max:30',
                 'regex:/^[a-zA-Z][a-zA-Z0-9_.-]+$/',
                 Rule::unique('users', 'login_id')
-                    ->ignore($this->user), // 更新時自分を判定から除外
+                    ->ignore($targetUser),
             ],
 
             'email' => [
@@ -46,7 +48,7 @@ class StoreUserRequest extends FormRequest
                 'email', // 開発用 @example.orgの許容
                 'max:255',
                 Rule::unique('users', 'email')
-                    ->ignore($this->user),
+                    ->ignore($targetUser),
             ],
 
             'password' => [
@@ -57,14 +59,10 @@ class StoreUserRequest extends FormRequest
                 'regex:/^[a-zA-Z0-9!@#$%&*\-_.]+$/',
             ],
 
-            // 'password_confirmation' => [
-            //     'required_with:password',
-            //     'string',
-            // ],
-
             'role' => [
                 'required',
                 'string',
+                'exists:roles,name'
             ],
         ];
     }

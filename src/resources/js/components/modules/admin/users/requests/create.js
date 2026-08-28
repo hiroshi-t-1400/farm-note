@@ -6,7 +6,7 @@ export default (config) => {
     const actionType = config?.initialModel?.['actionType'];
     const targetUser = config?.initialModel?.['targetUser'] || '';
     const targetUserId = targetUser.id || '';
-
+console.log(targetUser);
     const backUrl = `${location.origin}/dashboard`; // 戻る遷移先はdashboard
 
     const formData = loadUser();
@@ -23,9 +23,21 @@ export default (config) => {
         }
     };
 
+    let old = buildOld();
+    const isUpdate = actionType === 'update' ? true : false;
+
+    function buildOld() {
+        const get = formData == {} ? {} : {...formData};
+        get.roleLabel = ROLES[get.role];
+        return get;
+    };
+
+        console.log({'old': old});
     return {
         formData,
-        // roleLabel,
+        old, // for update
+        isUpdate,
+        passwordMessage: ' ＊変更しない場合は空欄',
         errors: {},
 
         resultData,

@@ -1,14 +1,9 @@
-// /var/www/src/resources/js/components/modules/admin/users/users
+// /var/www/src/resources/js/components/modules/admin/users/requests/edit.js
 
 import { tsToDate } from "../../../../../utils/date";
+import { ROLES } from "../../../../../constants/roles";
 
 export default (config) => {
-
-    const roleLabel = {
-        owner: 'オーナー',
-        manager: '管理者',
-        worker: '一般ユーザー'
-    };
 
     let {payload, id, created_at, rejection_reason} = config?.initialModel || '';
 
@@ -21,7 +16,7 @@ export default (config) => {
         };
 
     let old = {...payload};
-    old.roleLabel = roleLabel[old.role];
+    old.roleLabel = ROLES[old.role];
 
     const createdAt = tsToDate(created_at);
 
@@ -41,17 +36,13 @@ export default (config) => {
         resultData: '',
         backUrl,
 
-        getRoleLabel(role) {
-            return roleLabel[role];
-        },
-
         async submitUpdate() {
             this.errors = {};
 
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const response = await window.http.patch(`/admin/users/${this.targetId}/update`, {
+                const response = await window.http.patch(`/admin/requests/users/${this.targetId}/update`, {
                     name: this.username,
                     email: this.email,
                     password: this.password,
@@ -73,7 +64,7 @@ export default (config) => {
                     // ----------------------------------------------------
                     // 1. バリデーションエラー（422）
                     // ----------------------------------------------------
-                    if (response.status === 422) {
+                    if (status === 422) {
                         this.errors = data.errors || {};
                         alert('申請内容の変更に失敗しました。 : ' + (response.data.message || '入力内容を確認してください。'));
                         return;
@@ -82,7 +73,7 @@ export default (config) => {
                     // ----------------------------------------------------
                     // 2. 連続送信（429）のハンドリング
                     // ----------------------------------------------------
-                    if (response.status === 429) {
+                    if (status === 429) {
                         this.errors = data.errors || {};
                         alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
                         return;
@@ -98,7 +89,7 @@ export default (config) => {
                 }
 
                 // axiosのタイムアウトエラーハンドリング
-                if (error.code === 'ECONNABORTED') {
+                if (e.code === 'ECONNABORTED') {
                     console.error('通信エラー： タイムアウトが発生しました。', e);
                     alert('通信タイムアウトしました。接続状態をご確認の上、再度お試しください。');
                 } else {

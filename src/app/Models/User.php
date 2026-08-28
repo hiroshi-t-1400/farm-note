@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\WorkLog\WorkLog;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -87,7 +88,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // 自分が出した申請の一覧
     public function changeRequests(): HasMany
     {
-        return $this->hasMany(UserChangeRequest::class, 'requested_by');
+        return $this->hasMany(UserChangeApplication::class, 'requested_by');
     }
 
     public function scopeDefaultSort(Builder $query): Builder

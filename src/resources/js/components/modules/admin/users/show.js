@@ -1,4 +1,5 @@
-// /var/www/src/resources/js/components/modules/admin/users/users
+// /var/www/src/resources/js/components/modules/admin/users/show.js
+
 import { tsToDate } from "../../dashboard/utils";
 
 import { ROLES } from "../../../../constants/roles";
@@ -32,7 +33,7 @@ export default (config) => {
         return true;
     };
 
-    // const editUrl =`${location.href}/admin/requests/users/${userId}`
+    const editUrl =`${location.origin}/admin/requests/users/update/${userId}`
 
     return {
         userId,
@@ -48,7 +49,7 @@ export default (config) => {
         statusClass,
 
         backUrl,
-        // editUrl,
+        editUrl,
 
         errors: {},
 

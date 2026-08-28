@@ -185,18 +185,15 @@ class WorkController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, StoreWorkLogRequest $workLog): JsonResponse
-    // public function update(StoreWorkLogRequest $request, string $id): JsonResponse
+    public function update(StoreWorkLogRequest $request, WorkLog $workLog): JsonResponse
     {
         Gate::authorize('update', $workLog);
+        $validated = $request->validated();
 
-        $validated = $workLog->validated();
+        $target_log = $workLog;
 
         // 登録する作業が予定plan、完了completed、下書きdraftで分岐
         $status = $validated['status'] ? 'plan' : 'completed';
-
-        $target_log = $workLog;
-        // $target_log = WorkLog::find($workLog->id);
 
         $target_log->update([
                 'crop_season_id' => $validated['crop_season_id'],

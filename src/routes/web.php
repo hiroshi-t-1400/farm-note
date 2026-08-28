@@ -4,6 +4,7 @@
 
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserApprovalController;
+use App\Http\Controllers\Admin\UserChange\UserChangeApplicationController;
 use App\Http\Controllers\Admin\UserChangeRequestController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserController as ControllersUserController;
 use App\Http\Controllers\WorkController;
+use App\Models\Admin\UserChange\UserChangeApplication;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -51,7 +53,6 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
     $request->fulfill();
 
     return redirect()->intended('/dashboard?verified=1');
-    // return response()->view('/dashboard');
 })->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
 
 // 確認メールの再送信
@@ -94,19 +95,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->name('admin.requests.users.')
         ->group(function () {
 
-            Route::get('/{actionType}/{targetUser?}', [UserChangeRequestController::class, 'create'])
+            Route::get('/create/{actionType}', [UserChangeApplicationController::class, 'create'])
                 ->name('create');
 
-            Route::get('/index', [UserChangeRequestController::class, 'index'])
+            Route::get('/', [UserChangeApplicationController::class, 'index'])
                 ->name('index');
-            Route::post('/{actionType}/{targetUser?}', [UserChangeRequestController::class, 'store'])
+            Route::post('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'store'])
                 ->name('store');
-            // Route::delete('/{changeRequest}/delete', [UserChangeRequestController::class, 'destroy'])
-            //     ->name('destroy');
+
             // 申請内容の更新
-            Route::get('/{changeRequest}', [UserChangeRequestController::class, 'edit'])
+            Route::get('/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
                 ->name('edit');
-            Route::patch('/{changeRequest}/update', [UserChangeRequestController::class, 'update'])
+            Route::patch('/{changeRequest}/update', [UserChangeApplicationController::class, 'update'])
                 ->name('update');
     });
     // 承認 オーナー専用グループ
