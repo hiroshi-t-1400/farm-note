@@ -1,6 +1,7 @@
 // /var/www/src/resources/js/components/modules/admin/users/show.js
 
 import { tsToDate } from "../../dashboard/utils";
+import { getBackUrl } from "../../../../utils";
 
 import { ROLES } from "../../../../constants/roles";
 import { USER_STATUS } from "../../../../constants/userStatus";
@@ -17,13 +18,7 @@ export default (config) => {
     const isActive = checkStatus();
     let statusClass = '';
 
-    let backUrl = checkBack();
-
-    function checkBack() {
-        return document.referrer !== location.href
-            ? document.referrer
-            : `${location.origin}/users/index`;
-    };
+    let backUrl = getBackUrl(`${location.origin}/users/index`);
 
     function checkStatus() {
         if (status !== 'active') {

@@ -26,7 +26,7 @@ class UpdateSubmitRequest extends FormRequest
      */
     public function rules(): array
     {
-        $targetUser = User::where('email', $this->input('email'));
+        $targetUser = User::where('email', $this->input('email'))->get();
 
         return [
             'name' => ['required', 'string', 'max:255'],

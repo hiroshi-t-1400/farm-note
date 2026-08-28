@@ -6,7 +6,7 @@ export default (config) => {
     const actionType = config?.initialModel?.['actionType'];
     const targetUser = config?.initialModel?.['targetUser'] || '';
     const targetUserId = targetUser.id || '';
-console.log(targetUser);
+
     const backUrl = `${location.origin}/dashboard`; // 戻る遷移先はdashboard
 
     const formData = loadUser();
