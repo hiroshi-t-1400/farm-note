@@ -1,66 +1,33 @@
-// /var/www/src/resources/js/components/modules/admin/users/requests/edit.js
+// /var/www/src/resources/js/components/modules/admin/requests/users/createRequest.js
 
-import { tsToDate } from "../../../../../utils/date";
-import { ROLES } from "../../../../../constants/roles";
-import { getBackUrl } from "../../../../../utils";
-
-export default (config) => {
-
-    let {payload, id, created_at, rejection_reason} = config?.initialModel || '';
-
-    payload = {
-            username: payload.name,
-            loginId: payload.login_id,
-            email: payload.email,
-            password: '',
-            role: payload.role
-        };
-
-    let old = {...payload};
-    old.roleLabel = ROLES[old.role];
-
-    const createdAt = tsToDate(created_at);
-    const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
-
+export function requestLogic() {
     return {
-        targetId: id,
 
-        payload,
-        old,
-        createdAt,
+        buildPayload () {
+            return {
+                name: this.formData.username,
+                email: this.formData.email,
+                password: this.formData.password,
+                loginId: this.formData.loginId,
+                role: this.formData.role,
+            }
+        },
 
-        rejection_reason,
-
-        errors: {},
-
-        resultData: '',
-        backUrl,
-
-        async submitUpdate() {
+        async submitStore(successFanc) {
             this.errors = {};
+            const requestData = this.buildPayload ();
 
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const payload = {
-                    name: this.payload.username,
-                    loginId: this.payload.loginId,
-                    email: this.payload.email,
-                    password: this.payload.password,
-                    role: this.payload.role
-                };
-                console.log(payload);
-
-                const response = await window.http.patch(
-                    `/admin/requests/users/${this.targetId}/update`,
-                    payload
-                );
+                const response = await window.http.post(`/admin/requests/users/${this.actionType}`,
+                    requestData);
 
                 // ----------------------------------------------------
                 // 認証成功（200 OK系）
                 // ----------------------------------------------------
-                alert(response.data.message);
-                window.location.replace(backUrl);
+
+                successFanc();
 
             } catch (e) {
                 if (e.response) {
@@ -72,7 +39,7 @@ export default (config) => {
                     // ----------------------------------------------------
                     if (status === 422) {
                         this.errors = data.errors || {};
-                        alert('申請内容の変更に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
+                        alert('申請に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
                         return;
                     }
 

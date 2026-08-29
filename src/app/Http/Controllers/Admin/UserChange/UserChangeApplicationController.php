@@ -109,7 +109,7 @@ class UserChangeApplicationController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'システムエラーが発生しました。管理者にお問い合わせください。'
+                'message' => 'サーバーエラーが発生しました。時間をおいて再度お試しください。'
             ], 500);
         }
     }
@@ -170,13 +170,22 @@ class UserChangeApplicationController extends Controller
     // public function update(UpdateSubmitRequest $changeRequest): JsonResponse
     public function update(UpdateSubmitRequest $request, UserChangeApplication $changeRequest): JsonResponse
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        if (!$request->filled('password')) {
-            unset($validated['password']);
+            if (!$request->filled('password')) {
+                unset($validated['password']);
+            }
+
+            $changeRequest->update([
+                'payload' => $validated,
+            ]);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'サーバーエラーが発生しました。',
+            ], 422);
         }
-
-        $changeRequest->update($validated);
 
         return response()->json([
             'status' => 'success',

@@ -159,7 +159,10 @@
             </x-ui.form-group>
 
             <div class="flex py-5 justify-center gap-x-4">
-                <x-ui.button name="submit" dusk="submit-button"
+                <x-ui.button
+                    type="button"
+                    @click="submitCreate()"
+                    name="submit" dusk="submit-button"
                     class="w-[10rem]">
                     {{ $submitButton }}
                 </x-ui.button>

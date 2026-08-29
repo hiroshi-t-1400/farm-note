@@ -95,11 +95,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->name('admin.requests.users.')
         ->group(function () {
 
-            Route::get('/create/{actionType}', [UserChangeApplicationController::class, 'create'])
-                ->name('create');
-
             Route::get('/', [UserChangeApplicationController::class, 'index'])
-                ->name('index');
+            ->name('index');
+
+            Route::get('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'create'])
+                ->name('create-request');
+                
             Route::post('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'store'])
                 ->name('store');
 

@@ -1,77 +1,69 @@
-// /var/www/src/resources/js/components/modules/admin/users/users
+// /var/www/src/resources/js/components/modules/admin/users/requests/edit.js
+
+import { tsToDate } from "../../../../../utils/date";
 import { ROLES } from "../../../../../constants/roles";
+import { getBackUrl } from "../../../../../utils";
 
 export default (config) => {
 
-    const actionType = config?.initialModel?.['actionType'];
-    const targetUser = config?.initialModel?.['targetUser'] || '';
-    const targetUserId = targetUser.id || '';
+    let {payload, id, created_at, rejection_reason} = config?.initialModel || '';
 
-    const backUrl = `${location.origin}/dashboard`; // 戻る遷移先はdashboard
-
-    const formData = loadUser();
-
-    const resultData = {};
-
-    function loadUser() {
-        return {
-            email: targetUser?.email || '',
+    payload = {
+            username: payload.name,
+            loginId: payload.login_id,
+            email: payload.email,
             password: '',
-            loginId: targetUser?.login_id || '',
-            username: targetUser?.name || '',
-            role: targetUser?.roles?.[0]?.['name'] || 'worker',
-        }
-    };
+            role: payload.role
+        };
 
-    let old = buildOld();
-    const isUpdate = actionType === 'update' ? true : false;
+    let old = {...payload};
+    old.roleLabel = ROLES[old.role];
 
-    function buildOld() {
-        const get = formData == {} ? {} : {...formData};
-        get.roleLabel = ROLES[get.role];
-        return get;
-    };
+    const createdAt = tsToDate(created_at);
+    const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
+    const submitUrl = `${window.location.origin}/admin/requests/users/${id}/update`;
+    // const submitUrl = '';
 
-        console.log({'old': old});
     return {
-        formData,
-        old, // for update
-        isUpdate,
-        passwordMessage: ' ＊変更しない場合は空欄',
+        targetId: id,
+
+        payload,
+        old,
+        createdAt,
+
+        rejection_reason,
+
         errors: {},
 
-        resultData,
-
+        resultData: '',
         backUrl,
 
-        buildPayload () {
-            return {
-                name: this.formData.username,
-                email: this.formData.email,
-                password: this.formData.password,
-                loginId: this.formData.loginId,
-                role: this.formData.role,
-            }
-        },
 
-        async submitStore() {
+        async submitUpdate() {
             this.errors = {};
-            const requestData = this.buildPayload ();
 
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const response = await window.http.post(`/admin/requests/users/${actionType}/${targetUserId}`,
-                    requestData);
+                const payload = {
+                    name: this.payload.username,
+                    loginId: this.payload.loginId,
+                    email: this.payload.email,
+                    password: this.payload.password,
+                    role: this.payload.role
+                };
+                console.log(payload);
+
+                const response = await window.http.patch(
+                    submitUrl,
+                    payload
+                );
 
                 // ----------------------------------------------------
                 // 認証成功（200 OK系）
                 // ----------------------------------------------------
-                // 申請したユーザーデータを返す。申請画面に通信リザルトとしてレンダする
-                this.resultData = requestData;
-                this.formData = {};
-
-                alert('アカウント登録申請が完了しました。');
+                alert(response.data.message);
+                window.location.replace(backUrl);
 
             } catch (e) {
                 if (e.response) {
@@ -81,16 +73,16 @@ export default (config) => {
                     // ----------------------------------------------------
                     // 1. バリデーションエラー（422）
                     // ----------------------------------------------------
-                    if (data.status === 422) {
+                    if (status === 422) {
                         this.errors = data.errors || {};
-                        alert('アカウント登録に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
+                        alert('申請内容の変更に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
                         return;
                     }
 
                     // ----------------------------------------------------
                     // 2. 連続送信（429）のハンドリング
                     // ----------------------------------------------------
-                    if (data.status === 429) {
+                    if (status === 429) {
                         this.errors = data.errors || {};
                         alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
                         return;
