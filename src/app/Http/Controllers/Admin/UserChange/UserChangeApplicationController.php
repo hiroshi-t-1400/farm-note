@@ -10,6 +10,7 @@ use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\User;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
@@ -45,16 +46,18 @@ class UserChangeApplicationController extends Controller
     /**
      * @param string $actionType [create, update, disable]
      */
-    public function create(string $actionType, ?User $targetUser = null): Response
+    public function create(string $actionType, ?User $targetUser = null): Response|RedirectResponse
     {
         $requestData = [];
 
         if ($targetUser !== null) {
             // 異常なアクセスへのフォールバック
-            if (User::where('id', $targetUser->id)->exists()) {
-                alert('送信データが異常です。');
-                return response()->view('dashboard');
-            }
+            alert($targetUser->id);
+            // if (User::where('id', $targetUser->id)->exists()) {
+            //     alert('送信データが異常です。');
+            //     // return response()->view('dashboard');
+            //     return redirect('/dashboard');
+            // }
 
             $targetUser->load('roles');
             $requestData['targetUser'] = $targetUser;
@@ -65,45 +68,82 @@ class UserChangeApplicationController extends Controller
         return response()->view('admin.requests.users.create', compact('requestData'));
     }
 
-    // アクションに対応したstoreメソッド呼び出し
-    public function store(
-        Request $request,
-        string $actionType,
-        ?User $targetUser = null
-    ): JsonResponse {
+    // // アクションに対応したstoreメソッド呼び出し
+    // public function store(
+    //     Request $request,
+    //     string $actionType,
+    //     ?User $targetUser = null
+    // ): JsonResponse {
 
-        $requestData = $request;
+    //     $requestData = $request;
+
+    //     try {
+    //         $application = match ($actionType) {
+    //             'create' => $this->storeCreate(
+    //                 $requestData, $actionType
+    //             ),
+
+    //             'update' => $this->storeUpdate(
+    //                 $requestData, $actionType, $targetUser
+    //             ),
+
+    //             'disable' => $this->storeDisable(
+    //                 $request, $actionType, $targetUser
+    //             ),
+
+    //             default => abort(404),
+    //         };
+
+    //         return response()->json($application);
+
+    //     } catch (\LogicException $e) {
+    //         // 「既に処理済み」「ステータスが不整合」などの業務エラー ➔ 422
+    //         return response()->json([
+    //             'message' => $e->getMessage()
+    //         ], 422);
+    //     } catch (\Throwable $e) {
+    //         // その他のエラーをLogを保存、messegeとして読み出せるように
+    //         Log::error('申請処理エラー', [
+    //             'action_type' => $actionType,
+    //             'target_user_id' => $targetUser->id ?? '',
+    //             'user_id' => $request->user()->id,
+    //             'error' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString(),
+    //         ]);
+
+    //         return response()->json([
+    //             'message' => 'サーバーエラーが発生しました。時間をおいて再度お試しください。'
+    //         ], 500);
+    //     }
+    // }
+
+    // 新規登録
+    public function storeCreate(StoreRequest $requestData): JsonResponse
+    {
+        $actionType = 'create';
 
         try {
-            $application = match ($request) {
-                'create' => $this->storeCreate(
-                    $requestData, $actionType
-                ),
+            $validated = $requestData->validated();
 
-                'update' => $this->storeUpdate(
-                    $requestData, $actionType, $targetUser
-                ),
-
-                'disable' => $this->storeDisable(
-                    $request, $actionType, $targetUser
-                ),
-
-                default => abort(404),
-            };
-
-            return response()->json($application);
-
+            UserChangeApplication::create([
+                'action_type' => $actionType,
+                'target_user_id' => null,
+                'payload' => $validated,
+                'status' => UserChangeApplication::STATUS_PENDING,
+                'requested_by' => $requestData->user()->id,
+            ]);
         } catch (\LogicException $e) {
             // 「既に処理済み」「ステータスが不整合」などの業務エラー ➔ 422
             return response()->json([
                 'message' => $e->getMessage()
             ], 422);
+
         } catch (\Throwable $e) {
             // その他のエラーをLogを保存、messegeとして読み出せるように
             Log::error('申請処理エラー', [
                 'action_type' => $actionType,
-                'target_user_id' => $targetUser->id,
-                'user_id' => $request->user()->id,
+                'target_user_id' => $targetUser->id ?? '',
+                'user_id' => $requestData->user()->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -112,20 +152,6 @@ class UserChangeApplicationController extends Controller
                 'message' => 'サーバーエラーが発生しました。時間をおいて再度お試しください。'
             ], 500);
         }
-    }
-
-    // 新規登録
-    public function storeCreate(StoreRequest $requestData, string $actionType): JsonResponse
-    {
-        $validated = $requestData->validated();
-
-        UserChangeApplication::create([
-            'action_type' => $actionType,
-            'target_user_id' => null,
-            'payload' => $validated,
-            'status' => UserChangeApplication::STATUS_PENDING,
-            'requested_by' => $requestData->user()->id,
-        ]);
 
         return response()->json([
             'status' => 'success',
@@ -133,17 +159,40 @@ class UserChangeApplicationController extends Controller
         ]);
     }
 
-    public function storeUpdate(UpdateRequest $requestData, string $actionType, User $targetUser)
+    public function storeUpdate(UpdateRequest $requestData, User $targetUser)
     {
-        $validated = $requestData->validated();
+        $actionType = 'update';
+        try {
+            $validated = $requestData->validated();
 
-        UserChangeApplication::create([
-            'action_type' => $actionType,
-            'target_user_id' => $targetUser->id,
-            'payload' => $validated,
-            'status' => UserChangeApplication::STATUS_PENDING,
-            'requested_by' => $requestData->user()->id,
-        ]);
+            UserChangeApplication::create([
+                'action_type' => $actionType,
+                'target_user_id' => $targetUser->id,
+                'payload' => $validated,
+                'status' => UserChangeApplication::STATUS_PENDING,
+                'requested_by' => $requestData->user()->id,
+            ]);
+
+        } catch (\LogicException $e) {
+            // 「既に処理済み」「ステータスが不整合」などの業務エラー ➔ 422
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+
+        } catch (\Throwable $e) {
+            // その他のエラーをLogを保存、messegeとして読み出せるように
+            Log::error('申請処理エラー', [
+                'action_type' => $actionType,
+                'target_user_id' => $targetUser->id ?? '',
+                'user_id' => $requestData->user()->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'サーバーエラーが発生しました。時間をおいて再度お試しください。'
+            ], 500);
+        }
 
         return response()->json([
             'status' => 'success',

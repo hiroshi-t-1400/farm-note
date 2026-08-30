@@ -11,14 +11,11 @@
         x-data="createUserChangeRequest({
             initialModel: @js($requestData)
         })"
+        @submit.prevent="submitStore()"
         x-cloak
     >
 
-            <x-admin.requests.users.create>
-                <x-slot:submitButton>
-                    申請する
-                </x-slot>
-            </x-admin.requests.users.create>
+            <x-admin.requests.users.create />
 
     </form>
 

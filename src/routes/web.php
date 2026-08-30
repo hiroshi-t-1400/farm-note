@@ -99,10 +99,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             ->name('index');
 
             Route::get('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'create'])
-                ->name('create-request');
-                
-            Route::post('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'store'])
-                ->name('store');
+                ->name('create');
+
+            Route::post('/store-create', [UserChangeApplicationController::class, 'storeCreate'])
+                ->name('store-create');
+            Route::post('/{targetUser}/store-update', [UserChangeApplicationController::class, 'storeUpdate'])
+                ->name('store-update');
 
             // 申請内容の更新
             Route::get('/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
@@ -130,7 +132,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->group(function () {
         Route::get('/index', [ControllersUserController::class, 'index'])
             ->name('index');
-        Route::get('/{user}', [ControllersUserController::class, 'show'])
+        Route::get('/', [ControllersUserController::class, 'show'])
             ->name('show');
     });
 

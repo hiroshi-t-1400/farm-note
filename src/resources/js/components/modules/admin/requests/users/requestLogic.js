@@ -1,83 +1,94 @@
 // /var/www/src/resources/js/components/modules/admin/requests/users/createRequest.js
 
-export function requestLogic() {
+
+export function buildPayload (formData) {
     return {
-
-        buildPayload () {
-            return {
-                name: this.formData.username,
-                email: this.formData.email,
-                password: this.formData.password,
-                loginId: this.formData.loginId,
-                role: this.formData.role,
-            }
-        },
-
-        async submitStore(successFanc) {
-            this.errors = {};
-            const requestData = this.buildPayload ();
-
-            try {
-                await window.http.get('/sanctum/csrf-cookie');
-
-                const response = await window.http.post(`/admin/requests/users/${this.actionType}`,
-                    requestData);
-
-                // ----------------------------------------------------
-                // 認証成功（200 OK系）
-                // ----------------------------------------------------
-
-                successFanc();
-
-            } catch (e) {
-                if (e.response) {
-                    const status = e.response.status;
-                    const data = e.response.data;
-
-                    // ----------------------------------------------------
-                    // 1. バリデーションエラー（422）
-                    // ----------------------------------------------------
-                    if (status === 422) {
-                        this.errors = data.errors || {};
-                        alert('申請に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
-                        return;
-                    }
-
-                    // ----------------------------------------------------
-                    // 2. 連続送信（429）のハンドリング
-                    // ----------------------------------------------------
-                    if (status === 429) {
-                        this.errors = data.errors || {};
-                        alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
-                        return;
-                    }
-
-                    // ----------------------------------------------------
-                    // 3. その他のサーバーエラー（500系や404など
-                    // ----------------------------------------------------
-                    // 個別ハンドリング以外
-                    console.error('サーバーエラーが発生しました。', status, data);
-                    alert('サーバーエラーが発生しました。時間をおいて再度お試しください。');
-                    return;
-                }
-
-                // axiosのタイムアウトエラーハンドリング
-                if (e.code === 'ECONNABORTED') {
-                    console.error('通信エラー： タイムアウトが発生しました。', e);
-                    alert('通信タイムアウトしました。接続状態をご確認の上、再度お試しください。');
-                } else {
-                    console.error('不明な通信エラー:', e.message);
-                    alert('通信エラーが発生しました。');
-                }
-            }
-        },
-
-        // バリデーションエラーメッセージを返す
-        getError(field) {
-            // bladeの属性はusernameとしているためここで変換する
-            if (field === 'username') return this.errors?.['name'] || null;
-            return this.errors?.[field] || null;
-        },
+        name: formData.username,
+        email: formData.email,
+        password: formData.password,
+        loginId: formData.loginId,
+        role: formData.role,
     }
+}
+
+
+export async function submit(actionTypeUrl, payload) {
+    try {
+        await window.http.get('/sanctum/csrf-cookie');
+
+        const response = await window.http.post(
+            actionTypeUrl,
+            payload
+        );
+
+        // ----------------------------------------------------
+        // 認証成功（200 OK系）
+        // ----------------------------------------------------
+
+        return response;
+
+    } catch (e) {
+        throw normalizeRequestError(e);
+    }
+}
+
+function normalizeRequestError(e) {
+    if (e.response) {
+        const {status, data} = e.response;
+
+        // ----------------------------------------------------
+        // 1. バリデーションエラー（422）
+        // ----------------------------------------------------
+        if (status === 422) {
+            return {
+                type: 'validation',
+                status,
+                errors: data.errors || {},
+                message: data.message || '内容を確認してください。',
+            };
+        }
+
+        // ----------------------------------------------------
+        // 2. 連続送信（429）のハンドリング
+        // ----------------------------------------------------
+        if (status === 429) {
+            return {
+                type: 'too_many_requests',
+                status,
+                errors: data.errors || {},
+                message: '送信操作が多すぎます。',
+            };
+        }
+
+        // ----------------------------------------------------
+        // 3. その他のサーバーエラー（500系や404など
+        // ----------------------------------------------------
+        return {
+            type: 'server',
+            status,
+            errors: data.errors || {},
+            message: 'サーバーエラーが発生しました。',
+        };
+    }
+
+    // axiosのタイムアウトエラーハンドリング
+    if (e.code === 'ECONNABORTED') {
+        return {
+            type: 'timeout',
+            message: 'タイムアウトが発生しました。',
+        };
+    }
+
+    return {
+        type: 'network',
+        message: '通信エラーが発生しました。',
+    };
+}
+
+// バリデーションエラーメッセージを返す
+export function getError(field, errors) {
+    // bladeの属性はusernameとしているためここで変換する
+    if (field === 'username') return errors?.['name'] || null;
+    return errors?.[field] || null;
 }
 

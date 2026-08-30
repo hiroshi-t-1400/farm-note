@@ -80,7 +80,7 @@
 
                         <!-- 【manager専用】ユーザー新規登録申請画面 -->
                         @can('user-change.request')
-                            <a href="{{ route('admin.requests.users.create-request', $actionType='create') }}"
+                            <a href="{{ route('admin.requests.users.create', $actionType='create') }}"
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 新規登録申請

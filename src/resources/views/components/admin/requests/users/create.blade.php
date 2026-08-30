@@ -160,11 +160,9 @@
 
             <div class="flex py-5 justify-center gap-x-4">
                 <x-ui.button
-                    type="button"
-                    @click="submitCreate()"
                     name="submit" dusk="submit-button"
                     class="w-[10rem]">
-                    {{ $submitButton }}
+                    申請する
                 </x-ui.button>
                 <x-ui.button
                     type="href"

@@ -26,7 +26,9 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $targetUser = User::where('email', $this->input('email'));
+        // route()でRequestのrouteパラメータを参照
+        // (User $targetUser)としてルートモデルバインディングされているためuserモデルが取得される
+        $targetUser = $this->route('targetUser');
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -52,7 +54,7 @@ class UpdateRequest extends FormRequest
             ],
 
             'password' => [
-                'required',
+                'nullable',
                 'string',
                 Password::min(10)
                     ->uncompromised(3),
