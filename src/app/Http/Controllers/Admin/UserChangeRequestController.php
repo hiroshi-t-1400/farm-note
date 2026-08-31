@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserChangeRequest;
+use App\Models\User;
 use App\Models\UserChangeRequest;
+use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -34,28 +36,59 @@ class UserChangeRequestController extends Controller
         return response()->view('admin.users.edit', compact('changeRequest'));
     }
 
-    public function create()
+    // 申請作成画面
+    /**
+     * @param string $actionType [create, update, delete]
+     */
+    public function create(string $actionType, ?User $targetUser = null)
     {
-        return response()->view('admin.users.create');
+        $requestData = [];
+
+        if ($targetUser !== null) {
+            $targetUser->load('roles');
+            $requestData['targetUser'] = $targetUser;
+        }
+
+        $requestData['actionType'] = $actionType;
+
+        return response()->view('admin.requests.users.create', compact('requestData'));
     }
 
-    public function store(StoreUserRequest $request): JsonResponse
+    public function store(Request $request, StoreUserRequest $requestData, string $actionType, ?User $targetUser = null): JsonResponse
     {
-        $validated = $request->validated();
+        if ($actionType === 'delete') {
+            UserChangeRequest::create([
+                'action_type' => $actionType,
+                'target_user_id' => $targetUser->id,
+                'status' => UserChangeRequest::STATUS_PENDING,
+                'requested_by' => $request->user()->id,
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'ユーザー削除の申請を送信しました。'
+            ]);
+        }
+
+        $validated = $requestData->validated();
 
         $validated['password'] = Hash::make($validated['password']);
 
         UserChangeRequest::create([
-            'action_type' => 'create',
-            'target_user_id' => null,
+            'action_type' => $actionType,
+            'target_user_id' => $targetUser?->id ?? null,
             'payload' => $validated,
             'status' => UserChangeRequest::STATUS_PENDING,
             'requested_by' => $request->user()->id,
         ]);
 
+        $message = $actionType === 'create'
+            ? 'ユーザー登録の申請を送信しました。'
+            : 'ユーザー情報更新の申請を送信しました。';
+
         return response()->json([
-            'status' => 'pending',
-            'message' => 'ユーザー登録の申請を送信しました。'
+            'status' => 'success',
+            'message' => $message,
         ]);
     }
 

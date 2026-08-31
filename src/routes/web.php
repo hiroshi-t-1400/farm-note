@@ -4,6 +4,7 @@
 
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserApprovalController;
+use App\Http\Controllers\Admin\UserChange\UserChangeApplicationController;
 use App\Http\Controllers\Admin\UserChangeRequestController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserController as ControllersUserController;
 use App\Http\Controllers\WorkController;
+use App\Models\Admin\UserChange\UserChangeApplication;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -51,7 +53,6 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
     $request->fulfill();
 
     return redirect()->intended('/dashboard?verified=1');
-    // return response()->view('/dashboard');
 })->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
 
 // 確認メールの再送信
@@ -90,19 +91,26 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //------------------------------
     // 登録・変更申請 管理者専用グループ
     Route::middleware(['role:manager'])
-        ->prefix('admin/requests')
-        ->name('admin.requests.')
+        ->prefix('admin/requests/users')
+        ->name('admin.requests.users.')
         ->group(function () {
-            Route::get('/users', [UserChangeRequestController::class, 'index'])
-                ->name('users.index');
-            Route::get('/users/create', [UserChangeRequestController::class, 'create'])
-                ->name('users.create');
-            Route::post('/users/create', [UserChangeRequestController::class, 'store'])
-                ->name('users.store');
-            Route::get('/users/{changeRequest}', [UserChangeRequestController::class, 'edit'])
-                ->name('users.edit');
-            Route::patch('/users/{changeRequest}/update', [UserChangeRequestController::class, 'update'])
-                ->name('users.update');
+
+            Route::get('/', [UserChangeApplicationController::class, 'index'])
+            ->name('index');
+
+            Route::get('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'create'])
+                ->name('create');
+
+            Route::post('/store-create', [UserChangeApplicationController::class, 'storeCreate'])
+                ->name('store-create');
+            Route::post('/{targetUser}/store-update', [UserChangeApplicationController::class, 'storeUpdate'])
+                ->name('store-update');
+
+            // 申請内容の更新
+            Route::get('/record/edit/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
+                ->name('edit');
+            Route::patch('/record/{changeRequest}/update/{targetUser?}', [UserChangeApplicationController::class, 'update'])
+                ->name('update');
     });
     // 承認 オーナー専用グループ
     Route::middleware(['role:owner'])
@@ -124,7 +132,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->group(function () {
         Route::get('/index', [ControllersUserController::class, 'index'])
             ->name('index');
-        Route::get('/{user}', [ControllersUserController::class, 'show'])
+        Route::get('/', [ControllersUserController::class, 'show'])
             ->name('show');
     });
 

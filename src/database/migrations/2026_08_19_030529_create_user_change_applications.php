@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_change_requests', function (Blueprint $table) {
+        Schema::create('user_change_applications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('target_user_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->foreignId('requested_by')->constrained('users');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_change_requests');
+        Schema::dropIfExists('user_change_applications');
     }
 };

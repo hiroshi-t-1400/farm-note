@@ -63,7 +63,7 @@
             <div class="flex flex-wrap gap-x-4 gap-y-2">
                 <x-ui.button
                     type="href"
-                    {{-- href="editUrl" --}}
+                    ::href="`${editUrl}`"
                     name="edit" dusk="submit-edit"
                     class="w-[10rem]"
                 >

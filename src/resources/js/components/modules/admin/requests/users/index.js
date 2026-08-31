@@ -7,7 +7,7 @@ import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 import { ACTION_LABELS } from "../../../../../constants/actions";
 
 export default (config) => {
-console.log(config?.initialModels);
+
     const data = config?.initialModels?.data;
     const path = config?.initialModels?.path;
 
@@ -27,7 +27,7 @@ console.log(config?.initialModels);
         role: r.payload.role,
         roleLabel: ROLES[r.payload.role],
         rejectionReason: r.rejection_reason,
-        showUrl: `${path}/${r.id}`,
+        showUrl: `${window.location.origin}/admin/requests/users/record/edit/${r.id}`,
 
         status: r.status,
         statusLabel: REQUEST_STATUS[r.status],

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserApprovalRequest;
-use App\Models\UserChangeRequest;
+use App\Models\Admin\UserChange\UserChangeApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +13,7 @@ class UserApprovalController extends Controller
     // 一覧
     public function index()
     {
-        $changeRequests = UserChangeRequest::where('status', 'pending')
+        $changeRequests = UserChangeApplication::where('status', 'pending')
             ->with(['targetUser', 'requester'])
             ->orderBy('created_at')
             ->cursorPaginate(15);
@@ -22,7 +22,7 @@ class UserApprovalController extends Controller
     }
 
     // 承認操作画面表示
-    public function show(Request $request, UserChangeRequest $changeRequest)
+    public function show(Request $request, UserChangeApplication $changeRequest)
     {
         return response()->view('admin.approvals.show', compact('changeRequest'))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
@@ -31,7 +31,7 @@ class UserApprovalController extends Controller
     }
 
     // 承認ロジック
-    public function approve(Request $request, UserChangeRequest $changeRequest)
+    public function approve(Request $request, UserChangeApplication $changeRequest)
     {
         // policyで認可の設定
         // $this->authorize('approve', $request);
@@ -69,7 +69,7 @@ class UserApprovalController extends Controller
     }
 
     // 棄却ロジック
-    public function reject(UserApprovalRequest $request, UserChangeRequest $changeRequest)
+    public function reject(UserApprovalRequest $request, UserChangeApplication $changeRequest)
     {
         $validated = $request->validated();
 

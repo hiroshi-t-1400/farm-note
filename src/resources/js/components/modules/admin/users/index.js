@@ -22,7 +22,7 @@ export default (config) => {
         updatedAt: tsToDate(u.updated_at),
         // statusCss: statusClass[r.status],
     }));
-    
+
     return {
         indexData: indexData,
 

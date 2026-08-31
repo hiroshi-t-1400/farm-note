@@ -324,7 +324,8 @@ export function storeFormLogic (initialData = {}) {
                     status: status,
                     title: title,
                     content: content,
-                    updated_by: updatedBy,
+                    // updated_by: updatedBy,
+                    updated_by: this.$store.auth.user.id,
                     material_logs
                 };
             },

@@ -1,49 +1,42 @@
-// /var/www/src/resources/js/components/modules/admin/users/users
+// /var/www/src/resources/js/components/modules/admin/requests/users/edit.js
 
 import { tsToDate } from "../../../../../utils/date";
+import { getBackUrl } from "../../../../../utils";
+
+import { buildPayload, loadUser } from "./requestLogic";
 
 export default (config) => {
+    console.log(config?.initialModel);
+    let {payload, id, created_at, rejection_reason: rejectionReason, actionType, target_user_id: targetUserId} = config?.initialModel || '';
 
-    const roleLabel = {
-        owner: 'オーナー',
-        manager: '管理者',
-        worker: '一般ユーザー'
-    };
-
-    let {payload, id, created_at, rejection_reason} = config?.initialModel || '';
-
-    payload = {
-            username: payload.name,
-            loginId: payload.login_id,
-            email: payload.email,
-            password: '',
-            role: payload.role
-        };
-
-    let old = {...payload};
-    old.roleLabel = roleLabel[old.role];
+    let {formData, old} = loadUser(payload);
 
     const createdAt = tsToDate(created_at);
+    const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
+    const submitRoute = getSubmitRoute();
+console.log(submitRoute);
+    function getSubmitRoute() {
+        const addPath = actionType === 'create'
+            ? 'update'
+            : `update/${targetUserId}`;
 
-    const backUrl = `${location.origin}/admin/requests/users`; // 戻る遷移先はindexページ
+            return `${window.location.origin}/admin/requests/users/record/${id}/${addPath}`;
+    }
 
     return {
         targetId: id,
 
-        payload,
+        formData,
         old,
         createdAt,
 
-        rejection_reason,
+        rejectionReason,
 
         errors: {},
 
         resultData: '',
         backUrl,
 
-        getRoleLabel(role) {
-            return roleLabel[role];
-        },
 
         async submitUpdate() {
             this.errors = {};
@@ -51,19 +44,19 @@ export default (config) => {
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const response = await window.http.patch(`/admin/users/${this.targetId}/update`, {
-                    name: this.username,
-                    email: this.email,
-                    password: this.password,
-                    loginId: this.loginId
-                });
+                const payload = buildPayload(this.formData);
+                console.log(payload);
+
+                const response = await window.http.patch(
+                    submitRoute,
+                    payload
+                );
 
                 // ----------------------------------------------------
-                // 認証成功（200 OK系）
+                // 成功（200 OK系）
                 // ----------------------------------------------------
-                // 申請したユーザーデータを返す。申請画面に通信リザルトとしてレンダする
-                this.resultData = response.data;
-                alert('申請内容を変更しました。');
+                alert(response.data.message);
+                window.location.replace(backUrl);
 
             } catch (e) {
                 if (e.response) {
@@ -73,16 +66,16 @@ export default (config) => {
                     // ----------------------------------------------------
                     // 1. バリデーションエラー（422）
                     // ----------------------------------------------------
-                    if (response.status === 422) {
+                    if (status === 422) {
                         this.errors = data.errors || {};
-                        alert('申請内容の変更に失敗しました。 : ' + (response.data.message || '入力内容を確認してください。'));
+                        alert('申請内容の変更に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
                         return;
                     }
 
                     // ----------------------------------------------------
                     // 2. 連続送信（429）のハンドリング
                     // ----------------------------------------------------
-                    if (response.status === 429) {
+                    if (status === 429) {
                         this.errors = data.errors || {};
                         alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
                         return;
@@ -98,7 +91,7 @@ export default (config) => {
                 }
 
                 // axiosのタイムアウトエラーハンドリング
-                if (error.code === 'ECONNABORTED') {
+                if (e.code === 'ECONNABORTED') {
                     console.error('通信エラー： タイムアウトが発生しました。', e);
                     alert('通信タイムアウトしました。接続状態をご確認の上、再度お試しください。');
                 } else {

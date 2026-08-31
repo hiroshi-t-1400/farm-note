@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Admin\UserChange;
 
+use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Override;
 
-class StoreUserRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,6 +28,10 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        // route()でRequestのrouteパラメータを参照
+        // (User $targetUser)としてルートモデルバインディングされているためuserモデルが取得される
+        $targetUser = $this->route('targetUser');
+
         return [
             'name' => ['required', 'string', 'max:255'],
 
@@ -36,7 +42,18 @@ class StoreUserRequest extends FormRequest
                 'max:30',
                 'regex:/^[a-zA-Z][a-zA-Z0-9_.-]+$/',
                 Rule::unique('users', 'login_id')
-                    ->ignore($this->user), // 更新時自分を判定から除外
+                    ->ignore($targetUser),
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->login_id',
+                )
+                    ->where(function (Builder $query) {
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        );
+                }),
             ],
 
             'email' => [
@@ -46,25 +63,33 @@ class StoreUserRequest extends FormRequest
                 'email', // 開発用 @example.orgの許容
                 'max:255',
                 Rule::unique('users', 'email')
-                    ->ignore($this->user),
+                    ->ignore($targetUser),
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->email',
+                )
+                    ->where(function (Builder $query) {
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        );
+                }),
             ],
 
+            // 更新時はnullを許可、nullであればレコードカラム変更をしない
             'password' => [
-                'required',
+                'nullable',
                 'string',
                 Password::min(10)
                     ->uncompromised(3),
                 'regex:/^[a-zA-Z0-9!@#$%&*\-_.]+$/',
             ],
 
-            // 'password_confirmation' => [
-            //     'required_with:password',
-            //     'string',
-            // ],
-
             'role' => [
                 'required',
                 'string',
+                'exists:roles,name'
             ],
         ];
     }

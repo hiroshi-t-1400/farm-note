@@ -10,9 +10,10 @@ import editWorkLog from './components/modules/work-logs/edit';
 
 import indexUser from './components/modules/admin/users/index';
 import showUser from './components/modules/admin/users/show';
-import createUserChangeRequest from './components/modules/admin/users/requests/create';
-import editUserChangeRequest from './components/modules/admin/users/requests/edit';
-import indexUserChangeRequest from './components/modules/admin/users/requests/index';
+// import createUserChangeRequest from './components/modules/admin/requests/users/createRequest';
+import createUserChangeRequest from './components/modules/admin/requests/users/userRequest';
+import editUserChangeRequest from './components/modules/admin/requests/users/edit';
+import indexUserChangeRequest from './components/modules/admin/requests/users/index';
 import approveUser from './components/modules/admin/approvals/approve';
 import indexApprovals from './components/modules/admin/approvals/index';
 

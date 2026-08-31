@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\Http\Controller\Admin;
 
+use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\User;
-use App\Models\UserChangeRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-class UserChangeRequestControllerTest extends TestCase
+class UserChangeApplicationControllerTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -43,7 +43,7 @@ class UserChangeRequestControllerTest extends TestCase
 
     public function test_manager_can_edit_own_user_change_request(): void
     {
-        $changeRequest = UserChangeRequest::factory()->actionCreate()->create([
+        $changeRequest = UserChangeApplication::factory()->actionCreate()->create([
             'status' => 'pending',
             'payload' => [
                 'name' => '新規 太郎',
@@ -82,5 +82,43 @@ class UserChangeRequestControllerTest extends TestCase
         //     'status' => 'approved',
         //     'approved_by' => $this->owner->id,
         // ]);
+    }
+
+    public function test_manager_can_create_request(): void
+    {
+        $response = $this->actingAs($this->manager)
+            ->get('/admin/requests/users');
+
+        $actionType = 'create';
+
+        $requestData = [
+            'name' => 'tomatotaro',
+            'login_id' => 'tomatotaro',
+            'email' => 'tomato1234@example.org',
+            'password' => 'tomato@@tomato',
+            'role' => 'worker',
+        ];
+
+        $url = route('admin.requests.users.store-create');
+
+        $response = $this->actingAs($this->manager)
+            ->postJson($url, $requestData);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'ユーザー登録の申請を送信しました。'
+            ]);
+
+        $data = UserChangeApplication::find(1);
+        dump($data);
+
+        $this->assertDatabaseHas('user_change_applications', [
+            'id' => 1,
+            'payload' => [
+                'name' => 'tomatotaro',
+                'email' => 'tomato1234@example.org',
+            ],
+        ]);
+
     }
 }

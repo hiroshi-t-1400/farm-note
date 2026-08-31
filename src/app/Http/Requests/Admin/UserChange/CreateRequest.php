@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Admin\UserChange;
 
-use App\Models\User;
+use App\Models\Admin\UserChange\UserChangeApplication;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Override;
 
-class StoreUserRequest extends FormRequest
+class CreateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -35,8 +36,18 @@ class StoreUserRequest extends FormRequest
                 'min:4',
                 'max:30',
                 'regex:/^[a-zA-Z][a-zA-Z0-9_.-]+$/',
-                Rule::unique('users', 'login_id')
-                    ->ignore($this->user), // 更新時自分を判定から除外
+                'unique:users,login_id',
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->login_id',
+                )
+                    ->where(function (Builder $query) {
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        );
+                }),
             ],
 
             'email' => [
@@ -45,8 +56,18 @@ class StoreUserRequest extends FormRequest
                 // 'email:frc,dns',  // 本番用
                 'email', // 開発用 @example.orgの許容
                 'max:255',
-                Rule::unique('users', 'email')
-                    ->ignore($this->user),
+                'unique:users,email',
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->email',
+                )
+                    ->where(function (Builder $query) {
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        );
+                }),
             ],
 
             'password' => [
@@ -57,14 +78,10 @@ class StoreUserRequest extends FormRequest
                 'regex:/^[a-zA-Z0-9!@#$%&*\-_.]+$/',
             ],
 
-            // 'password_confirmation' => [
-            //     'required_with:password',
-            //     'string',
-            // ],
-
             'role' => [
                 'required',
                 'string',
+                'exists:roles,name'
             ],
         ];
     }
