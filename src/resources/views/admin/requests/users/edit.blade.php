@@ -167,6 +167,17 @@
                         class="w-[10rem]">
                         更新する
                     </x-ui.button>
+
+                    <x-ui.button
+                        type="button"
+                        variant="danger"
+                        @click="submitDelete()"
+                        name="delete" dusk="submit-delete"
+                        class="w-[10rem]"
+                    >
+                        削除する
+                    </x-ui.button>
+
                     <x-ui.button
                         type="href"
                         name="cancel"

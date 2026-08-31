@@ -27,7 +27,7 @@ export default (config) => {
         role: r.payload.role,
         roleLabel: ROLES[r.payload.role],
         rejectionReason: r.rejection_reason,
-        showUrl: `${window.location.origin}/admin/requests/users/record/edit/${r.id}`,
+        showUrl: `${window.location.origin}/admin/requests/users/edit/${r.id}`,
 
         status: r.status,
         statusLabel: REQUEST_STATUS[r.status],

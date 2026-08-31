@@ -12,14 +12,33 @@ export function buildPayload (formData) {
 }
 
 
-export async function submit(submitRoute, payload) {
+export async function submit(submitRoute = null, payload = null, formAction = null) {
     try {
         await window.http.get('/sanctum/csrf-cookie');
+        let response = '';
 
-        const response = await window.http.post(
-            submitRoute,
-            payload
-        );
+        if (formAction === 'patch') {
+            response = await window.http.patch(
+                submitRoute,
+                payload
+            );
+        } else if (formAction === 'put') {
+            response = await window.http.put(
+                submitRoute,
+                payload
+            );
+        } else if (formAction === 'delete') {
+            response = await window.http.delete(
+                submitRoute,
+                payload
+            );
+        } else {
+            response = await window.http.post(
+                submitRoute,
+                payload
+            );
+        }
+
 
         // ----------------------------------------------------
         // 成功処理（200 OK系）

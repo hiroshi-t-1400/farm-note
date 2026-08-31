@@ -194,4 +194,22 @@ class UserChangeApplicationController extends Controller
             'message' => '申請内容を更新しました。',
         ]);
     }
+
+    public function destroy(Request $request, UserChangeApplication $changeRequest)
+    {
+        Gate::authorize('delete', $changeRequest);
+
+        if ($changeRequest->status === 'rejected') {
+            return response()->json([
+                'status' => 'deny',
+                'message' => '却下された申請の削除はできません。',
+            ]);
+        }
+        $changeRequest->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '申請を削除しました。',
+        ]);
+    }
 }

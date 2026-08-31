@@ -95,22 +95,26 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->name('admin.requests.users.')
         ->group(function () {
 
+            // 申請の削除
+            Route::delete('/destroy{changeRequest}', [UserChangeApplicationController::class, 'destroy'])
+                ->name('destroy');
+            // 申請内容の更新画面
+            Route::get('/edit/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
+                ->name('edit');
+
             Route::get('/', [UserChangeApplicationController::class, 'index'])
             ->name('index');
-
+            // 申請内容の変更
+            Route::patch('/{changeRequest}/update/{targetUser?}', [UserChangeApplicationController::class, 'update'])
+                ->name('update');
+            // 申請の作成画面
             Route::get('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'create'])
                 ->name('create');
-
+            // 申請のHTTPリクエスト
             Route::post('/store-create', [UserChangeApplicationController::class, 'storeCreate'])
                 ->name('store-create');
             Route::post('/{targetUser}/store-update', [UserChangeApplicationController::class, 'storeUpdate'])
                 ->name('store-update');
-
-            // 申請内容の更新
-            Route::get('/record/edit/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
-                ->name('edit');
-            Route::patch('/record/{changeRequest}/update/{targetUser?}', [UserChangeApplicationController::class, 'update'])
-                ->name('update');
     });
     // 承認 オーナー専用グループ
     Route::middleware(['role:owner'])
@@ -130,9 +134,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('users')
         ->name('users.')
         ->group(function () {
-        Route::get('/index', [ControllersUserController::class, 'index'])
+        Route::get('/', [ControllersUserController::class, 'index'])
             ->name('index');
-        Route::get('/', [ControllersUserController::class, 'show'])
+        Route::get('/{user}', [ControllersUserController::class, 'show'])
             ->name('show');
     });
 
