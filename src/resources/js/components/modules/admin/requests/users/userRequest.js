@@ -2,14 +2,14 @@
 
 import { ROLES } from "../../../../../constants/roles";
 import { getBackUrl } from "../../../../../utils";
-import { buildPayload, submit } from "./requestLogic";
+import { buildPayload, submit, getError } from "./requestLogic";
 
 export default (config) => {
 
     const actionType = config?.initialModel?.['actionType'] || '';
     const targetUser = config?.initialModel?.['targetUser'] || '';
     const targetUserId = targetUser?.id || '';
-console.log({'targetUser':targetUser});
+
     const backUrl = buildBackUrl();
 
     const formData = loadUser();
@@ -65,27 +65,27 @@ console.log({'targetUser':targetUser});
 
         async submitStore() {
             const payload = buildPayload(this.formData);
-                try {
-                    const response = await submit(
-                        this.submitRoute,
-                        payload
-                    );
+            try {
+                const response = await submit(
+                    this.submitRoute,
+                    payload
+                );
 
-                    // 成功処理
-                    this.formData = {};
-                    alert(response.data.message);
+                // 成功処理
+                this.formData = {};
+                alert(response.data.message);
 
-                    if (actionType === 'create') {
-                        // 申請画面に留まり直前の申請内容をレンダリングする
-                        this.resultData = payload;
-                    } else if (actionType === 'update') {
-                        // 設定した戻り画面:index へ画面遷移
-                        window.location.replace(this.backUrl);
-                    }
-
-                } catch(error) {
-                    this.handleRequestError(error);
+                if (actionType === 'create') {
+                    // 申請画面に留まり直前の申請内容をレンダリングする
+                    this.resultData = payload;
+                } else if (actionType === 'update') {
+                    // 設定した戻り画面:index へ画面遷移
+                    window.location.replace(this.backUrl);
                 }
+
+            } catch(error) {
+                this.handleRequestError(error);
+            }
         },
 
         handleRequestError(error) {
@@ -95,32 +95,8 @@ console.log({'targetUser':targetUser});
                 alert(error.message);
                 return;
             }
-
             alert(error.message);
         },
-
-        // async submitCreate() {
-        //     this.buildPayload();
-        //     const actionType = this.actionType;
-        //     this.submitStore(() => {
-        //         this.resultData = requestData;
-        //         this.formData = {};
-
-        //         alert(response.data.message);
-        //     });
-        // },
-
-        // // ユーザー情報変更申請ボタンクリックのイベント
-        // async submitUpdate() {
-        //     this.builtPayload;
-        //     const actionType = this.actionType;
-        //     this.submitStore(() => {
-        //         this.formData = {};
-
-        //         alert(response.data.message);
-        //         window.location.replace(this.backUrl);
-        //     });
-        // },
 
         // バリデーションエラーメッセージを返す
         getError(field) {

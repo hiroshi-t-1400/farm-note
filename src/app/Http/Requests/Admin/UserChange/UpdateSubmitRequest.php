@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Admin\UserChange;
 
+use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -26,7 +28,8 @@ class UpdateSubmitRequest extends FormRequest
      */
     public function rules(): array
     {
-        $targetUser = User::where('email', $this->input('email'))->get();
+        $targetUser = $this->route('targetUser');
+        $targetRequest = $this->route('changeRequest');
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -39,6 +42,19 @@ class UpdateSubmitRequest extends FormRequest
                 'regex:/^[a-zA-Z][a-zA-Z0-9_.-]+$/',
                 Rule::unique('users', 'login_id')
                     ->ignore($targetUser), // 更新時自分を判定から除外
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->login_id',
+                )
+                    ->where(
+                        fn (Builder $query) =>
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        )
+                    )
+                    ->ignore($targetRequest),
             ],
 
             'email' => [
@@ -49,6 +65,18 @@ class UpdateSubmitRequest extends FormRequest
                 'max:255',
                 Rule::unique('users', 'email')
                     ->ignore($targetUser), // 更新時自分を判定から除外
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->email'
+                )
+                    ->where(fn (Builder $query) =>
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        )
+                    )
+                    ->ignore($targetRequest),
             ],
 
             'password' => [

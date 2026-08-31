@@ -1,37 +1,36 @@
-// /var/www/src/resources/js/components/modules/admin/users/requests/edit.js
+// /var/www/src/resources/js/components/modules/admin/requests/users/edit.js
 
 import { tsToDate } from "../../../../../utils/date";
-import { ROLES } from "../../../../../constants/roles";
 import { getBackUrl } from "../../../../../utils";
 
+import { buildPayload, loadUser } from "./requestLogic";
+
 export default (config) => {
+    console.log(config?.initialModel);
+    let {payload, id, created_at, rejection_reason: rejectionReason, actionType, target_user_id: targetUserId} = config?.initialModel || '';
 
-    let {payload, id, created_at, rejection_reason} = config?.initialModel || '';
-
-    payload = {
-            username: payload.name,
-            loginId: payload.login_id,
-            email: payload.email,
-            password: '',
-            role: payload.role
-        };
-
-    let old = {...payload};
-    old.roleLabel = ROLES[old.role];
+    let {formData, old} = loadUser(payload);
 
     const createdAt = tsToDate(created_at);
     const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
-    const submitUrl = `${window.location.origin}/admin/requests/users/${id}/update`;
-    // const submitUrl = '';
+    const submitRoute = getSubmitRoute();
+console.log(submitRoute);
+    function getSubmitRoute() {
+        const addPath = actionType === 'create'
+            ? 'update'
+            : `update/${targetUserId}`;
+
+            return `${window.location.origin}/admin/requests/users/record/${id}/${addPath}`;
+    }
 
     return {
         targetId: id,
 
-        payload,
+        formData,
         old,
         createdAt,
 
-        rejection_reason,
+        rejectionReason,
 
         errors: {},
 
@@ -45,22 +44,16 @@ export default (config) => {
             try {
                 await window.http.get('/sanctum/csrf-cookie');
 
-                const payload = {
-                    name: this.payload.username,
-                    loginId: this.payload.loginId,
-                    email: this.payload.email,
-                    password: this.payload.password,
-                    role: this.payload.role
-                };
+                const payload = buildPayload(this.formData);
                 console.log(payload);
 
                 const response = await window.http.patch(
-                    submitUrl,
+                    submitRoute,
                     payload
                 );
 
                 // ----------------------------------------------------
-                // 認証成功（200 OK系）
+                // 成功（200 OK系）
                 // ----------------------------------------------------
                 alert(response.data.message);
                 window.location.replace(backUrl);

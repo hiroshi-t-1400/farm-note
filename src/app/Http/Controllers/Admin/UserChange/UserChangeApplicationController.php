@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\UserChange;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\UserChange\StoreRequest;
+use App\Http\Requests\Admin\UserChange\CreateRequest;
 use App\Http\Requests\Admin\UserChange\UpdateRequest;
 use App\Http\Requests\Admin\UserChange\UpdateSubmitRequest;
 use App\Models\Admin\UserChange\UserChangeApplication;
@@ -68,57 +68,8 @@ class UserChangeApplicationController extends Controller
         return response()->view('admin.requests.users.create', compact('requestData'));
     }
 
-    // // アクションに対応したstoreメソッド呼び出し
-    // public function store(
-    //     Request $request,
-    //     string $actionType,
-    //     ?User $targetUser = null
-    // ): JsonResponse {
-
-    //     $requestData = $request;
-
-    //     try {
-    //         $application = match ($actionType) {
-    //             'create' => $this->storeCreate(
-    //                 $requestData, $actionType
-    //             ),
-
-    //             'update' => $this->storeUpdate(
-    //                 $requestData, $actionType, $targetUser
-    //             ),
-
-    //             'disable' => $this->storeDisable(
-    //                 $request, $actionType, $targetUser
-    //             ),
-
-    //             default => abort(404),
-    //         };
-
-    //         return response()->json($application);
-
-    //     } catch (\LogicException $e) {
-    //         // 「既に処理済み」「ステータスが不整合」などの業務エラー ➔ 422
-    //         return response()->json([
-    //             'message' => $e->getMessage()
-    //         ], 422);
-    //     } catch (\Throwable $e) {
-    //         // その他のエラーをLogを保存、messegeとして読み出せるように
-    //         Log::error('申請処理エラー', [
-    //             'action_type' => $actionType,
-    //             'target_user_id' => $targetUser->id ?? '',
-    //             'user_id' => $request->user()->id,
-    //             'error' => $e->getMessage(),
-    //             'trace' => $e->getTraceAsString(),
-    //         ]);
-
-    //         return response()->json([
-    //             'message' => 'サーバーエラーが発生しました。時間をおいて再度お試しください。'
-    //         ], 500);
-    //     }
-    // }
-
     // 新規登録
-    public function storeCreate(StoreRequest $requestData): JsonResponse
+    public function storeCreate(CreateRequest $requestData): JsonResponse
     {
         $actionType = 'create';
 
@@ -216,8 +167,10 @@ class UserChangeApplicationController extends Controller
     }
 
     // 申請内容の更新
-    // public function update(UpdateSubmitRequest $changeRequest): JsonResponse
-    public function update(UpdateSubmitRequest $request, UserChangeApplication $changeRequest): JsonResponse
+    public function update(
+        UpdateSubmitRequest $request,
+        UserChangeApplication $changeRequest,
+        ?User $targetUser): JsonResponse
     {
         try {
             $validated = $request->validated();

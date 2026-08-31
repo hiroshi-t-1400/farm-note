@@ -107,9 +107,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 ->name('store-update');
 
             // 申請内容の更新
-            Route::get('/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
+            Route::get('/record/edit/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
                 ->name('edit');
-            Route::patch('/{changeRequest}/update', [UserChangeApplicationController::class, 'update'])
+            Route::patch('/record/{changeRequest}/update/{targetUser?}', [UserChangeApplicationController::class, 'update'])
                 ->name('update');
     });
     // 承認 オーナー専用グループ

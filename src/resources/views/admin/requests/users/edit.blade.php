@@ -33,7 +33,7 @@
                     <x-ui.input
                         type="text"
                         name="username"
-                        x-model="payload.username"
+                        x-model="formData.username"
                         placeholder="例：アグリ 太郎"
                         required
                     />
@@ -50,7 +50,7 @@
                     <x-ui.input
                         type="text"
                         name="loginId"
-                        x-model="payload.loginId"
+                        x-model="formData.loginId"
                         placeholder="例：nihon_taro"
                         required
                     />
@@ -67,7 +67,7 @@
                     <x-ui.input
                         type="email"
                         name="email"
-                        x-model="payload.email"
+                        x-model="formData.email"
                         placeholder="例：farm_taro@example.org"
                         required
                     />
@@ -87,7 +87,7 @@
                             <x-ui.input
                                 ::type="show ? 'text' : 'password'"
                                 name="password"
-                                x-model="payload.password"
+                                x-model="formData.password"
                                 placeholder="パスワード"
                                 class="w-full"
                             />
@@ -136,7 +136,7 @@
                     >
                         <x-ui.select
                             name="role"
-                            x-model="payload.role"
+                            x-model="formData.role"
                             required
                         >
                             <option value="worker">一般ユーザー</option>
@@ -151,10 +151,10 @@
 
                 </div>
 
-                <template x-if="rejection_reason">
+                <template x-if="rejectionReason">
                     <x-ui.textarea
-                        name="rejection_reason"
-                        x-model="rejection_reason"
+                        name="rejectionReason"
+                        x-model="rejectionReason"
                         variant="error"
                         disabled
                         class="w-full"

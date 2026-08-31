@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Admin\UserChange;
 
+use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -41,6 +43,17 @@ class UpdateRequest extends FormRequest
                 'regex:/^[a-zA-Z][a-zA-Z0-9_.-]+$/',
                 Rule::unique('users', 'login_id')
                     ->ignore($targetUser),
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->login_id',
+                )
+                    ->where(function (Builder $query) {
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        );
+                }),
             ],
 
             'email' => [
@@ -51,8 +64,20 @@ class UpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique('users', 'email')
                     ->ignore($targetUser),
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->email',
+                )
+                    ->where(function (Builder $query) {
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        );
+                }),
             ],
 
+            // 更新時はnullを許可、nullであればレコードカラム変更をしない
             'password' => [
                 'nullable',
                 'string',

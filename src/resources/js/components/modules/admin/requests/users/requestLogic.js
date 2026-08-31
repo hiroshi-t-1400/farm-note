@@ -1,5 +1,5 @@
 // /var/www/src/resources/js/components/modules/admin/requests/users/createRequest.js
-
+import { ROLES } from "../../../../../constants/roles";
 
 export function buildPayload (formData) {
     return {
@@ -12,17 +12,17 @@ export function buildPayload (formData) {
 }
 
 
-export async function submit(actionTypeUrl, payload) {
+export async function submit(submitRoute, payload) {
     try {
         await window.http.get('/sanctum/csrf-cookie');
 
         const response = await window.http.post(
-            actionTypeUrl,
+            submitRoute,
             payload
         );
 
         // ----------------------------------------------------
-        // 認証成功（200 OK系）
+        // 成功処理（200 OK系）
         // ----------------------------------------------------
 
         return response;
@@ -86,9 +86,33 @@ function normalizeRequestError(e) {
 }
 
 // バリデーションエラーメッセージを返す
-export function getError(field, errors) {
-    // bladeの属性はusernameとしているためここで変換する
+export function getError(errors) {
+    // errors.map(e => ({
+
+    // }))
     if (field === 'username') return errors?.['name'] || null;
     return errors?.[field] || null;
 }
 
+export function loadUser(targetUser) {
+    const formData = {
+        email: targetUser?.email || '',
+        password: '',
+        loginId: targetUser?.login_id || '',
+        username: targetUser?.name || '',
+        role: targetUser?.roles?.[0]?.['name'] || 'worker',
+    };
+
+    const old = buildOld(formData);
+
+    return {
+        formData,
+        old,
+    }
+};
+
+function buildOld(formData) {
+    const get = formData == {} ? {} : {...formData};
+    get.roleLabel = ROLES[get.role];
+    return get;
+};

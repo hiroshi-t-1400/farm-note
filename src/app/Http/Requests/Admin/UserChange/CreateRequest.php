@@ -2,13 +2,15 @@
 
 namespace App\Http\Requests\Admin\UserChange;
 
+use App\Models\Admin\UserChange\UserChangeApplication;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Override;
 
-class StoreRequest extends FormRequest
+class CreateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,7 +36,18 @@ class StoreRequest extends FormRequest
                 'min:4',
                 'max:30',
                 'regex:/^[a-zA-Z][a-zA-Z0-9_.-]+$/',
-                'unique:users,login_id'
+                'unique:users,login_id',
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->login_id',
+                )
+                    ->where(function (Builder $query) {
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        );
+                }),
             ],
 
             'email' => [
@@ -43,7 +56,18 @@ class StoreRequest extends FormRequest
                 // 'email:frc,dns',  // 本番用
                 'email', // 開発用 @example.orgの許容
                 'max:255',
-                'unique:users,email'
+                'unique:users,email',
+
+                Rule::unique(
+                    'user_change_applications',
+                    'payload->email',
+                )
+                    ->where(function (Builder $query) {
+                        $query->where(
+                            'status',
+                            UserChangeApplication::STATUS_PENDING,
+                        );
+                }),
             ],
 
             'password' => [
