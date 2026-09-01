@@ -1,7 +1,9 @@
 // /var/www/src/resources/js/components/modules/admin/requests/users/createRequest.js
 import { ROLES } from "../../../../../constants/roles";
+import submitService from "./submitService";
 
-export function buildPayload (formData) {
+
+function buildPayload (formData) {
     return {
         name: formData.username,
         email: formData.email,
@@ -11,44 +13,74 @@ export function buildPayload (formData) {
     }
 }
 
-
-export async function submit(submitRoute = null, payload = null, formAction = null) {
+export async function submitCreate(
+    formData
+) {
+    const payload = buildPayload(formData);
     try {
-        await window.http.get('/sanctum/csrf-cookie');
-        let response = '';
-
-        if (formAction === 'patch') {
-            response = await window.http.patch(
-                submitRoute,
-                payload
-            );
-        } else if (formAction === 'put') {
-            response = await window.http.put(
-                submitRoute,
-                payload
-            );
-        } else if (formAction === 'delete') {
-            response = await window.http.delete(
-                submitRoute,
-                payload
-            );
-        } else {
-            response = await window.http.post(
-                submitRoute,
-                payload
-            );
-        }
-
-
-        // ----------------------------------------------------
-        // 成功処理（200 OK系）
-        // ----------------------------------------------------
-
+        const response = await submitService.createRequest(
+            payload
+        );
         return response;
-
     } catch (e) {
         throw normalizeRequestError(e);
     }
+}
+
+export async function submitUpdate(
+    targetUserId,
+    formData
+) {
+    const payload = buildPayload(formData);
+    try {
+        const response = await submitService.updateRequest(
+            targetUserId,
+            payload
+        );
+    } catch (e) {
+        throw normalizeRequestError(e);
+    }
+}
+
+export async function submitDisable(targetUserId) {
+    try {
+        const response = await submitService.destroyRequest(
+            targetUserId
+        );
+    } catch (e) {
+        throw normalizeRequestError(e);
+    }
+}
+
+/**
+ * 申請内容の編集
+ */
+export async function submitUpdateRequestData(
+    requestDataId,
+    targetUserId,
+    formData
+) {
+    const payload = buildPayload(formData);
+    try {
+        const response = await submitService.updateRequestData(
+            requestDataId,
+            targetUserId,
+            payload
+        );
+    } catch (e) {
+        throw normalizeRequestError(e);
+    }
+}
+
+/**
+ * 申請の削除・取り下げ
+ */
+export async function submitDeleteRequestData(
+    requestDataId
+) {
+    const response = await submitService.deleteRequestData(
+        requestDataId
+    )
 }
 
 function normalizeRequestError(e) {
@@ -104,16 +136,7 @@ function normalizeRequestError(e) {
     };
 }
 
-// バリデーションエラーメッセージを返す
-export function getError(errors) {
-    // errors.map(e => ({
-
-    // }))
-    if (field === 'username') return errors?.['name'] || null;
-    return errors?.[field] || null;
-}
-
-export function loadUser(targetUser) {
+export function loadUser(targetUser = null) {
     const formData = {
         email: targetUser?.email || '',
         password: '',
@@ -123,7 +146,7 @@ export function loadUser(targetUser) {
     };
 
     const old = buildOld(formData);
-
+// console.log(formData);
     return {
         formData,
         old,

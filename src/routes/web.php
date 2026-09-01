@@ -98,15 +98,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
             // 申請の削除
             Route::delete('/destroy{changeRequest}', [UserChangeApplicationController::class, 'destroy'])
                 ->name('destroy');
-            // 申請内容の更新画面
+            // 申請内容の編集画面
             Route::get('/edit/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
                 ->name('edit');
 
             Route::get('/', [UserChangeApplicationController::class, 'index'])
             ->name('index');
-            // 申請内容の変更
+            // 申請内容の編集送信
             Route::patch('/{changeRequest}/update/{targetUser?}', [UserChangeApplicationController::class, 'update'])
                 ->name('update');
+            // Route::patch('/{changeRequest}/{targetUser?}/update', [UserChangeApplicationController::class, 'update'])
+            //     ->name('update');
             // 申請の作成画面
             Route::get('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'create'])
                 ->name('create');
@@ -115,7 +117,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 ->name('store-create');
             Route::post('/{targetUser}/store-update', [UserChangeApplicationController::class, 'storeUpdate'])
                 ->name('store-update');
-    });
+            Route::post('/{targetUser}/store-disable', [UserChangeApplicationController::class, 'storeDisabel'])
+                ->name('store-disable');
+        });
     // 承認 オーナー専用グループ
     Route::middleware(['role:owner'])
         ->prefix('admin/approvals')

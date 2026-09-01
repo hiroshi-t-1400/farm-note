@@ -1,8 +1,7 @@
 // /var/www/src/resources/js/components/modules/admin/requests/users/create.js
 
-import { ROLES } from "../../../../../constants/roles";
 import { getBackUrl } from "../../../../../utils";
-import { buildPayload, submit, getError } from "./requestLogic";
+import { submitCreate, submitUpdate, loadUser } from "./requestLogic";
 
 export default (config) => {
 
@@ -10,21 +9,11 @@ export default (config) => {
     const targetUser = config?.initialModel?.['targetUser'] || '';
     const targetUserId = targetUser?.id || '';
 
-    const backUrl = buildBackUrl();
-
-    const formData = loadUser();
-
     const resultData = {};
 
-    let old = buildOld();
     const isUpdate = actionType === 'update' ? true : false;
 
-    function submitRoute() {
-        return actionType === 'create'
-            ? `/admin/requests/users/store-create`
-            : `/admin/requests/users/${targetUserId}/store-update`;
-    }
-
+    const backUrl = buildBackUrl();
     function buildBackUrl() {
         if (actionType === 'create') {
             return getBackUrl(`${location.origin}/dashboard`);
@@ -32,27 +21,11 @@ export default (config) => {
         return getBackUrl(`${location.origin}/admin/requests/users`);
     };
 
-    function loadUser() {
-        return {
-            email: targetUser?.email || '',
-            password: '',
-            loginId: targetUser?.login_id || '',
-            username: targetUser?.name || '',
-            role: targetUser?.roles?.[0]?.['name'] || 'worker',
-        }
-    };
-
-    function buildOld() {
-        const get = formData == {} ? {} : {...formData};
-        get.roleLabel = ROLES[get.role];
-        return get;
-    };
+    const {old, formData} = loadUser(targetUser);
 
     return {
         formData,
         resultData,
-
-        submitRoute: submitRoute(),
 
         old, // for update
         isUpdate,
@@ -63,33 +36,32 @@ export default (config) => {
         backUrl,
         actionType,
 
-        async submitStore() {
-            const payload = buildPayload(this.formData);
+        async submit() {
             try {
-                const response = await submit(
-                    this.submitRoute,
-                    payload
-                );
-
-                // 成功処理
-                this.formData = {};
-                alert(response.data.message);
-
                 if (actionType === 'create') {
-                    // 申請画面に留まり直前の申請内容をレンダリングする
-                    this.resultData = payload;
+                    const response = await submitCreate(this.formData);
+                    // 成功処理
+                    this.resultData = {...this.formData};
+                        // 初期化
+                    this.formData = loadUser().formData;
+                    alert(response.data.message);
+
                 } else if (actionType === 'update') {
+                    const response = await submitUpdate(targetUserId, this.formData);
                     // 設定した戻り画面:index へ画面遷移
+                    alert(response.data.message);
                     window.location.replace(this.backUrl);
                 }
 
-            } catch(error) {
-                this.handleRequestError(error);
+            } catch (e) {
+                this.handleRequestError(e);
+                return;
             }
+
         },
 
         handleRequestError(error) {
-            console.log({'error':error});
+            console.error({'error':error});
             if (error.type === 'validation') {
                 this.errors = error.errors;
                 alert(error.message);

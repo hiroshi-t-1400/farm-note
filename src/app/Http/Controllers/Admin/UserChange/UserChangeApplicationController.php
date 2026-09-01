@@ -69,19 +69,20 @@ class UserChangeApplicationController extends Controller
     }
 
     // 新規登録
-    public function storeCreate(CreateRequest $requestData): JsonResponse
+    // public function storeCreate(CreateRequest $requestData): JsonResponse
+    public function storeCreate(CreateRequest $request): JsonResponse
     {
         $actionType = 'create';
 
         try {
-            $validated = $requestData->validated();
+            $validated = $request->validated();
 
             UserChangeApplication::create([
                 'action_type' => $actionType,
                 'target_user_id' => null,
                 'payload' => $validated,
                 'status' => UserChangeApplication::STATUS_PENDING,
-                'requested_by' => $requestData->user()->id,
+                'requested_by' => $request->user()->id,
             ]);
         } catch (\LogicException $e) {
             // 「既に処理済み」「ステータスが不整合」などの業務エラー ➔ 422
@@ -94,7 +95,7 @@ class UserChangeApplicationController extends Controller
             Log::error('申請処理エラー', [
                 'action_type' => $actionType,
                 'target_user_id' => $targetUser->id ?? '',
-                'user_id' => $requestData->user()->id,
+                'user_id' => $request->user()->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

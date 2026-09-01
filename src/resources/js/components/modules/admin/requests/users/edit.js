@@ -3,8 +3,7 @@
 import { tsToDate } from "../../../../../utils/date";
 import { getBackUrl } from "../../../../../utils";
 
-import { buildPayload, submit, loadUser } from "./requestLogic";
-import { deleteUserRequest } from "./delete";
+import { loadUser, submitUpdateRequestData, submitDeleteRequestData } from "./requestLogic";
 
 export default (config) => {
     let {payload, id, created_at, rejection_reason: rejectionReason, actionType, target_user_id: targetUserId} = config?.initialModel || '';

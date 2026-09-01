@@ -11,7 +11,7 @@
         x-data="createUserChangeRequest({
             initialModel: @js($requestData)
         })"
-        @submit.prevent="submitStore()"
+        @submit.prevent="submit()"
         x-cloak
     >
 
