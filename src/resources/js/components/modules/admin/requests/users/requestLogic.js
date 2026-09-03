@@ -37,6 +37,7 @@ export async function submitUpdate(
             targetUserId,
             payload
         );
+        return response;
     } catch (e) {
         throw normalizeRequestError(e);
     }
@@ -47,6 +48,7 @@ export async function submitDisable(targetUserId) {
         const response = await submitService.destroyRequest(
             targetUserId
         );
+        return response;
     } catch (e) {
         throw normalizeRequestError(e);
     }
@@ -67,6 +69,7 @@ export async function submitUpdateRequestData(
             targetUserId,
             payload
         );
+        return response;
     } catch (e) {
         throw normalizeRequestError(e);
     }
@@ -80,7 +83,8 @@ export async function submitDeleteRequestData(
 ) {
     const response = await submitService.deleteRequestData(
         requestDataId
-    )
+    );
+    return response;
 }
 
 function normalizeRequestError(e) {

@@ -2,72 +2,68 @@
 
 import { tsToDate } from "../../../../../utils/date";
 import { getBackUrl } from "../../../../../utils";
+import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 
 import { loadUser, submitUpdateRequestData, submitDeleteRequestData } from "./requestLogic";
+import handleRequestError from "./error";
 
 export default (config) => {
-    let {payload, id, created_at, rejection_reason: rejectionReason, actionType, target_user_id: targetUserId} = config?.initialModel || '';
+    let {
+        payload,
+        id,
+        created_at,
+        rejection_reason: rejectionReason,
+        target_user_id: targetUserId,
+        status: requestStatus,
+    } = config?.initialModel || '';
+    const targetId = id || ','
 
     let {formData, old} = loadUser(payload);
 
     const createdAt = tsToDate(created_at);
     const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
-    const submitRoute = getSubmitRoute();
 
-    function getSubmitRoute() {
-        const addPath = actionType === 'create'
-            ? 'update'
-            : `update/${targetUserId}`;
-
-            return `${window.location.origin}/admin/requests/users/${id}/${addPath}`;
-    }
+    // 主にアクションボタンの隠蔽
+    const DENY_STATUS = ['rejected', 'approved'];
+    function canEdit() {
+        return !DENY_STATUS.includes(requestStatus);
+    };
 
     return {
-        targetId: id,
+        targetId,
 
         formData,
         old,
         createdAt,
 
         rejectionReason,
-
+        canEdit: canEdit(),
         errors: {},
 
         resultData: '',
         backUrl,
 
-        async submitUpdate() {
-            const payload = buildPayload(this.formData);
-            try {
-                const response = await submit(
-                    submitRoute,
-                    payload,
-                    'patch',
-                );
 
-                // ----------------------------------------------------
-                // 成功（200 OK系）
-                // ----------------------------------------------------
+        async submitUpdate() {
+            try {
+                const response = await submitUpdateRequestData(targetId, targetUserId, this.formData);
+                // 成功処理
                 alert(response.data.message);
                 window.location.replace(backUrl);
-
-            } catch (error) {
-                this.handleRqruestError(error);
+            } catch (e) {
+                handleRequestError(e);
             }
-        },
-
-        handleRequestError(error) {
-            console.log({'error':error});
-            if (error.type === 'validation') {
-                this.errors = error.errors;
-                alert(error.message);
-                return;
-            }
-            alert(error.message);
         },
 
         async submitDelete() {
-            deleteUserRequest().submitDelete(this.targetId);
+            try {
+                const response = await submitDeleteRequestData(targetId);
+
+                alert(response.data.message);
+                window.location.replace(backUrl);
+            } catch(e) {
+                handleRequestError(e);
+            }
         },
 
         // バリデーションエラーメッセージを返す

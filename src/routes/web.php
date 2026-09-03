@@ -96,7 +96,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->group(function () {
 
             // 申請の削除
-            Route::delete('/destroy{changeRequest}', [UserChangeApplicationController::class, 'destroy'])
+            Route::delete('/destroy/{changeRequest}', [UserChangeApplicationController::class, 'destroy'])
                 ->name('destroy');
             // 申請内容の編集画面
             Route::get('/edit/{changeRequest}', [UserChangeApplicationController::class, 'edit'])

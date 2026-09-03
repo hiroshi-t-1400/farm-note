@@ -163,20 +163,24 @@
 
                 {{-- bottom --}}
                 <div class="flex py-5 justify-center gap-x-4">
-                    <x-ui.button name="submit" dusk="submit-button"
-                        class="w-[10rem]">
-                        更新する
-                    </x-ui.button>
+                    <template x-if="canEdit">
+                        <x-ui.button name="submit" dusk="submit-button"
+                            class="w-[10rem]">
+                            申請内容を更新する
+                        </x-ui.button>
+                    </template>
 
-                    <x-ui.button
-                        type="button"
-                        variant="danger"
-                        @click="submitDelete()"
-                        name="delete" dusk="submit-delete"
-                        class="w-[10rem]"
-                    >
-                        削除する
-                    </x-ui.button>
+                    <template x-if="canEdit">
+                        <x-ui.button
+                            type="button"
+                            variant="danger"
+                            @click="submitDelete()"
+                            name="delete" dusk="submit-delete"
+                            class="w-[10rem]"
+                        >
+                            この申請を削除する
+                        </x-ui.button>
+                    </template>
 
                     <x-ui.button
                         type="href"
