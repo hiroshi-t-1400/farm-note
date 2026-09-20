@@ -5,9 +5,12 @@ namespace App\Policies\Admin\UserChange;
 use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Str;
 
 class UserChangeApplicationPolicy
 {
+    const DENY_STATUS = ['rejected', 'approved'];
+
     /**
      * Determine whether the user can view any models.
      */
@@ -35,17 +38,33 @@ class UserChangeApplicationPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, UserChangeApplication $userChangeRequest): bool
+    public function update(User $user, UserChangeApplication $userChangeRequest): Response
     {
-        return $user->id === $userChangeRequest->requester->id;
+        if (in_array($userChangeRequest->status, self::DENY_STATUS, true)) {
+            return Response::deny('この申請は現在編集できません。');
+        }
+
+        if ($user->id !== $userChangeRequest->requester->id) {
+            return Response::deny('この申請を編集する権限がありません。');
+        }
+
+        return Response::allow();
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, UserChangeApplication $userChangeRequest): bool
+    public function delete(User $user, UserChangeApplication $userChangeRequest): Response
     {
-        return $user->id === $userChangeRequest->requester->id;
+        if (in_array($userChangeRequest->status, self::DENY_STATUS, true)) {
+            return Response::deny('この申請は現在削除できません。');
+        }
+
+        if ($user->id !== $userChangeRequest->requester->id) {
+            return Response::deny('この申請を削除する権限がありません。');
+        }
+
+        return Response::allow();
     }
 
     /**
