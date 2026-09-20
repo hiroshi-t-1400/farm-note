@@ -1,7 +1,6 @@
 // /var/www/src/resources/js/components/modules/admin/users/show.js
 
 import { tsToDate } from "../../dashboard/utils";
-import { getBackUrl } from "../../../../utils";
 
 import { ROLES } from "../../../../constants/roles";
 import { USER_STATUS } from "../../../../constants/userStatus";
@@ -18,7 +17,19 @@ export default (config) => {
     const isActive = checkStatus();
     let statusClass = '';
 
-    let backUrl = getBackUrl(`${location.origin}/users/index`);
+    const editUrl =`${location.origin}/admin/requests/users/update/${userId}`
+
+    let backUrl = getBackUrl();
+
+    // dashboadなどから直接アクセスされている場合は元の画面に戻る
+    function getBackUrl() {
+        const isRefEdit = document.referrer.includes('update');
+
+        if (!isRefEdit && document.referrer !== location.href) {
+            return document.referrer;
+        }
+        return `${location.origin}/users`;
+    };
 
     function checkStatus() {
         if (status !== 'active') {
@@ -28,7 +39,6 @@ export default (config) => {
         return true;
     };
 
-    const editUrl =`${location.origin}/admin/requests/users/update/${userId}`
 
     return {
         userId,

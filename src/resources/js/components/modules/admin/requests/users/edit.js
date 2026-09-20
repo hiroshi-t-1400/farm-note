@@ -2,36 +2,42 @@
 
 import { tsToDate } from "../../../../../utils/date";
 import { getBackUrl } from "../../../../../utils";
+import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 
-import { buildPayload, loadUser } from "./requestLogic";
+import { loadUser, submitUpdateRequestData, submitDeleteRequestData } from "./requestLogic";
+import handleRequestError from "./error";
 
 export default (config) => {
-    console.log(config?.initialModel);
-    let {payload, id, created_at, rejection_reason: rejectionReason, actionType, target_user_id: targetUserId} = config?.initialModel || '';
+    let {
+        payload,
+        id,
+        created_at,
+        rejection_reason: rejectionReason,
+        target_user_id: targetUserId,
+        status: requestStatus,
+    } = config?.initialModel || '';
+    const targetId = id || ','
 
     let {formData, old} = loadUser(payload);
 
     const createdAt = tsToDate(created_at);
     const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
-    const submitRoute = getSubmitRoute();
-console.log(submitRoute);
-    function getSubmitRoute() {
-        const addPath = actionType === 'create'
-            ? 'update'
-            : `update/${targetUserId}`;
 
-            return `${window.location.origin}/admin/requests/users/record/${id}/${addPath}`;
-    }
+    // 主にアクションボタンの隠蔽
+    const DENY_STATUS = ['rejected', 'approved'];
+    function canEdit() {
+        return !DENY_STATUS.includes(requestStatus);
+    };
 
     return {
-        targetId: id,
+        targetId,
 
         formData,
         old,
         createdAt,
 
         rejectionReason,
-
+        canEdit: canEdit(),
         errors: {},
 
         resultData: '',
@@ -39,65 +45,24 @@ console.log(submitRoute);
 
 
         async submitUpdate() {
-            this.errors = {};
-
             try {
-                await window.http.get('/sanctum/csrf-cookie');
-
-                const payload = buildPayload(this.formData);
-                console.log(payload);
-
-                const response = await window.http.patch(
-                    submitRoute,
-                    payload
-                );
-
-                // ----------------------------------------------------
-                // 成功（200 OK系）
-                // ----------------------------------------------------
+                const response = await submitUpdateRequestData(targetId, targetUserId, this.formData);
+                // 成功処理
                 alert(response.data.message);
                 window.location.replace(backUrl);
-
             } catch (e) {
-                if (e.response) {
-                    const status = e.response.status;
-                    const data = e.response.data;
+                handleRequestError(e);
+            }
+        },
 
-                    // ----------------------------------------------------
-                    // 1. バリデーションエラー（422）
-                    // ----------------------------------------------------
-                    if (status === 422) {
-                        this.errors = data.errors || {};
-                        alert('申請内容の変更に失敗しました。 : ' + (data.message || '入力内容を確認してください。'));
-                        return;
-                    }
+        async submitDelete() {
+            try {
+                const response = await submitDeleteRequestData(targetId);
 
-                    // ----------------------------------------------------
-                    // 2. 連続送信（429）のハンドリング
-                    // ----------------------------------------------------
-                    if (status === 429) {
-                        this.errors = data.errors || {};
-                        alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
-                        return;
-                    }
-
-                    // ----------------------------------------------------
-                    // 3. その他のサーバーエラー（500系や404など
-                    // ----------------------------------------------------
-                    // 個別ハンドリング以外
-                    console.error('サーバーエラーが発生しました。', status, data);
-                    alert('サーバーエラーが発生しました。時間をおいて再度お試しください。');
-                    return;
-                }
-
-                // axiosのタイムアウトエラーハンドリング
-                if (e.code === 'ECONNABORTED') {
-                    console.error('通信エラー： タイムアウトが発生しました。', e);
-                    alert('通信タイムアウトしました。接続状態をご確認の上、再度お試しください。');
-                } else {
-                    console.error('不明な通信エラー:', e.message);
-                    alert('通信エラーが発生しました。');
-                }
+                alert(response.data.message);
+                window.location.replace(backUrl);
+            } catch(e) {
+                handleRequestError(e);
             }
         },
 

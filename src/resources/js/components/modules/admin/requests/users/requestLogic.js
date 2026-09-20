@@ -1,7 +1,9 @@
 // /var/www/src/resources/js/components/modules/admin/requests/users/createRequest.js
 import { ROLES } from "../../../../../constants/roles";
+import submitService from "./submitService";
 
-export function buildPayload (formData) {
+
+function buildPayload (formData) {
     return {
         name: formData.username,
         email: formData.email,
@@ -11,25 +13,78 @@ export function buildPayload (formData) {
     }
 }
 
-
-export async function submit(submitRoute, payload) {
+export async function submitCreate(
+    formData
+) {
+    const payload = buildPayload(formData);
     try {
-        await window.http.get('/sanctum/csrf-cookie');
-
-        const response = await window.http.post(
-            submitRoute,
+        const response = await submitService.createRequest(
             payload
         );
-
-        // ----------------------------------------------------
-        // 成功処理（200 OK系）
-        // ----------------------------------------------------
-
         return response;
-
     } catch (e) {
         throw normalizeRequestError(e);
     }
+}
+
+export async function submitUpdate(
+    targetUserId,
+    formData
+) {
+    const payload = buildPayload(formData);
+    try {
+        const response = await submitService.updateRequest(
+            targetUserId,
+            payload
+        );
+        return response;
+    } catch (e) {
+        throw normalizeRequestError(e);
+    }
+}
+
+export async function submitDisable(targetUserId) {
+    try {
+        const response = await submitService.destroyRequest(
+            targetUserId
+        );
+        return response;
+    } catch (e) {
+        throw normalizeRequestError(e);
+    }
+}
+
+/**
+ * 申請内容の編集
+ */
+export async function submitUpdateRequestData(
+    requestDataId,
+    targetUserId,
+    formData
+) {
+    const payload = buildPayload(formData);
+    try {
+        const response = await submitService.updateRequestData(
+            requestDataId,
+            targetUserId,
+            payload
+        );
+        return response;
+    } catch (e) {
+        throw normalizeRequestError(e);
+    }
+}
+
+/**
+ * 申請の削除・取り下げ
+ */
+export async function submitDeleteRequestData(
+    requestDataId
+) {
+    const response = await submitService.deleteRequestData(
+        requestDataId
+    );
+    return response;
 }
 
 function normalizeRequestError(e) {
@@ -61,7 +116,19 @@ function normalizeRequestError(e) {
         }
 
         // ----------------------------------------------------
-        // 3. その他のサーバーエラー（500系や404など
+        // 3. 認可エラー（403）のハンドリング
+        // ----------------------------------------------------
+        if (status === 403) {
+            return {
+                type: 'forbidden',
+                status,
+                errors: data.errors || {},
+                message: 'この操作は認可されていません。',
+            };
+        }
+
+        // ----------------------------------------------------
+        // 4. その他のサーバーエラー（500系や404など
         // ----------------------------------------------------
         return {
             type: 'server',
@@ -85,16 +152,7 @@ function normalizeRequestError(e) {
     };
 }
 
-// バリデーションエラーメッセージを返す
-export function getError(errors) {
-    // errors.map(e => ({
-
-    // }))
-    if (field === 'username') return errors?.['name'] || null;
-    return errors?.[field] || null;
-}
-
-export function loadUser(targetUser) {
+export function loadUser(targetUser = null) {
     const formData = {
         email: targetUser?.email || '',
         password: '',
@@ -104,7 +162,7 @@ export function loadUser(targetUser) {
     };
 
     const old = buildOld(formData);
-
+// console.log(formData);
     return {
         formData,
         old,

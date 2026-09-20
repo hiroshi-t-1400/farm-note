@@ -2,7 +2,7 @@
 
 <x-layouts.layout title="ユーザー一覧 - 農作業日誌">
     <x-slot:header>
-        登録ユーザーの一覧
+        ユーザー一覧
     </x-slot>
 
     <div x-data="indexUser({

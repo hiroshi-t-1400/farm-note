@@ -34,7 +34,7 @@ class UserChangeApplicationController extends Controller
     // show と editを兼用
     public function edit(Request $request, UserChangeApplication $changeRequest): Response
     {
-        Gate::authorize('update', $changeRequest);
+        Gate::authorize('view', $changeRequest);
 
 
         $changeRequest->load(['targetUser', 'requester']);
@@ -70,6 +70,7 @@ class UserChangeApplicationController extends Controller
 
     // 新規登録
     public function storeCreate(CreateRequest $requestData): JsonResponse
+    // public function storeCreate(CreateRequest $request): JsonResponse
     {
         $actionType = 'create';
 
@@ -166,12 +167,19 @@ class UserChangeApplicationController extends Controller
         ]);
     }
 
-    // 申請内容の更新
+    /**
+     * 申請内容の更新
+     *
+     * @param User|null $targetUser FormRequestにてID等の重複のバリデーションを行うためにルートモデルバインディングしている
+     */
     public function update(
         UpdateSubmitRequest $request,
         UserChangeApplication $changeRequest,
-        ?User $targetUser): JsonResponse
-    {
+        ?User $targetUser
+    ): JsonResponse {
+
+        Gate::authorize('update', $changeRequest);
+
         try {
             $validated = $request->validated();
 
@@ -192,6 +200,24 @@ class UserChangeApplicationController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => '申請内容を更新しました。',
+        ]);
+    }
+
+    public function destroy(Request $request, UserChangeApplication $changeRequest)
+    {
+        Gate::authorize('delete', $changeRequest);
+
+        if ($changeRequest->status === 'rejected') {
+            return response()->json([
+                'status' => 'deny',
+                'message' => '却下された申請の削除はできません。',
+            ]);
+        }
+        $changeRequest->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '申請を削除しました。',
         ]);
     }
 }
