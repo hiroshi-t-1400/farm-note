@@ -36,29 +36,24 @@ class UserChangeApplicationController extends Controller
     {
         Gate::authorize('view', $changeRequest);
 
-
         $changeRequest->load(['targetUser', 'requester']);
 
-        return response()->view('admin.requests.users.edit', compact('changeRequest'));
+        if($changeRequest->status === 'rejected') {
+            return response()->view('admin.requests.users.reapply', compact('changeRequest'));
+        } else {
+            return response()->view('admin.requests.users.edit', compact('changeRequest'));
+        }
     }
 
     // 申請作成画面
     /**
-     * @param string $actionType [create, update, disable]
+     * @param string $actionType [create, update]
      */
     public function create(string $actionType, ?User $targetUser = null): Response|RedirectResponse
     {
         $requestData = [];
 
         if ($targetUser !== null) {
-            // 異常なアクセスへのフォールバック
-            alert($targetUser->id);
-            // if (User::where('id', $targetUser->id)->exists()) {
-            //     alert('送信データが異常です。');
-            //     // return response()->view('dashboard');
-            //     return redirect('/dashboard');
-            // }
-
             $targetUser->load('roles');
             $requestData['targetUser'] = $targetUser;
         }
@@ -68,9 +63,8 @@ class UserChangeApplicationController extends Controller
         return response()->view('admin.requests.users.create', compact('requestData'));
     }
 
-    // 新規登録
+    // 新規登録post
     public function storeCreate(CreateRequest $requestData): JsonResponse
-    // public function storeCreate(CreateRequest $request): JsonResponse
     {
         $actionType = 'create';
 
@@ -177,7 +171,7 @@ class UserChangeApplicationController extends Controller
     public function update(
         UpdateSubmitRequest $request,
         UserChangeApplication $changeRequest,
-        ?User $targetUser
+        ?User $targetUser = null
     ): JsonResponse {
 
         Gate::authorize('update', $changeRequest);

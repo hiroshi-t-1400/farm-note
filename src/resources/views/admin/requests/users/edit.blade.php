@@ -23,6 +23,12 @@
         <template x-if="!$store.auth.loading">
             <div>
                 <x-ui.form-group>
+                    <span class="text-gray-800 text-base font-semibold">
+                        申請状態：
+                            <span x-text="statusLabel" :class="statusClass"></span>
+                    </span>
+                </x-ui.form-group>
+                <x-ui.form-group>
                     <span class="text-gray-800 text-base font-semibold">初回申請日：<span x-text="createdAt"></span></span>
                 </x-ui.form-group>
 
@@ -151,16 +157,6 @@
 
                 </div>
 
-                <template x-if="rejectionReason">
-                    <x-ui.textarea
-                        name="rejectionReason"
-                        x-model="rejectionReason"
-                        variant="error"
-                        disabled
-                        class="w-full"
-                    />
-                </template>
-
                 {{-- bottom --}}
                 <div class="flex py-5 justify-center gap-x-4">
                     <template x-if="canEdit">
@@ -182,20 +178,6 @@
                         </x-ui.button>
                     </template>
 
-                    @can('acknowledge', $changeRequest)
-                        <template x-if="canAcknowledge">
-                            <x-ui.button
-                                type="button"
-                                @click="submitAcknowledge()"
-                                name="acknowledge" dusk="submit-acknowledge"
-                                class="w-[10rem]"
-                            >
-                                内容を確認した
-                            </x-ui.button>
-                        </template>
-                    @endcan
-
-
                     <x-ui.button
                         type="href"
                         name="cancel"
@@ -203,7 +185,7 @@
                         variant="secondary-ghost"
                         dusk="cancel-button"
                         class="w-[10rem]">
-                        キャンセル
+                        戻る
                     </x-ui.button>
                 </div>
             </div>

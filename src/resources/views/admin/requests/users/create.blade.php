@@ -2,9 +2,9 @@
 
 <x-layouts.layout title="ユーザー管理の申請 - 農作業日誌">
 
-    {{-- <x-slot:header>
+    <x-slot:header>
         ユーザー新規登録の申請
-    </x-slot> --}}
+    </x-slot>
 
 
     <form

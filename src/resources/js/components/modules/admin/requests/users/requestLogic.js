@@ -13,6 +13,7 @@ function buildPayload (formData) {
     }
 }
 
+// ユーザーの新規登録申請post
 export async function submitCreate(
     formData
 ) {
@@ -27,6 +28,7 @@ export async function submitCreate(
     }
 }
 
+// 既存ユーザー情報の更新申請post
 export async function submitUpdate(
     targetUserId,
     formData
@@ -43,6 +45,7 @@ export async function submitUpdate(
     }
 }
 
+// 既存ユーザーの削除申請post
 export async function submitDisable(targetUserId) {
     try {
         const response = await submitService.destroyRequest(

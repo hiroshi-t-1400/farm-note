@@ -102,8 +102,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::patch('/{changeRequest}/acknowledge/', [UserChangeApplicationController::class, 'acknowledge'])
                 ->name('rejection_acknowledge');
             // 申請内容の編集画面
-            Route::get('/edit/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
+            Route::get('/{changeRequest}/edit', [UserChangeApplicationController::class, 'edit'])
                 ->name('edit');
+            //
+            Route::get('/{changeRequest}/reapply', [UserChangeApplicationController::class, 'reapply'])
+                ->name('reapply');
 
             Route::get('/', [UserChangeApplicationController::class, 'index'])
             ->name('index');

@@ -27,19 +27,23 @@ export default (config) => {
         role: r.payload.role,
         roleLabel: ROLES[r.payload.role],
         rejectionReason: r.rejection_reason,
-        showUrl: `${window.location.origin}/admin/requests/users/edit/${r.id}`,
+        showUrl: `${window.location.origin}/admin/requests/users/${r.id}/edit`,
 
         status: r.status,
         statusLabel: REQUEST_STATUS[r.status],
+        acknowledged: isAcknowlegded(r.rejection_acknowledge_at) || '',
         statusCss: statusClass[r.status],
 
         requesterId: r.requester.id,
         requesterName: r.requester.name
     }));
 
+    function isAcknowlegded(timestamp) {
+        if (timestamp) return '確認済み';
+    };
+
     return {
         indexData: indexData,
-
         ...offsetPagenation(config?.initialModels),
 
         hasRejected() {

@@ -30,9 +30,15 @@ const submitService = {
 
     // 申請内容の更新
     // 更新申請の変更であればuser情報の取得が必要
-    updateRequestData(requestDataId, targetUserId, payload) {
+    updateRequestData(requestDataId, targetUserId = null, payload) {
+        let targetUrl = '';
+        if(targetUserId === null) {
+            targetUrl = `/${requestDataId}/update`;
+        } else {
+            targetUrl = `/${requestDataId}/update/${targetUserId}`;
+        }
         return axiosUserRequestClient.patch(
-            `/${requestDataId}/update/${targetUserId}`,
+            targetUrl,
             payload,
         );
     },

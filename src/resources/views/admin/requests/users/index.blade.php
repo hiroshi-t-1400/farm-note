@@ -22,7 +22,7 @@
 
         <div class="flex flex-col ">
 
-            <div class="hidden sm:grid sm:grid-cols-[10rem_10rem_8rem_minmax(3rem,_auto)_minmax(3rem,_1fr)] gap-x-4 items-center pb-2 mb-2 border-b-2 border-gray-200 text-xs font-bold text-gray-500 tracking-wider">
+            <div class="hidden sm:grid sm:grid-cols-[10rem_10rem_8rem_minmax(6rem,_auto)_minmax(3rem,_1fr)] gap-x-4 items-center pb-2 mb-2 border-b-2 border-gray-200 text-xs font-bold text-gray-500 tracking-wider">
                 <div>対象者氏名</div>
                 <div>申請者名</div>
                 <div>申請日</div>
@@ -33,7 +33,7 @@
             <template x-for="data in indexData" :key="data.id">
                 <div class="w-fit">
                     <template x-if="$store.auth.can('update', data)">
-                        <div class="grid grid-cols-1 sm:grid-cols-[10rem_10rem_8rem_minmax(3rem,_auto)_minmax(0,_auto)] gap-x-4 gap-y-2 items-center py-3 border-b border-gray-100 relative hover:bg-blue-50/40 transition-colors group">
+                        <div class="grid grid-cols-1 sm:grid-cols-[10rem_10rem_8rem_minmax(6rem,_auto)_minmax(0,_auto)] gap-x-4 gap-y-2 items-center py-3 border-b border-gray-100 relative hover:bg-blue-50/40 transition-colors group">
                             <a :href="data.showUrl"
                                 class="absolute inset-0 z-10"
                                 :aria-label="`${data.username}さんの申請詳細を確認する`"
@@ -43,7 +43,7 @@
                             <span x-text="data.requesterName" class="min-w-0 truncate font-semibold text-gray-700"></span>
                             <span x-text="data.createdAt" class="min-w-0 text-gray-500 text-sm"></span>
                             <span
-                                x-text="data.statusLabel"
+                                x-text="`${data.statusLabel} ${data.acknowledged}`"
                                 :class="`min-w-0 ${data.statusCss}`"
                             ></span>
                             <span class="min-w-0 truncate text-gray-500 text-sm"
@@ -54,7 +54,7 @@
                     </template>
 
                     <template x-if="!$store.auth.can('update', data)">
-                        <div class="grid grid-cols-1 sm:grid-cols-[10rem_10rem_8rem_minmax(3rem,_auto)_minmax(0,_auto)] gap-x-4 gap-y-2 items-center py-3 border-b border-gray-100 relative hover:bg-blue-50/40 transition-colors group">
+                        <div class="grid grid-cols-1 sm:grid-cols-[10rem_10rem_8rem_minmax(6rem,_auto)_minmax(0,_auto)] gap-x-4 gap-y-2 items-center py-3 border-b border-gray-100 relative hover:bg-blue-50/40 transition-colors group">
 
                             <span class="min-w-0 truncate font-semibold text-gray-800 " x-text="data.username"></span>
                             <span x-text="data.requesterName" class="min-w-0 truncate text-gray-700"></span>
