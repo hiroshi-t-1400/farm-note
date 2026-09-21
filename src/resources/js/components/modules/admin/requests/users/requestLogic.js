@@ -87,6 +87,19 @@ export async function submitDeleteRequestData(
     return response;
 }
 
+/**
+ * 却下された申請を確認した処理
+ */
+export async function submitAcknowledgeRequestData(
+    requestDataId
+) {
+    const response = await submitService.acknowledgeRequestData(
+        requestDataId
+    );
+    return response;
+}
+
+
 function normalizeRequestError(e) {
     if (e.response) {
         const {status, data} = e.response;

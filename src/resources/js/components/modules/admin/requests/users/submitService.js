@@ -23,7 +23,7 @@ const submitService = {
     // login_id,emailのuniqueルールのためuser情報をモデルバインディングで取得
     updateRequest(targetUserId, payload) {
         return axiosUserRequestClient.post(
-            `${targetUserId}/store-update`,
+            `/${targetUserId}/store-update`,
             payload,
         );
     },
@@ -32,7 +32,7 @@ const submitService = {
     // 更新申請の変更であればuser情報の取得が必要
     updateRequestData(requestDataId, targetUserId, payload) {
         return axiosUserRequestClient.patch(
-            `${requestDataId}/update/${targetUserId}`,
+            `/${requestDataId}/update/${targetUserId}`,
             payload,
         );
     },
@@ -40,9 +40,17 @@ const submitService = {
     // 申請の削除
     deleteRequestData(requestDataId) {
         return axiosUserRequestClient.delete(
-            `/destroy/${requestDataId}`
+            `/${requestDataId}/destroy/`
         );
     },
+
+    // 却下された申請を確認
+    acknowledgeRequestData(requestDataId) {
+        return axiosUserRequestClient.patch(
+            `/${requestDataId}/acknowledge/`
+        );
+    }
+
 };
 
 export default submitService;

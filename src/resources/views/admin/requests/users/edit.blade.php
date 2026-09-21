@@ -182,6 +182,20 @@
                         </x-ui.button>
                     </template>
 
+                    @can('acknowledge', $changeRequest)
+                        <template x-if="canAcknowledge">
+                            <x-ui.button
+                                type="button"
+                                @click="submitAcknowledge()"
+                                name="acknowledge" dusk="submit-acknowledge"
+                                class="w-[10rem]"
+                            >
+                                内容を確認した
+                            </x-ui.button>
+                        </template>
+                    @endcan
+
+
                     <x-ui.button
                         type="href"
                         name="cancel"

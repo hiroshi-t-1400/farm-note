@@ -4,7 +4,7 @@ import { tsToDate } from "../../../../../utils/date";
 import { getBackUrl } from "../../../../../utils";
 import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 
-import { loadUser, submitUpdateRequestData, submitDeleteRequestData } from "./requestLogic";
+import { loadUser, submitUpdateRequestData, submitDeleteRequestData, submitAcknowledgeRequestData } from "./requestLogic";
 import handleRequestError from "./error";
 
 export default (config) => {
@@ -29,6 +29,10 @@ export default (config) => {
         return !DENY_STATUS.includes(requestStatus);
     };
 
+    function canAcknowledge() {
+        return requestStatus === 'rejected';
+    };
+
     return {
         targetId,
 
@@ -38,6 +42,7 @@ export default (config) => {
 
         rejectionReason,
         canEdit: canEdit(),
+        canAcknowledge: canAcknowledge(),
         errors: {},
 
         resultData: '',
@@ -61,6 +66,16 @@ export default (config) => {
 
                 alert(response.data.message);
                 window.location.replace(backUrl);
+            } catch(e) {
+                handleRequestError(e);
+            }
+        },
+
+        async submitAcknowledge() {
+            try {
+                const response = await submitAcknowledgeRequestData(targetId);
+
+                alert(response.data.message);
             } catch(e) {
                 handleRequestError(e);
             }
