@@ -16,28 +16,46 @@
 
         <x-admin.requests.users.edit>
 
-            <template x-if="rejectionReason">
-                <x-ui.textarea
-                    name="rejectionReason"
-                    x-model="rejectionReason"
-                    variant="error"
-                    disabled
-                    class="w-full"
-                />
-            </template>
+            <x-slot:isAcknowledge>
+                <span x-show="isAcknowledged" class="font-bold text-amber-800">（確認済み）</span>
+            </x-slot>
+
+            <x-slot:reapplyStatus>
+                <x-ui.form-group>
+                    <span class="text-gray-800 text-base font-semibold">
+                        再申請：
+                            <span x-text="reapplyStatus" class="font-bold text-blue-500"></span>
+                            <span x-show="!reapplyStatus"
+                                class="font-bold text-blue-500">再申請されていません。</span>
+                    </span>
+                </x-ui.form-group>
+            </x-slot>
+
+
+            <x-slot:rejectionReason>
+                <template x-if="rejectionReason">
+                    <x-ui.textarea
+                        name="rejectionReason"
+                        x-model="rejectionReason"
+                        variant="error"
+                        disabled
+                        class="w-full"
+                    />
+                </template>
+            </x-slot>
 
             <x-slot:bottom_button>
                 {{-- bottom --}}
                 <div class="flex py-5 justify-center gap-x-4">
-                    <template x-if="isAcknowledged">
+                    <template x-if="canReapply()">
                         <x-ui.button name="submit" dusk="submit-button"
                             class="w-[10rem]">
                             再申請を送信する
                         </x-ui.button>
                     </template>
 
-                    @can('acknowledge', $changeRequest)
-                        <template x-if="!isAcknowledged">
+                    @can('history', $changeRequest)
+                        <template x-if="canAcknowledge()">
                             <x-ui.button
                                 variant="danger"
                                 type="button"

@@ -102,6 +102,18 @@ export async function submitAcknowledgeRequestData(
     return response;
 }
 
+/**
+ * 却下された申請の再申請を行った履歴を記録
+ */
+export async function submitReapplyHistory(
+    requestDataId
+) {
+    const response = await submitService.reapplyHistory(
+        requestDataId
+    );
+    return response;
+}
+
 
 function normalizeRequestError(e) {
     if (e.response) {

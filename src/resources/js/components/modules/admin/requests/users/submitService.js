@@ -55,7 +55,14 @@ const submitService = {
         return axiosUserRequestClient.patch(
             `/${requestDataId}/acknowledge/`
         );
-    }
+    },
+
+    // 再申請の履歴を記録
+    reapplyHistory(requestDataId) {
+        return axiosUserRequestClient.patch(
+            `/${requestDataId}/reapply`
+        );
+    },
 
 };
 

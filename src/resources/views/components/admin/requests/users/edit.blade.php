@@ -1,6 +1,9 @@
 {{-- /var/www/src/resources/views/components/admin/requests/users/edit.blade.php --}}
 @props([
     'bottom_button' => '',
+    'isAcknowledge' => '',
+    'reapplyStatus' => '',
+    'rejectionReason' => '',
 ])
 
 <template x-if="$store.auth.loading">
@@ -13,9 +16,12 @@
             <span class="text-gray-800 text-base font-semibold">
                 申請状態：
                     <span x-text="statusLabel" :class="statusClass"></span>
-                    <span x-show="isAcknowledged" :class="statusClass">（確認済み）</span>
+                    {{ $isAcknowledge }}
             </span>
         </x-ui.form-group>
+
+        {{ $reapplyStatus }}
+
         <x-ui.form-group>
             <span class="text-gray-800 text-base font-semibold">初回申請日：<span x-text="createdAt"></span></span>
         </x-ui.form-group>
@@ -143,6 +149,7 @@
                 </span>
             </x-ui.form-group>
 
+            {{ $rejectionReason }}
         </div>
 
 

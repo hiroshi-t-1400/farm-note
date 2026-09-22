@@ -17,30 +17,41 @@ export default (config) => {
         pending: 'font-bold text-blue-500',
     };
 
-    const indexData = data.map(r => ({
-        id: r.id,
-        targetUserId: r.target_user_id,
-        actionType: r.action_type,
-        actionLabel: ACTION_LABELS[r.action_type],
-        username: r.payload.name,
-        createdAt: tsToDate(r.created_at),
-        role: r.payload.role,
-        roleLabel: ROLES[r.payload.role],
-        rejectionReason: r.rejection_reason,
-        showUrl: `${window.location.origin}/admin/requests/users/${r.id}/edit`,
+    const indexData = data.map(r => {
+        let reviewStatus = '';
+        let reviewCss = '';
 
-        status: r.status,
-        statusLabel: REQUEST_STATUS[r.status],
-        acknowledged: isAcknowlegded(r.rejection_acknowledge_at) || '',
-        statusCss: statusClass[r.status],
+        if(r.reapplied_at) {
+            reviewStatus = '再申請済み';
+            reviewCss = statusClass.pending;
+        } else if(r.rejection_acknowledge_at) {
+            reviewStatus = '確認済み';
+            reviewCss = statusClass.rejected
+            console.log({'acknowledge reviewStatus':reviewStatus});
+        }
 
-        requesterId: r.requester.id,
-        requesterName: r.requester.name
-    }));
+        return {
+            id: r.id,
+            targetUserId: r.target_user_id,
+            actionType: r.action_type,
+            actionLabel: ACTION_LABELS[r.action_type],
+            username: r.payload.name,
+            createdAt: tsToDate(r.created_at),
+            role: r.payload.role,
+            roleLabel: ROLES[r.payload.role],
+            rejectionReason: r.rejection_reason,
+            showUrl: `${window.location.origin}/admin/requests/users/${r.id}/edit`,
 
-    function isAcknowlegded(timestamp) {
-        if (timestamp) return '確認済み';
-    };
+            status: r.status,
+            statusLabel: REQUEST_STATUS[r.status],
+            reviewStatus: reviewStatus,
+            reviewCss:reviewCss,
+            statusCss: statusClass[r.status],
+
+            requesterId: r.requester.id,
+            requesterName: r.requester.name
+        };
+    });
 
     return {
         indexData: indexData,

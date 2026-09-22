@@ -32,6 +32,7 @@ class UserChangeApplication extends Model
         'approved_at',
         'rejection_reason',
         'rejection_acknowledge_at',
+        'reapplied_at',
     ];
 
     protected $casts = [

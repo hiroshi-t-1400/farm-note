@@ -4,33 +4,36 @@ import { tsToDate } from "../../../../../utils/date";
 import { getBackUrl } from "../../../../../utils";
 import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 
-import { loadUser, submitCreate, submitUpdate, submitDisable, submitAcknowledgeRequestData } from "./requestLogic";
+import { loadUser, submitCreate, submitUpdate, submitDisable, submitAcknowledgeRequestData, submitReapplyHistory,  } from "./requestLogic";
 
 export default (config) => {
     let {
         action_type,
         payload,
-        id,
+        id: targetId = '',
         created_at,
         rejection_reason: rejectionReason,
         rejection_acknowledge_at: rejectionAcknowledgeAt,
         target_user_id: targetUserId = '',
-        status: requestStatus,
+        reapplied_at,
     } = config?.initialModel || '';
-    const targetId = id || ','
 
     let {formData, old} = loadUser(payload);
 
     const createdAt = tsToDate(created_at);
+    const reapplyStatus = checkReapplied();
     const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
 
-    const isAcknowledged = checkAcknowledged();
+    const isAcknowledged = !!rejectionAcknowledgeAt;
 
-    function checkAcknowledged() {
-        return rejectionAcknowledgeAt !== null;
+    // function checkAcknowledged() {
+    //     return !!rejectionAcknowledgeAt;
+    // };
+
+    function checkReapplied() {
+        if(reapplied_at === null) return '';
+        return tsToDate(reapplied_at);
     };
-
-
 
     return {
         targetId,
@@ -38,9 +41,10 @@ export default (config) => {
         formData,
         old,
         createdAt,
+        reapplyStatus,
 
         rejectionReason,
-        isAcknowledged: isAcknowledged || '', // 再申請送信ボタンと確認ボタンのオンオフ
+        isAcknowledged: isAcknowledged,
         statusLabel: '却下',
         statusClass: 'font-bold text-amber-800',
         errors: {},
@@ -48,12 +52,22 @@ export default (config) => {
         resultData: '',
         backUrl,
 
+        canAcknowledge() {
+            return !this.isAcknowledged;
+        },
+
+        canReapply() {
+            return this.isAcknowledged && !reapplyStatus;
+        },
+
         async submit() {
             if(action_type === 'create') {
                 await this.create();
             } else if(action_type === 'update') {
                 await this.update();
             }
+
+            await this.updateApplicationStatus();
         },
 
         async create() {
@@ -78,8 +92,6 @@ export default (config) => {
             }
         },
 
-        // 再申請したレコードにreappliedステータsu
-
         // 申請が却下されたことを確認したボタン
         async submitAcknowledge() {
             try {
@@ -88,6 +100,15 @@ export default (config) => {
                 alert(response.data.message);
                 // 再申請の送信ボタンをactive
                 this.isAcknowledged = true;
+            } catch(e) {
+                this.handleRequestError(e);
+            }
+        },
+
+        // 却下されたレコードに再申請の履歴を記録
+        async updateApplicationStatus() {
+            try {
+                const response = await submitReapplyHistory(targetId);
             } catch(e) {
                 this.handleRequestError(e);
             }

@@ -215,7 +215,7 @@ class UserChangeApplicationController extends Controller
     // 却下状態を確認した記録
     public function acknowledge(UserChangeApplication $changeRequest)
     {
-        Gate::authorize('acknowledge', $changeRequest);
+        Gate::authorize('history', $changeRequest);
 
         $changeRequest->update([
             'rejection_acknowledge_at' => now(),
@@ -225,5 +225,21 @@ class UserChangeApplicationController extends Controller
             'status' => 'success',
             'message' => '却下された申請を確認済みに更新しました。',
         ]);
+    }
+
+    // 再申請した記録
+    public function reapply(UserChangeApplication $changeApplication)
+    {
+        Gate::authorize('history', $changeApplication);
+
+        $changeApplication->update([
+            'reapplied_at' => now(),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '再申請の履歴を記録しました。',
+        ]);
+
     }
 }

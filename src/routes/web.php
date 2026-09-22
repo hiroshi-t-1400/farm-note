@@ -104,9 +104,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             // 申請内容の編集画面
             Route::get('/{changeRequest}/edit', [UserChangeApplicationController::class, 'edit'])
                 ->name('edit');
-            //
-            Route::get('/{changeRequest}/reapply', [UserChangeApplicationController::class, 'reapply'])
-                ->name('reapply');
+            // 申請のステータスを変更する
+            Route::patch('/{changeApplication}/reapply', [UserChangeApplicationController::class, 'reapply'])
+                ->name('reapplyHistory');
 
             Route::get('/', [UserChangeApplicationController::class, 'index'])
             ->name('index');

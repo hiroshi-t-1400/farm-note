@@ -22,6 +22,7 @@ return new class extends Migration
             $table->timestamp('approved_at')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->timestamp('rejection_acknowledge_at')->nullable();
+            $table->timestamp('reapplied_at')->nullable();
 
             $table->timestamps();
         });
