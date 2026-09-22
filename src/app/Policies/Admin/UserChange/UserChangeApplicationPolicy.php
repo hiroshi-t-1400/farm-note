@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class UserChangeApplicationPolicy
 {
-    const DENY_STATUS = ['rejected', 'approved'];
+    const DENY_STATUS = ['rejected', 'approved', 'closed'];
 
     /**
      * Determine whether the user can view any models.
@@ -81,5 +81,18 @@ class UserChangeApplicationPolicy
     public function forceDelete(User $user, UserChangeApplication $userChangeRequest): bool
     {
         return false;
+    }
+
+    /**
+     * 申請が却下されたことを確認したステータスに変更
+     * 却下された申請は内容の修正を禁止されるが"確認"および"再申請"の操作履歴の記録は許可される
+     */
+    public function history(User $user, UserChangeApplication $userChangeRequest): Response
+    {
+        if ($user->id !== $userChangeRequest->requester->id) {
+            return Response::deny('この申請を更新する権限がありません。');
+        }
+
+        return Response::allow();
     }
 }

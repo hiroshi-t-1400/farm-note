@@ -10,8 +10,9 @@ import editWorkLog from './components/modules/work-logs/edit';
 
 import indexUser from './components/modules/admin/users/index';
 import showUser from './components/modules/admin/users/show';
-// import createUserChangeRequest from './components/modules/admin/requests/users/createRequest';
+// import createUserChangeRequest from './components/modules/admin/requests/users/create';
 import createUserChangeRequest from './components/modules/admin/requests/users/userRequest';
+import reapplyUserChangeApplication from './components/modules/admin/requests/users/reapply';
 import editUserChangeRequest from './components/modules/admin/requests/users/edit';
 import indexUserChangeRequest from './components/modules/admin/requests/users/index';
 import approveUser from './components/modules/admin/approvals/approve';
@@ -38,6 +39,7 @@ Alpine.data('editWorkLog', editWorkLog);
 Alpine.data('indexUser', indexUser);
 Alpine.data('showUser', showUser);
 Alpine.data('createUserChangeRequest', createUserChangeRequest);
+Alpine.data('reapplyUserChangeApplication', reapplyUserChangeApplication);
 Alpine.data('editUserChangeRequest', editUserChangeRequest);
 Alpine.data('indexUserChangeRequest', indexUserChangeRequest);
 Alpine.data('approveUser', approveUser);

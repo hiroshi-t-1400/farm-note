@@ -4,16 +4,14 @@ import { tsToDate } from "../../../../../utils/date";
 import { getBackUrl } from "../../../../../utils";
 import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 
-import { loadUser, submitUpdateRequestData, submitDeleteRequestData } from "./requestLogic";
-import handleRequestError from "./error";
+import { loadUser, submitUpdateRequestData, submitDeleteRequestData, submitCreate, submitAcknowledgeRequestData } from "./requestLogic";
 
 export default (config) => {
     let {
         payload,
         id,
         created_at,
-        rejection_reason: rejectionReason,
-        target_user_id: targetUserId,
+        target_user_id: targetUserId = '',
         status: requestStatus,
     } = config?.initialModel || '';
     const targetId = id || ','
@@ -23,10 +21,16 @@ export default (config) => {
     const createdAt = tsToDate(created_at);
     const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
 
-    // 主にアクションボタンの隠蔽
-    const DENY_STATUS = ['rejected', 'approved'];
+    const statusLabel = REQUEST_STATUS[requestStatus];
+    const statusClass = {
+        default: 'text-gray-500 text-sm',
+        rejected: 'font-bold text-amber-800',
+        pending: 'font-bold text-blue-500',
+    };
+
+    // 新規申請の申請内容を編集できるか
     function canEdit() {
-        return !DENY_STATUS.includes(requestStatus);
+        if(requestStatus === 'pending') return true;
     };
 
     return {
@@ -36,13 +40,13 @@ export default (config) => {
         old,
         createdAt,
 
-        rejectionReason,
-        canEdit: canEdit(),
+        canEdit: canEdit() || '',
+        statusLabel: statusLabel,
+        statusClass: statusClass[requestStatus],
         errors: {},
 
         resultData: '',
         backUrl,
-
 
         async submitUpdate() {
             try {
@@ -51,7 +55,7 @@ export default (config) => {
                 alert(response.data.message);
                 window.location.replace(backUrl);
             } catch (e) {
-                handleRequestError(e);
+                this.handleRequestError(e);
             }
         },
 
@@ -62,8 +66,18 @@ export default (config) => {
                 alert(response.data.message);
                 window.location.replace(backUrl);
             } catch(e) {
-                handleRequestError(e);
+                this.handleRequestError(e);
             }
+        },
+
+        handleRequestError(error) {
+            console.log({ 'error': error });
+            if (error.type === 'validation') {
+                this.errors = error.errors;
+                alert(error.message);
+                return;
+            }
+            alert(error.message);
         },
 
         // バリデーションエラーメッセージを返す

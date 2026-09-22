@@ -36,29 +36,24 @@ class UserChangeApplicationController extends Controller
     {
         Gate::authorize('view', $changeRequest);
 
-
         $changeRequest->load(['targetUser', 'requester']);
 
-        return response()->view('admin.requests.users.edit', compact('changeRequest'));
+        if($changeRequest->status === 'rejected') {
+            return response()->view('admin.requests.users.reapply', compact('changeRequest'));
+        } else {
+            return response()->view('admin.requests.users.edit', compact('changeRequest'));
+        }
     }
 
     // 申請作成画面
     /**
-     * @param string $actionType [create, update, disable]
+     * @param string $actionType [create, update]
      */
     public function create(string $actionType, ?User $targetUser = null): Response|RedirectResponse
     {
         $requestData = [];
 
         if ($targetUser !== null) {
-            // 異常なアクセスへのフォールバック
-            alert($targetUser->id);
-            // if (User::where('id', $targetUser->id)->exists()) {
-            //     alert('送信データが異常です。');
-            //     // return response()->view('dashboard');
-            //     return redirect('/dashboard');
-            // }
-
             $targetUser->load('roles');
             $requestData['targetUser'] = $targetUser;
         }
@@ -68,9 +63,8 @@ class UserChangeApplicationController extends Controller
         return response()->view('admin.requests.users.create', compact('requestData'));
     }
 
-    // 新規登録
+    // 新規登録post
     public function storeCreate(CreateRequest $requestData): JsonResponse
-    // public function storeCreate(CreateRequest $request): JsonResponse
     {
         $actionType = 'create';
 
@@ -111,6 +105,7 @@ class UserChangeApplicationController extends Controller
         ]);
     }
 
+    // ユーザー情報の更新
     public function storeUpdate(UpdateRequest $requestData, User $targetUser)
     {
         $actionType = 'update';
@@ -152,6 +147,7 @@ class UserChangeApplicationController extends Controller
         ]);
     }
 
+    // ユーザー削除の申請
     public function storeDisable(Request $request, string $actionType, User $targetUser)
     {
         UserChangeApplication::create([
@@ -175,7 +171,7 @@ class UserChangeApplicationController extends Controller
     public function update(
         UpdateSubmitRequest $request,
         UserChangeApplication $changeRequest,
-        ?User $targetUser
+        ?User $targetUser = null
     ): JsonResponse {
 
         Gate::authorize('update', $changeRequest);
@@ -203,21 +199,47 @@ class UserChangeApplicationController extends Controller
         ]);
     }
 
+    // 申請の撤回・削除
     public function destroy(Request $request, UserChangeApplication $changeRequest)
     {
         Gate::authorize('delete', $changeRequest);
 
-        if ($changeRequest->status === 'rejected') {
-            return response()->json([
-                'status' => 'deny',
-                'message' => '却下された申請の削除はできません。',
-            ]);
-        }
         $changeRequest->delete();
 
         return response()->json([
             'status' => 'success',
             'message' => '申請を削除しました。',
         ]);
+    }
+
+    // 却下状態を確認した記録
+    public function acknowledge(UserChangeApplication $changeRequest)
+    {
+        Gate::authorize('history', $changeRequest);
+
+        $changeRequest->update([
+            'rejection_acknowledge_at' => now(),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '却下された申請を確認済みに更新しました。',
+        ]);
+    }
+
+    // 再申請した記録
+    public function reapply(UserChangeApplication $changeApplication)
+    {
+        Gate::authorize('history', $changeApplication);
+
+        $changeApplication->update([
+            'reapplied_at' => now(),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '再申請の履歴を記録しました。',
+        ]);
+
     }
 }

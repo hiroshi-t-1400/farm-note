@@ -2,7 +2,6 @@
 
 import { getBackUrl } from "../../../../../utils";
 import { submitCreate, submitUpdate, loadUser } from "./requestLogic";
-import handleRequestError from "./error";
 
 export default (config) => {
 
@@ -55,8 +54,18 @@ export default (config) => {
                 }
 
             } catch (e) {
-                handleRequestError(e);
+                this.handleRequestError(e);
             }
+        },
+
+        handleRequestError(error) {
+            console.log({ 'error': error });
+            if (error.type === 'validation') {
+                this.errors = error.errors;
+                alert(error.message);
+                return;
+            }
+            alert(error.message);
         },
 
         // バリデーションエラーメッセージを返す

@@ -96,11 +96,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->group(function () {
 
             // 申請の削除
-            Route::delete('/destroy/{changeRequest}', [UserChangeApplicationController::class, 'destroy'])
+            Route::delete('/{changeRequest}/destroy/', [UserChangeApplicationController::class, 'destroy'])
                 ->name('destroy');
+            // 却下について確認した
+            Route::patch('/{changeRequest}/acknowledge/', [UserChangeApplicationController::class, 'acknowledge'])
+                ->name('rejection_acknowledge');
             // 申請内容の編集画面
-            Route::get('/edit/{changeRequest}', [UserChangeApplicationController::class, 'edit'])
+            Route::get('/{changeRequest}/edit', [UserChangeApplicationController::class, 'edit'])
                 ->name('edit');
+            // 申請のステータスを変更する
+            Route::patch('/{changeApplication}/reapply', [UserChangeApplicationController::class, 'reapply'])
+                ->name('reapplyHistory');
 
             Route::get('/', [UserChangeApplicationController::class, 'index'])
             ->name('index');
