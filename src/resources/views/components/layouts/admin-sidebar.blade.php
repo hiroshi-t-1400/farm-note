@@ -27,7 +27,7 @@
                 @can('user-change.approve')
                     <div class="space-y-1">
                         <p class="px-2 text-sm font-medium text-gray-600 uppercase tracking-wider">オーナー専用</p>
-                        {{-- <a href="{{ route('admin.approvals.users.index') }}" --}}
+                        <a href="{{ route('admin.approvals.users.index') }}"
                             class="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'approvals' ? 'bg-slate-800 text-amber-500' : '' }}"
                         >
                             <div class="flex items-center">

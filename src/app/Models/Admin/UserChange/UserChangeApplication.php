@@ -33,6 +33,7 @@ class UserChangeApplication extends Model
         'rejection_reason',
         'rejection_acknowledge_at',
         'reapplied_at',
+        'parent_application_id',
     ];
 
     protected $casts = [
@@ -47,7 +48,7 @@ class UserChangeApplication extends Model
 
     public function targetUser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'target_user_id');
+        return $this->belongsTo(User::class, 'target_user_id')->with('roles');
     }
 
     public function requester(): BelongsTo
@@ -91,7 +92,7 @@ class UserChangeApplication extends Model
                 // ロール以外の属性を更新
                 $user->update(collect($this->payload)->except('role')->toArray());
 
-            } elseif ($this->action_type === 'delete') {
+            } elseif ($this->action_type === 'disable') {
                 $user = $this->targetUser;
                 $user->update(['status' => self::STATUS_DISABLED]);
             }

@@ -43,7 +43,9 @@ class UserApprovalController extends Controller
             session()->flash('success', '申請を承認しました。');
 
             // 成功ステータス（JSON）を返す
-            return response()->json(['message' => 'success'], 200);
+            return response()->json([
+                'message' => 'success'
+            ], 200);
 
         } catch (\LogicException $e) {
             // 「既に処理済み」「ステータスが不整合」などの業務エラー ➔ 422
@@ -64,11 +66,9 @@ class UserApprovalController extends Controller
                 'message' => 'システムエラーが発生しました。管理者にお問い合わせください。'
             ], 500);
         }
-
-
     }
 
-    // 棄却ロジック
+    // 却下ロジック
     public function reject(UserApprovalRequest $request, UserChangeApplication $changeRequest)
     {
         $validated = $request->validated();

@@ -7,7 +7,6 @@ import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 import { ACTION_LABELS } from "../../../../../constants/actions";
 
 export default (config) => {
-
     const data = config?.initialModels?.data;
     const path = config?.initialModels?.path;
 
@@ -27,7 +26,6 @@ export default (config) => {
         } else if(r.rejection_acknowledge_at) {
             reviewStatus = '確認済み';
             reviewCss = statusClass.rejected
-            console.log({'acknowledge reviewStatus':reviewStatus});
         }
 
         return {
@@ -35,10 +33,10 @@ export default (config) => {
             targetUserId: r.target_user_id,
             actionType: r.action_type,
             actionLabel: ACTION_LABELS[r.action_type],
-            username: r.payload.name,
+            username: r?.payload?.name || r?.target_user?.name,
             createdAt: tsToDate(r.created_at),
-            role: r.payload.role,
-            roleLabel: ROLES[r.payload.role],
+            role: r?.payload?.role,
+            roleLabel: ROLES[r?.payload?.role],
             rejectionReason: r.rejection_reason,
             showUrl: `${window.location.origin}/admin/requests/users/${r.id}/edit`,
 

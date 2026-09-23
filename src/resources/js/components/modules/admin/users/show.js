@@ -5,9 +5,11 @@ import { tsToDate } from "../../dashboard/utils";
 import { ROLES } from "../../../../constants/roles";
 import { USER_STATUS } from "../../../../constants/userStatus";
 
+import { submitDisable } from "../requests/users/requestLogic";
+
 export default (config) => {
 
-    let {id: userId, name: username, login_id: loginId, email, created_at, updated_at, roles, status} = config?.initialModels || '';
+    let {id: userId, name: username, login_id: loginId, email, created_at, updated_at, roles, status, actionType} = config?.initialModels || '';
 
     const createdAt = tsToDate(created_at);
     const updatedAt = tsToDate(updated_at);
@@ -47,6 +49,7 @@ export default (config) => {
         email,
         createdAt,
         updatedAt,
+        actionType,
         roleLabel,
         statusLabel,
 
@@ -58,58 +61,26 @@ export default (config) => {
 
         errors: {},
 
+        // 閲覧中のユーザーを削除する申請を送信
         async submitDelete() {
             if (!confirm('ユーザー情報の削除を申請してよろしいですか？')) {
                 return;
             }
 
-            this.errors = {};
-
             try {
-                const response = await window.http.patch(`/admin/requests/users/${this.userId}/destroy`);
+                const response = await submitDisable(this.userId);
 
-                window.location.replace(this.backUrl);
+                // 成功処理
+                alert(response.data.message);
+                window.location.replace(backUrl);
             } catch(e) {
-                if (e.response) {
-                    const status = e.response.status;
-                    const data = e.response.data;
-
-                    // ----------------------------------------------------
-                    // 1. ビジネスロジックエラーのハンドリング
-                    // ----------------------------------------------------
-                    if (status === 422) {
-                        this.error = data.errors || {};
-                        alert(data.message || '申請を実行できませんでした。');
-                        return;
-                    }
-
-                    // ----------------------------------------------------
-                    // 2. 連続送信（429）のハンドリング
-                    // ----------------------------------------------------
-                    if (status === 429) {
-                        this.errors = data.errors || {};
-                        alert('送信操作が多すぎます。しばらく時間をおいてから再度お試しください。');
-                        return;
-                    }
-
-                    // ----------------------------------------------------
-                    // 3. その他のサーバーエラー（500系や404など
-                    // ----------------------------------------------------
-                    // 個別ハンドリング以外
-                    console.error('サーバーエラーが発生しました。', status, data);
-                    alert('サーバーエラーが発生しました。時間をおいて再度お試しください。');
-                    return;
-                }
-
-                // axiosのタイムアウトエラーハンドリング
-                if (e.code === 'ECONNABORTED') {
-                    console.error('通信エラー： タイムアウトが発生しました。', e);
-                    alert('通信タイムアウトしました。接続状態をご確認の上、再度お試しください。');
-                } else {
-                    console.error('不明な通信エラー:', e.message);
-                    alert('通信エラーが発生しました。');
-                }
+                this.handleRequestError(e);
             }
+        },
+
+        handleRequestError(error) {
+            console.log({ 'error': error });
+            alert(error.message);
         },
     }
 }
