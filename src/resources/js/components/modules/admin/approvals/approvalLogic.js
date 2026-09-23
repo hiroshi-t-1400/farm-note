@@ -1,26 +1,15 @@
-// /var/www/src/resources/js/components/modules/admin/requests/users/createRequest.js
-import { ROLES } from "../../../../../constants/roles";
+// /var/www/src/resources/js/components/modules/admin/approvals/approvalLogic.js
+
 import submitService from "./submitService";
 
 
-function buildPayload (formData) {
-    return {
-        name: formData.username,
-        email: formData.email,
-        password: formData.password,
-        loginId: formData.loginId,
-        role: formData.role,
-    }
-}
-
-// ユーザーの新規登録申請post
-export async function submitCreate(
-    formData
+// 申請の承認操作を送信
+export async function submitApproveApplication(
+    applicationId
 ) {
-    const payload = buildPayload(formData);
     try {
-        const response = await submitService.createRequest(
-            payload
+        const response = await submitService.approveApplication(
+            applicationId
         );
         return response;
     } catch (e) {
@@ -28,94 +17,21 @@ export async function submitCreate(
     }
 }
 
-// 既存ユーザー情報の更新申請post
-export async function submitUpdate(
-    targetUserId,
-    formData
+// 申請の却下操作を送信
+export async function submitRejectApplication(
+    applicationId,
+    rejectionReason
 ) {
-    const payload = buildPayload(formData);
     try {
-        const response = await submitService.updateRequest(
-            targetUserId,
-            payload
+        const response = await submitService.rejectApplication(
+            applicationId,
+            rejectionReason
         );
         return response;
     } catch (e) {
         throw normalizeRequestError(e);
     }
 }
-
-// 既存ユーザーの削除申請post
-export async function submitDisable(targetUserId) {
-    try {
-        const response = await submitService.destroyRequest(
-            targetUserId
-        );
-        return response;
-    } catch (e) {
-        throw normalizeRequestError(e);
-    }
-}
-
-/**
- * 申請内容の編集
- */
-export async function submitUpdateRequestData(
-    requestDataId,
-    targetUserId,
-    formData
-) {
-    const payload = buildPayload(formData);
-    try {
-        const response = await submitService.updateRequestData(
-            requestDataId,
-            targetUserId,
-            payload
-        );
-        return response;
-    } catch (e) {
-        throw normalizeRequestError(e);
-    }
-}
-
-/**
- * 申請の削除・取り下げ
- */
-export async function submitDeleteRequestData(
-    requestDataId
-) {
-    const response = await submitService.deleteRequestData(
-        requestDataId
-    );
-    return response;
-}
-
-/**
- * 却下された申請を確認した処理
- */
-export async function submitAcknowledgeRequestData(
-    requestDataId
-) {
-    const response = await submitService.acknowledgeRequestData(
-        requestDataId
-    );
-    return response;
-}
-
-/**
- * 却下された申請の再申請を行った履歴を記録
- */
-export async function submitReapplyHistory(
-    parentApplicationId,
-    childApplicationId
-) {
-    const response = await submitService.reapplyHistory(
-        parentApplicationId,
-        childApplicationId
-    );
-    return response;
-}
-
 
 function normalizeRequestError(e) {
     if (e.response) {
@@ -175,7 +91,7 @@ function normalizeRequestError(e) {
             message: 'タイムアウトが発生しました。',
         };
     }
-
+console.log({'approvalLogic の 最後の例外の e': e});
     return {
         type: 'network',
         message: '通信エラーが発生しました。',
@@ -194,15 +110,5 @@ export function loadUser(targetUser) {
         role: role || 'worker',
     };
 
-    const old = buildOld(formData);
-    return {
-        formData,
-        old,
-    }
-};
-
-function buildOld(formData) {
-    const get = formData == {} ? {} : {...formData};
-    get.roleLabel = ROLES[get.role];
-    return get;
+    return formData;
 };

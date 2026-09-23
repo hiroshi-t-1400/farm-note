@@ -46,4 +46,6 @@
 
     </template>
 
+    <x-ui.pagenation />
+
 </div>

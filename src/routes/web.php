@@ -128,17 +128,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
     // 承認 オーナー専用グループ
     Route::middleware(['role:owner'])
-        ->prefix('admin/approvals')
-        ->name('admin.approvals.')
+        ->prefix('admin/approvals/users')
+        ->name('admin.approvals.users.')
         ->group(function () {
-            Route::get('/users', [UserApprovalController::class, 'index'])
-                ->name('users.index');
-            Route::get('/users/{changeRequest}', [UserApprovalController::class, 'show'])
-                ->name('users.show');
-            Route::patch('/users/{changeRequest}/approve', [UserApprovalController::class, 'approve'])
-                ->name('users.approve');
-            Route::patch('/users/{changeRequest}/reject', [UserApprovalController::class, 'reject'])
-                ->name('users.reject');
+            Route::get('/', [UserApprovalController::class, 'index'])
+                ->name('index');
+            Route::get('/{changeRequest}', [UserApprovalController::class, 'show'])
+                ->name('show');
+            Route::patch('/{changeRequest}/approve', [UserApprovalController::class, 'approve'])
+                ->name('approve');
+            Route::patch('/{changeRequest}/reject', [UserApprovalController::class, 'reject'])
+                ->name('reject');
         });
     // ユーザー情報閲覧
     Route::prefix('users')

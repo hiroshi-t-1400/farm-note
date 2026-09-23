@@ -133,28 +133,28 @@
 
                 <p class="py-1 ms-5 text-sm text-gray-600 font-semibold">使用できる記号<span class="rounded-md px-4 py-0.5 bg-gray-200">! @ # $ % & * - _ .</span></p>
             </x-ui.form-group>
-
-            <x-ui.form-group
-                name="role"
-                label="権限"
-            >
-                <x-ui.select
-                    name="role"
-                    x-model="formData.role"
-                    required
-                >
-                    <option value="worker">一般ユーザー</option>
-                    <option value="manager">管理者</option>
-                    {{-- <option value="owner">オーナー</option> --}}
-                </x-ui.select>
-                <span class="px-2 text-gray-600 text-sm font-semibold">
-                    変更前：
-                    <span x-text="old.roleLabel"></span>
-                </span>
-            </x-ui.form-group>
-
-            {{ $rejectionReason }}
         </div>
+
+        <x-ui.form-group
+            name="role"
+            label="権限"
+        >
+            <x-ui.select
+                name="role"
+                x-model="formData.role"
+                required
+            >
+                <option value="worker">一般ユーザー</option>
+                <option value="manager">管理者</option>
+                {{-- <option value="owner">オーナー</option> --}}
+            </x-ui.select>
+            <span class="px-2 text-gray-600 text-sm font-semibold">
+                変更前：
+                <span x-text="old.roleLabel"></span>
+            </span>
+        </x-ui.form-group>
+
+        {{ $rejectionReason }}
 
 
         {{ $bottom_button }}

@@ -1,5 +1,6 @@
 // /var/www/src/resources/js/components/modules/admin/users/users
 import { tsToDate } from "../../dashboard/utils";
+import { offsetPagenation } from "../../../../api/transformers/pagenation";
 
 export default (config) => {
 
@@ -37,6 +38,7 @@ export default (config) => {
 
     return {
         indexData: indexData,
+        ...offsetPagenation(config?.initialModels),
     }
 }
 

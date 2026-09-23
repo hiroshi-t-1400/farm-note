@@ -26,7 +26,6 @@ export default (config) => {
 
     const actionLabel = ACTION_LABELS[actionType];
     const reapplyStatus = checkReapplied();
-    const parentApplicationId = targetId;
 
     const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
 
