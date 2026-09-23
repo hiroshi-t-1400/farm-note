@@ -105,7 +105,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/{changeRequest}/edit', [UserChangeApplicationController::class, 'edit'])
                 ->name('edit');
             // 申請のステータスを変更する
-            Route::patch('/{changeApplication}/reapply', [UserChangeApplicationController::class, 'reapply'])
+            Route::patch('/{parentApplication}/{childApplication}/reapply', [UserChangeApplicationController::class, 'reapply'])
                 ->name('reapplyHistory');
 
             Route::get('/', [UserChangeApplicationController::class, 'index'])
@@ -123,7 +123,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 ->name('store-create');
             Route::post('/{targetUser}/store-update', [UserChangeApplicationController::class, 'storeUpdate'])
                 ->name('store-update');
-            Route::post('/{targetUser}/store-disable', [UserChangeApplicationController::class, 'storeDisabel'])
+            Route::post('/{targetUser}/store-disable', [UserChangeApplicationController::class, 'storeDisable'])
                 ->name('store-disable');
         });
     // 承認 オーナー専用グループ

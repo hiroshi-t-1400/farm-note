@@ -71,7 +71,7 @@ class UserChangeApplicationController extends Controller
         try {
             $validated = $requestData->validated();
 
-            UserChangeApplication::create([
+            $application = UserChangeApplication::create([
                 'action_type' => $actionType,
                 'target_user_id' => null,
                 'payload' => $validated,
@@ -102,6 +102,7 @@ class UserChangeApplicationController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'ユーザー登録の申請を送信しました。',
+            'application_id' => $application->id,
         ]);
     }
 
@@ -112,7 +113,7 @@ class UserChangeApplicationController extends Controller
         try {
             $validated = $requestData->validated();
 
-            UserChangeApplication::create([
+            $application = UserChangeApplication::create([
                 'action_type' => $actionType,
                 'target_user_id' => $targetUser->id,
                 'payload' => $validated,
@@ -144,13 +145,15 @@ class UserChangeApplicationController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'ユーザー情報更新の申請を送信しました。',
+            'application_id' => $application->id,
         ]);
     }
 
     // ユーザー削除の申請
-    public function storeDisable(Request $request, string $actionType, User $targetUser)
+    public function storeDisable(Request $request, User $targetUser)
     {
-        UserChangeApplication::create([
+        $actionType = 'disable';
+        $application = UserChangeApplication::create([
             'action_type' => $actionType,
             'target_user_id' => $targetUser->id,
             'status' => UserChangeApplication::STATUS_PENDING,
@@ -159,7 +162,8 @@ class UserChangeApplicationController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'ユーザー削除の申請を送信しました。'
+            'message' => 'ユーザー削除の申請を送信しました。',
+            'application_id' => $application->id,
         ]);
     }
 
@@ -228,12 +232,18 @@ class UserChangeApplicationController extends Controller
     }
 
     // 再申請した記録
-    public function reapply(UserChangeApplication $changeApplication)
+    public function reapply(UserChangeApplication $parentApplication, UserChangeApplication $childApplication)
     {
-        Gate::authorize('history', $changeApplication);
+        Gate::authorize('history', $parentApplication);
+        Gate::authorize('history', $childApplication);
 
-        $changeApplication->update([
+        $parentApplication->update([
             'reapplied_at' => now(),
+        ]);
+
+        $childApplication->update([
+            'parent_application_id' => $parentApplication->id,
+            'rejection_reason' => $parentApplication->rejection_reason,
         ]);
 
         return response()->json([

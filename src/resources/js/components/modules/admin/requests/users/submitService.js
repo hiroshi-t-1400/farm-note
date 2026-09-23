@@ -58,9 +58,9 @@ const submitService = {
     },
 
     // 再申請の履歴を記録
-    reapplyHistory(requestDataId) {
+    reapplyHistory(parentApplicationId, childApplicationId) {
         return axiosUserRequestClient.patch(
-            `/${requestDataId}/reapply`
+            `/${parentApplicationId}/${childApplicationId}/reapply`
         );
     },
 

@@ -4,35 +4,42 @@ import { tsToDate } from "../../../../../utils/date";
 import { getBackUrl } from "../../../../../utils";
 import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 
-import { loadUser, submitCreate, submitUpdate, submitDisable, submitAcknowledgeRequestData, submitReapplyHistory,  } from "./requestLogic";
+import { loadUser, submitCreate, submitUpdate, submitAcknowledgeRequestData, submitReapplyHistory,  } from "./requestLogic";
+import { ACTION_LABELS } from "../../../../../constants/actions";
 
 export default (config) => {
     let {
-        action_type,
+        action_type: actionType,
         payload,
         id: targetId = '',
         created_at,
         rejection_reason: rejectionReason,
         rejection_acknowledge_at: rejectionAcknowledgeAt,
         target_user_id: targetUserId = '',
+        target_user: targetUser = '',
         reapplied_at,
     } = config?.initialModel || '';
 
-    let {formData, old} = loadUser(payload);
+    let {formData, old} = loadUser(payload ?? targetUser);
 
     const createdAt = tsToDate(created_at);
+
+    const actionLabel = ACTION_LABELS[actionType];
     const reapplyStatus = checkReapplied();
+    const parentApplicationId = targetId;
+
     const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
 
     const isAcknowledged = !!rejectionAcknowledgeAt;
 
-    // function checkAcknowledged() {
-    //     return !!rejectionAcknowledgeAt;
-    // };
-
     function checkReapplied() {
         if(reapplied_at === null) return '';
         return tsToDate(reapplied_at);
+    };
+
+    function initFormData() {
+        let {formData, old} = loadUser(payload ?? targetUser);
+        formData.rejection_reason
     };
 
     return {
@@ -41,6 +48,7 @@ export default (config) => {
         formData,
         old,
         createdAt,
+        actionLabel,
         reapplyStatus,
 
         rejectionReason,
@@ -57,39 +65,33 @@ export default (config) => {
         },
 
         canReapply() {
-            return this.isAcknowledged && !reapplyStatus;
+            return this.isAcknowledged && !reapplyStatus && actionType !== 'disable';
+        },
+
+        async submitReapply() {
+            let response = '';
+            try {
+                response = await this.submit();
+            } catch(e) {
+                this.handleRequestError(e);
+            }
+
+            const data = response.data;
+
+            await this.updateApplicationStatus(data.applicationId);
+            alert(data.message);
+            window.location.replace(backUrl);
         },
 
         async submit() {
-            if(action_type === 'create') {
-                await this.create();
-            } else if(action_type === 'update') {
-                await this.update();
+            let response = '';
+            if(actionType === 'create') {
+                response = await submitCreate(this.formData);
+            } else if(actionType === 'update') {
+                response = await submitUpdate(targetUserId, this.formData);
             }
 
-            await this.updateApplicationStatus();
-        },
-
-        async create() {
-            try {
-                const response = await submitCreate(this.formData);
-                // 成功処理
-                alert(response.data.message);
-                window.location.replace(backUrl);
-            } catch (e) {
-                this.handleRequestError(e);
-            }
-        },
-
-        async update() {
-            try {
-                const response = await submitUpdate(targetUserId, this.formData);
-                //成功処理
-                alert(response.data.message);
-                window.location.replace(backUrl);
-            } catch (e) {
-                this.handleRequestError(e);
-            }
+            return response;
         },
 
         // 申請が却下されたことを確認したボタン
@@ -106,9 +108,9 @@ export default (config) => {
         },
 
         // 却下されたレコードに再申請の履歴を記録
-        async updateApplicationStatus() {
+        async updateApplicationStatus(childApplicationId) {
             try {
-                const response = await submitReapplyHistory(targetId);
+                await submitReapplyHistory(targetId, childApplicationId);
             } catch(e) {
                 this.handleRequestError(e);
             }

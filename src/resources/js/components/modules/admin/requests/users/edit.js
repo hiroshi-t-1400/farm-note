@@ -5,22 +5,26 @@ import { getBackUrl } from "../../../../../utils";
 import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 
 import { loadUser, submitUpdateRequestData, submitDeleteRequestData, submitCreate, submitAcknowledgeRequestData } from "./requestLogic";
+import { ACTION_LABELS } from "../../../../../constants/actions";
 
 export default (config) => {
     let {
-        payload,
+        action_type: actionType,
+        payload = '',
         id,
         created_at,
         target_user_id: targetUserId = '',
+        target_user: targetUser = '',
         status: requestStatus,
     } = config?.initialModel || '';
     const targetId = id || ','
 
-    let {formData, old} = loadUser(payload);
+    let {formData, old} = loadUser(payload ?? targetUser);
 
     const createdAt = tsToDate(created_at);
     const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
 
+    const actionLabel = ACTION_LABELS[actionType];
     const statusLabel = REQUEST_STATUS[requestStatus];
     const statusClass = {
         default: 'text-gray-500 text-sm',
@@ -28,10 +32,10 @@ export default (config) => {
         pending: 'font-bold text-blue-500',
     };
 
-    // 新規申請の申請内容を編集できるか
-    function canEdit() {
-        if(requestStatus === 'pending') return true;
-    };
+    // // 新規申請の申請内容を編集できるか
+    // function canEdit() {
+    //     if(requestStatus === 'pending' && actionType !== 'disable') return true;
+    // };
 
     return {
         targetId,
@@ -40,13 +44,22 @@ export default (config) => {
         old,
         createdAt,
 
-        canEdit: canEdit() || '',
+        actionLabel,
+        // canEdit: canEdit() || '',
         statusLabel: statusLabel,
         statusClass: statusClass[requestStatus],
         errors: {},
 
         resultData: '',
         backUrl,
+
+        canEdit() {
+            if(requestStatus === 'pending' && actionType !== 'disable') return true;
+        },
+
+        canDelete() {
+            if(requestStatus === 'pending') return true;
+        },
 
         async submitUpdate() {
             try {

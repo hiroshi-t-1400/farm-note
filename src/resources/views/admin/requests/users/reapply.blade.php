@@ -11,7 +11,7 @@
         x-data="reapplyUserChangeApplication({
             'initialModel': @js($changeRequest)
         })"
-        @submit.prevent="submit()"
+        @submit.prevent="submitReapply()"
     >
 
         <x-admin.requests.users.edit>

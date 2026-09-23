@@ -23,6 +23,10 @@
         {{ $reapplyStatus }}
 
         <x-ui.form-group>
+            <span class="text-gray-800 text-base font-semibold">申請種別：<span x-text="actionLabel"></span></span>
+        </x-ui.form-group>
+
+        <x-ui.form-group>
             <span class="text-gray-800 text-base font-semibold">初回申請日：<span x-text="createdAt"></span></span>
         </x-ui.form-group>
 

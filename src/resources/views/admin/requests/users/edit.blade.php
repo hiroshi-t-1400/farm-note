@@ -20,14 +20,14 @@
 
                 {{-- bottom --}}
                 <div class="flex py-5 justify-center gap-x-4">
-                    <template x-if="canEdit">
+                    <template x-if="canEdit()">
                         <x-ui.button name="submit" dusk="submit-button"
                             class="w-[10rem]">
                             申請内容を更新する
                         </x-ui.button>
                     </template>
 
-                    <template x-if="canEdit">
+                    <template x-if="canDelete()">
                         <x-ui.button
                             type="button"
                             variant="danger"

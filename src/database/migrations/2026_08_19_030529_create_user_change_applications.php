@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('rejection_reason')->nullable();
             $table->timestamp('rejection_acknowledge_at')->nullable();
             $table->timestamp('reapplied_at')->nullable();
+            $table->integer('parent_application_id')->nullable();
 
             $table->timestamps();
         });

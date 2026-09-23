@@ -106,10 +106,12 @@ export async function submitAcknowledgeRequestData(
  * 却下された申請の再申請を行った履歴を記録
  */
 export async function submitReapplyHistory(
-    requestDataId
+    parentApplicationId,
+    childApplicationId
 ) {
     const response = await submitService.reapplyHistory(
-        requestDataId
+        parentApplicationId,
+        childApplicationId
     );
     return response;
 }
@@ -180,17 +182,19 @@ function normalizeRequestError(e) {
     };
 }
 
-export function loadUser(targetUser = null) {
+export function loadUser(targetUser) {
+
+    let role = targetUser?.role ?? targetUser?.roles?.[0]?.['name']
+
     const formData = {
         email: targetUser?.email || '',
         password: '',
         loginId: targetUser?.login_id || '',
         username: targetUser?.name || '',
-        role: targetUser?.roles?.[0]?.['name'] || 'worker',
+        role: role || 'worker',
     };
 
     const old = buildOld(formData);
-// console.log(formData);
     return {
         formData,
         old,
