@@ -15,8 +15,10 @@ class UserApprovalController extends Controller
     {
         $changeRequests = UserChangeApplication::where('status', 'pending')
             ->with(['targetUser', 'requester'])
-            ->orderBy('created_at')
-            ->cursorPaginate(15);
+            ->orderBy('parent_application_id', 'desc')
+            ->orderBy('updated_at', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->paginate(15);
 
         return response()->view('/admin/approvals/index', compact('changeRequests'));
     }
@@ -33,9 +35,6 @@ class UserApprovalController extends Controller
     // 承認ロジック
     public function approve(Request $request, UserChangeApplication $changeRequest)
     {
-        // policyで認可の設定
-        // $this->authorize('approve', $request);
-
         try {
             // モデルにカプセル化されたビジネスロジックの実行
             $changeRequest->approve($request->user());

@@ -35,8 +35,8 @@ export default (config) => {
             actionLabel: ACTION_LABELS[r.action_type],
             username: r?.payload?.name || r?.target_user?.name,
             createdAt: tsToDate(r.created_at),
-            role: r?.payload?.role,
-            roleLabel: ROLES[r?.payload?.role],
+            role: r?.payload?.role || r?.target_user?.role,
+            roleLabel: ROLES[r?.payload?.role || r?.target_user?.role],
             rejectionReason: r.rejection_reason,
             showUrl: `${window.location.origin}/admin/requests/users/${r.id}/edit`,
 

@@ -89,9 +89,6 @@ class UserChangeApplication extends Model
                     $user->syncRoles([$this->payload['role']]);
                 }
 
-                // ロール以外の属性を更新
-                $user->update(collect($this->payload)->except('role')->toArray());
-
             } elseif ($this->action_type === 'disable') {
                 $user = $this->targetUser;
                 $user->update(['status' => self::STATUS_DISABLED]);
