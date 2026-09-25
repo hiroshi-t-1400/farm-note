@@ -4,7 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserApprovalRequest;
+use App\Notifications\UserChangeApplicationApproved;
+use App\Notifications\UserChangeApplicationRejected;
+
 use App\Models\Admin\UserChange\UserChangeApplication;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -35,11 +39,19 @@ class UserApprovalController extends Controller
     // 承認ロジック
     public function approve(Request $request, UserChangeApplication $changeApplication)
     {
+        $requester = $request->user();
+
         try {
             // モデルにカプセル化されたビジネスロジックの実行
-            $changeApplication->approve($request->user());
+            $changeApplication->approve($requester);
 
             session()->flash('success', '申請を承認しました。');
+
+            // 成功処理
+            // 担当の管理者へ承認を行った通知をする(notification database channels)
+            $requester->notify(
+                new UserChangeApplicationApproved($changeApplication)
+            );
 
             // 成功ステータス（JSON）を返す
             return response()->json([
@@ -56,7 +68,7 @@ class UserApprovalController extends Controller
             // その他のエラーをLogを保存、messegeとして読み出せるように
             Log::error('ユーザー承認処理エラー', [
                 'change_application_id' => $changeApplication->id,
-                'user_id' => $request->user()->id,
+                'user_id' => $requester->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -71,14 +83,23 @@ class UserApprovalController extends Controller
     public function reject(UserApprovalRequest $request, UserChangeApplication $changeApplication)
     {
         $validated = $request->validated();
+        $requester = $request->user();
 
         try {
-            $changeApplication->reject($request->user(), $validated['rejection_reason'] ?? null);
+            $changeApplication->reject($requester, $validated['rejection_reason'] ?? null);
 
             session()->flash('success', '申請を却下しました。');
 
+            // 成功処理
+            // 担当の管理者へ却下処理を行った通知をする(notification database channels)
+            $requester->notify(
+                new UserChangeApplicationRejected($changeApplication)
+            );
+
             // 成功ステータス（JSON）を返す
-            return response()->json(['message' => 'success'], 200);
+            return response()->json([
+                'message' => 'success'
+            ], 200);
 
         } catch (\LogicException $e) {
             return response()->json([
