@@ -10,4 +10,12 @@
     >
         {{ $count }}
     </span>
+
+@elseif ($count = -1)
+    <span
+        {{ $attributes->merge([
+            'class' => "right-0 top-0 block h-2.5 w-2.5 rounded-full bg-red-600"
+        ]) }}
+        aria-label="処理待ちのタスクがあります"
+    ></span>
 @endif

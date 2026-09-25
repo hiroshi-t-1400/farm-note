@@ -54,6 +54,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                             <span>ユーザー情報</span>
+
+                            @can('user-change.application')
+                                <!-- 未確認の却下された案件通知バッジ -->
+                                <x-admin.applications.users.unacknowledged-badge dot="true" />
+                            @endcan
                         </div>
                         <!-- 回転するカスタムインジケーター -->
                         <svg class="w-4 h-4 text-slate-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,11 +94,8 @@
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 申請一覧
-                                                        <p>
-                            バッジのテスト
-                            <x-admin.applications.users.unacknowledged-badge />
-                        </p>
-
+                                <!-- 未確認の却下された案件通知バッジ -->
+                                <x-admin.applications.users.unacknowledged-badge />
                             </a>
                         @endcan
                     </div>
