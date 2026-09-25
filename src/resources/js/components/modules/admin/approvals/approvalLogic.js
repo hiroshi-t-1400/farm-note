@@ -91,7 +91,7 @@ function normalizeRequestError(e) {
             message: 'タイムアウトが発生しました。',
         };
     }
-console.log({'approvalLogic の 最後の例外の e': e});
+
     return {
         type: 'network',
         message: '通信エラーが発生しました。',
