@@ -1,4 +1,4 @@
-// /var/www/src/resources/js/components/modules/admin/requests/users/createRequest.js
+// /var/www/src/resources/js/components/modules/admin/Applications/users/createApplication.js
 import { ROLES } from "../../../../../constants/roles";
 import submitService from "./submitService";
 
@@ -19,12 +19,12 @@ export async function submitCreate(
 ) {
     const payload = buildPayload(formData);
     try {
-        const response = await submitService.createRequest(
+        const response = await submitService.createApplication(
             payload
         );
         return response;
     } catch (e) {
-        throw normalizeRequestError(e);
+        throw normalizeApplicationError(e);
     }
 }
 
@@ -35,57 +35,57 @@ export async function submitUpdate(
 ) {
     const payload = buildPayload(formData);
     try {
-        const response = await submitService.updateRequest(
+        const response = await submitService.updateApplication(
             targetUserId,
             payload
         );
         return response;
     } catch (e) {
-        throw normalizeRequestError(e);
+        throw normalizeApplicationError(e);
     }
 }
 
 // 既存ユーザーの削除申請post
 export async function submitDisable(targetUserId) {
     try {
-        const response = await submitService.destroyRequest(
+        const response = await submitService.destroyApplication(
             targetUserId
         );
         return response;
     } catch (e) {
-        throw normalizeRequestError(e);
+        throw normalizeApplicationError(e);
     }
 }
 
 /**
  * 申請内容の編集
  */
-export async function submitUpdateRequestData(
-    requestDataId,
+export async function submitUpdateApplicationData(
+    ApplicationDataId,
     targetUserId,
     formData
 ) {
     const payload = buildPayload(formData);
     try {
-        const response = await submitService.updateRequestData(
-            requestDataId,
+        const response = await submitService.updateApplicationData(
+            ApplicationDataId,
             targetUserId,
             payload
         );
         return response;
     } catch (e) {
-        throw normalizeRequestError(e);
+        throw normalizeApplicationError(e);
     }
 }
 
 /**
  * 申請の削除・取り下げ
  */
-export async function submitDeleteRequestData(
-    requestDataId
+export async function submitDeleteApplicationData(
+    ApplicationDataId
 ) {
-    const response = await submitService.deleteRequestData(
-        requestDataId
+    const response = await submitService.deleteApplicationData(
+        ApplicationDataId
     );
     return response;
 }
@@ -93,11 +93,11 @@ export async function submitDeleteRequestData(
 /**
  * 却下された申請を確認した処理
  */
-export async function submitAcknowledgeRequestData(
-    requestDataId
+export async function submitAcknowledgeApplicationData(
+    ApplicationDataId
 ) {
-    const response = await submitService.acknowledgeRequestData(
-        requestDataId
+    const response = await submitService.acknowledgeApplicationData(
+        ApplicationDataId
     );
     return response;
 }
@@ -117,7 +117,7 @@ export async function submitReapplyHistory(
 }
 
 
-function normalizeRequestError(e) {
+function normalizeApplicationError(e) {
     if (e.response) {
         const {status, data} = e.response;
 
@@ -138,7 +138,7 @@ function normalizeRequestError(e) {
         // ----------------------------------------------------
         if (status === 429) {
             return {
-                type: 'too_many_requests',
+                type: 'too_many_Applications',
                 status,
                 errors: data.errors || {},
                 message: '送信操作が多すぎます。',

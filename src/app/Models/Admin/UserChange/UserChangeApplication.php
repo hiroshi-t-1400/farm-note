@@ -27,7 +27,7 @@ class UserChangeApplication extends Model
         'target_user_id',
         'payload',
         'status',
-        'requested_by',
+        'applied_by',
         'approved_by',
         'approved_at',
         'rejection_reason',
@@ -53,7 +53,7 @@ class UserChangeApplication extends Model
 
     public function requester(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'requested_by');
+        return $this->belongsTo(User::class, 'applied_by');
     }
 
 

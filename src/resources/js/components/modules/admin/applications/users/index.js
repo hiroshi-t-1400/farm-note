@@ -3,7 +3,7 @@ import { tsToDate } from "../../../../../utils/date";
 import { offsetPagenation } from "../../../../../api/transformers/pagenation";
 
 import { ROLES } from "../../../../../constants/roles";
-import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
+import { APPLICATION_STATUS } from "../../../../../constants/applicationStatus";
 import { ACTION_LABELS } from "../../../../../constants/actions";
 
 export default (config) => {
@@ -38,10 +38,10 @@ export default (config) => {
             role: r?.payload?.role || r?.target_user?.role,
             roleLabel: ROLES[r?.payload?.role || r?.target_user?.role],
             rejectionReason: r.rejection_reason,
-            showUrl: `${window.location.origin}/admin/requests/users/${r.id}/edit`,
+            showUrl: `${window.location.origin}/admin/applications/users/${r.id}/edit`,
 
             status: r.status,
-            statusLabel: REQUEST_STATUS[r.status],
+            statusLabel: APPLICATION_STATUS[r.status],
             reviewStatus: reviewStatus,
             reviewCss:reviewCss,
             statusCss: statusClass[r.status],

@@ -24,24 +24,24 @@ class UserChangeApplicationController extends Controller
     // 一覧
     public function index(): Response
     {
-        $changeRequests = UserChangeApplication::query()
+        $changeApplications = UserChangeApplication::query()
             ->defaultSort()
             ->paginate(15);  // モデルにカプセル化したScopeを呼び出す
 
-        return response()->view('admin.requests.users.index', compact('changeRequests'));
+        return response()->view('admin.applications.users.index', compact('changeApplications'));
     }
 
     // show と editを兼用
-    public function edit(Request $request, UserChangeApplication $changeRequest): Response
+    public function edit(Request $request, UserChangeApplication $changeApplication): Response
     {
-        Gate::authorize('view', $changeRequest);
+        Gate::authorize('view', $changeApplication);
 
-        $changeRequest->load(['targetUser', 'requester']);
+        $changeApplication->load(['targetUser', 'requester']);
 
-        if($changeRequest->status === 'rejected') {
-            return response()->view('admin.requests.users.reapply', compact('changeRequest'));
+        if($changeApplication->status === 'rejected') {
+            return response()->view('admin.applications.users.reapply', compact('changeApplication'));
         } else {
-            return response()->view('admin.requests.users.edit', compact('changeRequest'));
+            return response()->view('admin.applications.users.edit', compact('changeApplication'));
         }
     }
 
@@ -51,32 +51,32 @@ class UserChangeApplicationController extends Controller
      */
     public function create(string $actionType, ?User $targetUser = null): Response|RedirectResponse
     {
-        $requestData = [];
+        $applicationData = [];
 
         if ($targetUser !== null) {
             $targetUser->load('roles');
-            $requestData['targetUser'] = $targetUser;
+            $applicationData['targetUser'] = $targetUser;
         }
 
-        $requestData['actionType'] = $actionType;
+        $applicationData['actionType'] = $actionType;
 
-        return response()->view('admin.requests.users.create', compact('requestData'));
+        return response()->view('admin.applications.users.create', compact('applicationData'));
     }
 
     // 新規登録post
-    public function storeCreate(CreateRequest $requestData): JsonResponse
+    public function storeCreate(CreateRequest $applicationData): JsonResponse
     {
         $actionType = 'create';
 
         try {
-            $validated = $requestData->validated();
+            $validated = $applicationData->validated();
 
             $application = UserChangeApplication::create([
                 'action_type' => $actionType,
                 'target_user_id' => null,
                 'payload' => $validated,
                 'status' => UserChangeApplication::STATUS_PENDING,
-                'requested_by' => $requestData->user()->id,
+                'applied_by' => $applicationData->user()->id,
             ]);
         } catch (\LogicException $e) {
             // 「既に処理済み」「ステータスが不整合」などの業務エラー ➔ 422
@@ -89,7 +89,7 @@ class UserChangeApplicationController extends Controller
             Log::error('申請処理エラー', [
                 'action_type' => $actionType,
                 'target_user_id' => $targetUser->id ?? '',
-                'user_id' => $requestData->user()->id,
+                'user_id' => $applicationData->user()->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -107,18 +107,18 @@ class UserChangeApplicationController extends Controller
     }
 
     // ユーザー情報の更新
-    public function storeUpdate(UpdateRequest $requestData, User $targetUser)
+    public function storeUpdate(UpdateRequest $applicationData, User $targetUser)
     {
         $actionType = 'update';
         try {
-            $validated = $requestData->validated();
+            $validated = $applicationData->validated();
 
             $application = UserChangeApplication::create([
                 'action_type' => $actionType,
                 'target_user_id' => $targetUser->id,
                 'payload' => $validated,
                 'status' => UserChangeApplication::STATUS_PENDING,
-                'requested_by' => $requestData->user()->id,
+                'applied_by' => $applicationData->user()->id,
             ]);
 
         } catch (\LogicException $e) {
@@ -132,7 +132,7 @@ class UserChangeApplicationController extends Controller
             Log::error('申請処理エラー', [
                 'action_type' => $actionType,
                 'target_user_id' => $targetUser->id ?? '',
-                'user_id' => $requestData->user()->id,
+                'user_id' => $applicationData->user()->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -157,7 +157,7 @@ class UserChangeApplicationController extends Controller
             'action_type' => $actionType,
             'target_user_id' => $targetUser->id,
             'status' => UserChangeApplication::STATUS_PENDING,
-            'requested_by' => $request->user()->id,
+            'applied_by' => $request->user()->id,
         ]);
 
         return response()->json([
@@ -174,11 +174,11 @@ class UserChangeApplicationController extends Controller
      */
     public function update(
         UpdateSubmitRequest $request,
-        UserChangeApplication $changeRequest,
+        UserChangeApplication $changeApplication,
         ?User $targetUser = null
     ): JsonResponse {
 
-        Gate::authorize('update', $changeRequest);
+        Gate::authorize('update', $changeApplication);
 
         try {
             $validated = $request->validated();
@@ -187,7 +187,7 @@ class UserChangeApplicationController extends Controller
                 unset($validated['password']);
             }
 
-            $changeRequest->update([
+            $changeApplication->update([
                 'payload' => $validated,
             ]);
 
@@ -204,11 +204,11 @@ class UserChangeApplicationController extends Controller
     }
 
     // 申請の撤回・削除
-    public function destroy(Request $request, UserChangeApplication $changeRequest)
+    public function destroy(Request $request, UserChangeApplication $changeApplication)
     {
-        Gate::authorize('delete', $changeRequest);
+        Gate::authorize('delete', $changeApplication);
 
-        $changeRequest->delete();
+        $changeApplication->delete();
 
         return response()->json([
             'status' => 'success',
@@ -217,11 +217,11 @@ class UserChangeApplicationController extends Controller
     }
 
     // 却下状態を確認した記録
-    public function acknowledge(UserChangeApplication $changeRequest)
+    public function acknowledge(UserChangeApplication $changeApplication)
     {
-        Gate::authorize('history', $changeRequest);
+        Gate::authorize('history', $changeApplication);
 
-        $changeRequest->update([
+        $changeApplication->update([
             'rejection_acknowledge_at' => now(),
         ]);
 

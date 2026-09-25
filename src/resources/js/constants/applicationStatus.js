@@ -1,6 +1,6 @@
-// /var/www/src/resources/js/constants/requestStatus.js
+// /var/www/src/resources/js/constants/applicationStatus.js
 
-export const REQUEST_STATUS = {
+export const APPLICATION_STATUS = {
     pending: '処理待ち',
     approved: '承認済み',
     rejected: '却下',

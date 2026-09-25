@@ -9,12 +9,12 @@
 
     <form
         x-data="reapplyUserChangeApplication({
-            'initialModel': @js($changeRequest)
+            'initialModel': @js($changeApplication)
         })"
         @submit.prevent="submitReapply()"
     >
 
-        <x-admin.requests.users.edit>
+        <x-admin.applications.users.edit>
 
             <x-slot:isAcknowledge>
                 <span x-show="isAcknowledged" class="font-bold text-amber-800">（確認済み）</span>
@@ -54,7 +54,7 @@
                         </x-ui.button>
                     </template>
 
-                    @can('history', $changeRequest)
+                    @can('history', $changeApplication)
                         <template x-if="canAcknowledge()">
                             <x-ui.button
                                 variant="danger"
@@ -79,7 +79,7 @@
                     </x-ui.button>
                 </div>
             </x-slot>
-        </x-admin.requests.users.edit>
+        </x-admin.applications.users.edit>
     </form>
 
 </x-layouts.layout>

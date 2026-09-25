@@ -10,11 +10,10 @@ import editWorkLog from './components/modules/work-logs/edit';
 
 import indexUser from './components/modules/admin/users/index';
 import showUser from './components/modules/admin/users/show';
-// import createUserChangeRequest from './components/modules/admin/requests/users/create';
-import createUserChangeRequest from './components/modules/admin/requests/users/userRequest';
-import reapplyUserChangeApplication from './components/modules/admin/requests/users/reapply';
-import editUserChangeRequest from './components/modules/admin/requests/users/edit';
-import indexUserChangeRequest from './components/modules/admin/requests/users/index';
+import createUserChangeApplication from './components/modules/admin/applications/users/create';
+import reapplyUserChangeApplication from './components/modules/admin/applications/users/reapply';
+import editUserChangeApplication from './components/modules/admin/applications/users/edit';
+import indexUserChangeApplication from './components/modules/admin/applications/users/index';
 import approveUser from './components/modules/admin/approvals/approve';
 import indexApprovals from './components/modules/admin/approvals/index';
 
@@ -38,10 +37,10 @@ Alpine.data('editWorkLog', editWorkLog);
 // ユーザー情報
 Alpine.data('indexUser', indexUser);
 Alpine.data('showUser', showUser);
-Alpine.data('createUserChangeRequest', createUserChangeRequest);
+Alpine.data('createUserChangeApplication', createUserChangeApplication);
 Alpine.data('reapplyUserChangeApplication', reapplyUserChangeApplication);
-Alpine.data('editUserChangeRequest', editUserChangeRequest);
-Alpine.data('indexUserChangeRequest', indexUserChangeRequest);
+Alpine.data('editUserChangeApplication', editUserChangeApplication);
+Alpine.data('indexUserChangeApplication', indexUserChangeApplication);
 Alpine.data('approveUser', approveUser);
 Alpine.data('indexApprovals', indexApprovals);
 

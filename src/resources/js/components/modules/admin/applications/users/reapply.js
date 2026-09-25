@@ -1,10 +1,9 @@
-// /var/www/src/resources/js/components/modules/admin/requests/users/reapply.js
+// /var/www/src/resources/js/components/modules/admin/Applications/users/reapply.js
 
 import { tsToDate } from "../../../../../utils/date";
 import { getBackUrl } from "../../../../../utils";
-import { REQUEST_STATUS } from "../../../../../constants/requestStatus";
 
-import { loadUser, submitCreate, submitUpdate, submitAcknowledgeRequestData, submitReapplyHistory,  } from "./requestLogic";
+import { loadUser, submitCreate, submitUpdate, submitAcknowledgeApplicationData, submitReapplyHistory,  } from "./applicationLogic";
 import { ACTION_LABELS } from "../../../../../constants/actions";
 
 export default (config) => {
@@ -27,7 +26,7 @@ export default (config) => {
     const actionLabel = ACTION_LABELS[actionType];
     const reapplyStatus = checkReapplied();
 
-    const backUrl = getBackUrl(`${location.origin}/admin/requests/users`); // 戻る遷移先はindexページ
+    const backUrl = getBackUrl(`${location.origin}/admin/applications/users`); // 戻る遷移先はindexページ
 
     const isAcknowledged = !!rejectionAcknowledgeAt;
 
@@ -72,7 +71,7 @@ export default (config) => {
             try {
                 response = await this.submit();
             } catch(e) {
-                this.handleRequestError(e);
+                this.handleApplicationError(e);
             }
 
             const data = response.data;
@@ -96,13 +95,13 @@ export default (config) => {
         // 申請が却下されたことを確認したボタン
         async submitAcknowledge() {
             try {
-                const response = await submitAcknowledgeRequestData(targetId);
+                const response = await submitAcknowledgeApplicationData(targetId);
 
                 alert(response.data.message);
                 // 再申請の送信ボタンをactive
                 this.isAcknowledged = true;
             } catch(e) {
-                this.handleRequestError(e);
+                this.handleApplicationError(e);
             }
         },
 
@@ -111,11 +110,11 @@ export default (config) => {
             try {
                 await submitReapplyHistory(targetId, childApplicationId);
             } catch(e) {
-                this.handleRequestError(e);
+                this.handleApplicationError(e);
             }
         },
 
-        handleRequestError(error) {
+        handleApplicationError(error) {
             console.log({ 'error': error });
             if (error.type === 'validation') {
                 this.errors = error.errors;

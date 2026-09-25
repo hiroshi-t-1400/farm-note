@@ -1,12 +1,12 @@
 {{-- src/resources/views/components/admin/approvals/index.blade.php --}}
 
 @props([
-    'changeRequests'
+    'changeApplications'
 ])
 
 <div
     x-data="indexApprovals({
-        initialModels: @js($changeRequests)
+        initialModels: @js($changeApplications)
     })"
     x-cloak
 >

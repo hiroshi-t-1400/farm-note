@@ -13,7 +13,7 @@ export async function submitApproveApplication(
         );
         return response;
     } catch (e) {
-        throw normalizeRequestError(e);
+        throw normalizeApplicationError(e);
     }
 }
 
@@ -29,11 +29,11 @@ export async function submitRejectApplication(
         );
         return response;
     } catch (e) {
-        throw normalizeRequestError(e);
+        throw normalizeApplicationError(e);
     }
 }
 
-function normalizeRequestError(e) {
+function normalizeApplicationError(e) {
     if (e.response) {
         const {status, data} = e.response;
 

@@ -8,7 +8,7 @@
 
     <form
         x-data="approveUser({
-            initialModels: @js($changeRequest)
+            initialModels: @js($changeApplication)
         })"
     >
 

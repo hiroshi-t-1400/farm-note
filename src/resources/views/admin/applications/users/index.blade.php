@@ -5,8 +5,8 @@
         送信した承認の一覧
     </x-slot>
 
-    <div x-data="indexUserChangeRequest({
-        'initialModels': @js($changeRequests)
+    <div x-data="indexUserChangeApplication({
+        'initialModels': @js($changeApplications)
         })"
         x-cloak
     >

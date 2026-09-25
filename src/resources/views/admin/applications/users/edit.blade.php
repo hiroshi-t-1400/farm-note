@@ -8,13 +8,13 @@
 
 
     <form
-        x-data="editUserChangeRequest({
-            'initialModel': @js($changeRequest)
+        x-data="editUserChangeApplication({
+            'initialModel': @js($changeApplication)
         })"
         @submit.prevent="submitUpdate()"
     >
 
-        <x-admin.requests.users.edit>
+        <x-admin.applications.users.edit>
 
             <x-slot:bottom_button>
 
@@ -51,7 +51,7 @@
                 </div>
             </x-slot>
 
-        </x-admin.requests.users.edit>
+        </x-admin.applications.users.edit>
     </form>
 
 </x-layouts.layout>

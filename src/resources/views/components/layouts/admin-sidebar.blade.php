@@ -2,7 +2,7 @@
 @props([
     // 必要に応じて親からアクティブなメニュー名などを受け取る場合はここに定義します
     'activeMenu' => '',
-    'requestCount' => '',
+    'applicationCount' => '',
 ])
 
 
@@ -63,7 +63,7 @@
 
                     <!-- サブメニュー -->
                     <div x-show="open" x-transition class="pl-8 space-y-1 mt-1">
-                        @can('user-change.request')
+                        @can('user-change.application')
                             <a href="{{ route('users.index') }}"
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'users' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
@@ -79,13 +79,13 @@
                         @endcan
 
                         <!-- 【manager専用】ユーザー新規登録申請画面 -->
-                        @can('user-change.request')
-                            <a href="{{ route('admin.requests.users.create', $actionType='create') }}"
+                        @can('user-change.application')
+                            <a href="{{ route('admin.applications.users.create', $actionType='create') }}"
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 新規登録申請
                             </a>
-                            <a href="{{ route('admin.requests.users.index') }}"
+                            <a href="{{ route('admin.applications.users.index') }}"
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 申請一覧

@@ -86,9 +86,9 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     // 自分が出した申請の一覧
-    public function changeRequests(): HasMany
+    public function changeApplications(): HasMany
     {
-        return $this->hasMany(UserChangeApplication::class, 'requested_by');
+        return $this->hasMany(UserChangeApplication::class, 'applied_by');
     }
 
     public function scopeDefaultSort(Builder $query): Builder

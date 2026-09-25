@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('user_change_applications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('target_user_id')->nullable()->constrained('users')->cascadeOnDelete();
-            $table->foreignId('requested_by')->constrained('users');
+            $table->foreignId('applied_by')->constrained('users');
             $table->string('action_type');
             $table->json('payload')->nullable();
             $table->string('status')->default('pending'); // 指定が無ければ保留中状態に
