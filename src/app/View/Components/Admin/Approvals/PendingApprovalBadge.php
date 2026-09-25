@@ -7,15 +7,19 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class ApprovalBadge extends Component
+class PendingApprovalBadge extends Component
 {
+
     public int $pendingCount;
+
     /**
      * Create a new component instance.
      */
     public function __construct()
     {
-        $this->pendingCount = UserChangeApplication::where('status', 'pending')->count();
+        $this->pendingCount = UserChangeApplication::query()
+            ->where('status', UserChangeApplication::STATUS_PENDING)
+            ->count();
     }
 
     /**
@@ -23,6 +27,6 @@ class ApprovalBadge extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.admin.approvals.approval-badge');
+        return view('components.admin.approvals.pending-approval-badge');
     }
 }

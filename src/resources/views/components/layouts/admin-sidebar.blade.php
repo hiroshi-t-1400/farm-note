@@ -37,7 +37,7 @@
                                 <span>承認待ち一覧</span>
                             </div>
                             {{-- 未承認件数バッジ --}}
-                            <x-admin.approvals.approval-badge />
+                            <x-admin.approvals.pending-approval-badge />
                         </a>
                     </div>
                 @endcan
@@ -89,6 +89,11 @@
                                 class="block px-3 py-1.5 text-xs rounded-md transition-colors hover:bg-slate-800 hover:text-slate-100 {{ $activeMenu === 'user-registration' ? 'text-amber-500 font-semibold' : 'text-slate-400' }}"
                             >
                                 申請一覧
+                                                        <p>
+                            バッジのテスト
+                            <x-admin.applications.users.unacknowledged-badge />
+                        </p>
+
                             </a>
                         @endcan
                     </div>
