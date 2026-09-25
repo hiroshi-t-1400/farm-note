@@ -1,10 +1,10 @@
-// /var/www/src/resources/js/components/modules/admin/requests/users/axiosUserRequestClient.js
+// /var/www/src/resources/js/components/modules/admin/applications/users/axiosUserApplicationClient.js
 
 import axios from "axios";
 import applyCaseMiddleware from "axios-case-converter";
 
 const rawAxios = axios.create({
-    baseURL: '/admin/requests/users',
+    baseURL: '/admin/applications/users',
     headers: {
         'X-requester-With': 'XMLHttpRequest',
     },
@@ -13,10 +13,10 @@ const rawAxios = axios.create({
 })
 
 // axios-case-converterを適用
-const axiosUserRequestClient = applyCaseMiddleware(rawAxios, { ignoreHeaders:true });
+const axiosUserApplicationClient = applyCaseMiddleware(rawAxios, { ignoreHeaders:true });
 
 
-axiosUserRequestClient.interceptors.request.use(
+axiosUserApplicationClient.interceptors.request.use(
     (config) => {
         return config;
     },
@@ -25,7 +25,7 @@ axiosUserRequestClient.interceptors.request.use(
     }
 );
 
-axiosUserRequestClient.interceptors.response.use(
+axiosUserApplicationClient.interceptors.response.use(
     (response) => {
         return response;
     },
@@ -35,4 +35,4 @@ axiosUserRequestClient.interceptors.response.use(
     }
 )
 
-export default axiosUserRequestClient;
+export default axiosUserApplicationClient;

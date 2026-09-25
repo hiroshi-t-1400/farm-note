@@ -39,7 +39,7 @@ class UserChangeApplicationFactory extends Factory
                 'role' => 'worker',
             ],
             'status' => fake()->randomElement(['pending']),
-            'requested_by' => function () {
+            'applied_by' => function () {
                 if (is_null(static::$managerIds)) {
                     static::$managerIds = User::role('manager')->pluck('id')->toArray();
                 }

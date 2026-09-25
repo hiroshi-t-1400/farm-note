@@ -1,29 +1,34 @@
-{{-- /var/www/src/resources/views/components/admin/requests/users/create.blade.php --}}
+{{-- /var/www/src/resources/views/components/admin/applications/users/edit.blade.php --}}
+@props([
+    'bottom_button' => '',
+    'isAcknowledge' => '',
+    'reapplyStatus' => '',
+    'rejectionReason' => '',
+])
 
+<template x-if="$store.auth.loading">
+    <div>読み込み中...</div>
+</template>
 
-        <template x-if="resultData == {}" x-transition>
-            <div class="result-area py-2 px-4 sm:w-[20rem] sm:y-[7rem] mb-4 border-1 border-gray-500 rounded-lg">
-                <h3 class="text-base text-gray-700 font-semibold ">申請した内容</h3>
-                <dl class="px-1">
-                    <div class="py-0.5 flex flex-wrap justify-between">
-                        <dt class="text-base font-medium text-gray-600">氏名：</dt>
-                        <dd x-text="resultData.name" class="text-base text-gray-800 sm:mt-0 sm:col-span-1"></dd>
-                    </div>
-                    <div class="py-0.5 flex flex-wrap justify-between">
-                        <dt class="text-base font-medium text-gray-600">メールアドレス：</dt>
-                        <dd x-text="resultData.email" class="text-base text-gray-800 sm:mt-0 sm:col-span-1"></dd>
-                    </div>
-                    <div class="py-0.5 flex flex-wrap justify-between">
-                        <dt class="text-base font-medium text-gray-600">ログインID：</dt>
-                        <dd x-text="resultData.loginId" class="text-base text-gray-800 sm:mt-0 sm:col-span-1"></dd>
-                    </div>
-                    <div class="py-0.5 flex flex-wrap justify-between">
-                        <dt class="text-base font-medium text-gray-600">役職：</dt>
-                        <dd x-text="resultData.roleLabel" class="text-base text-gray-800 sm:mt-0 sm:col-span-1"></dd>
-                    </div>
-                </dl>
-            </div>
-        </template>
+<template x-if="!$store.auth.loading">
+    <div>
+        <x-ui.form-group>
+            <span class="text-gray-800 text-base font-semibold">
+                申請状態：
+                    <span x-text="statusLabel" :class="statusClass"></span>
+                    {{ $isAcknowledge }}
+            </span>
+        </x-ui.form-group>
+
+        {{ $reapplyStatus }}
+
+        <x-ui.form-group>
+            <span class="text-gray-800 text-base font-semibold">申請種別：<span x-text="actionLabel"></span></span>
+        </x-ui.form-group>
+
+        <x-ui.form-group>
+            <span class="text-gray-800 text-base font-semibold">初回申請日：<span x-text="createdAt"></span></span>
+        </x-ui.form-group>
 
         <x-ui.form-group
             name="username"
@@ -36,12 +41,10 @@
                 placeholder="例：アグリ 太郎"
                 required
             />
-            <span x-show="isUpdate"
-                class="px-2 text-gray-600 text-sm font-semibold"
-            >
-                変更前：
-                <span x-text="old.username"></span>
-            </span>
+                <span class="px-2 text-gray-600 text-sm font-semibold">
+                    変更前：
+                    <span x-text="old.username"></span>
+                </span>
         </x-ui.form-group>
 
         <x-ui.form-group
@@ -55,9 +58,7 @@
                 placeholder="例：nihon_taro"
                 required
             />
-            <span x-show="isUpdate"
-                class="px-2 text-gray-600 text-sm font-semibold"
-            >
+            <span class="px-2 text-gray-600 text-sm font-semibold">
                 変更前：
                 <span x-text="old.loginId"></span>
             </span>
@@ -74,23 +75,18 @@
                 placeholder="例：farm_taro@example.org"
                 required
             />
-            <span x-show="isUpdate"
-                class="px-2 text-gray-600 text-sm font-semibold"
-            >
+            <span class="px-2 text-gray-600 text-sm font-semibold">
                 変更前：
                 <span x-text="old.email"></span>
             </span>
         </x-ui.form-group>
 
         <div x-data="{ show: false }">
-                <x-ui.form-group
-                    name="password"
-                >
-                <x-slot:label>
-                    <span>パスワード</span>
-                    <span x-show="isUpdate" x-text="passwordMessage"></span>
-                </x-slot>
 
+            <x-ui.form-group
+                name="password"
+                label="パスワード ＊変更しない場合は空欄"
+            >
                 <div class="relative">
                     <x-ui.input
                         ::type="show ? 'text' : 'password'"
@@ -137,43 +133,32 @@
 
                 <p class="py-1 ms-5 text-sm text-gray-600 font-semibold">使用できる記号<span class="rounded-md px-4 py-0.5 bg-gray-200">! @ # $ % & * - _ .</span></p>
             </x-ui.form-group>
-
-            <x-ui.form-group
-                name="role"
-                label="権限"
-            >
-                <x-ui.select
-                    name="role"
-                    x-model="formData.role"
-                    required
-                >
-                    <option value="worker" selected>一般ユーザー</option>
-                    <option value="manager">管理者</option>
-                </x-ui.select>
-                <span x-show="isUpdate"
-                    class="px-2 text-gray-600 text-sm font-semibold"
-                >
-                    変更前：
-                    <span x-text="old.roleLabel"></span>
-                </span>
-            </x-ui.form-group>
-
-            <div class="flex py-5 justify-center gap-x-4">
-                <x-ui.button
-                    name="submit" dusk="submit-button"
-                    class="w-[10rem]">
-                    申請する
-                </x-ui.button>
-                <x-ui.button
-                    type="href"
-                    name="cancel"
-                    ::href="backUrl"
-                    variant="secondary-ghost"
-                    dusk="cancel-button"
-                    class="w-[10rem]">
-                    キャンセル
-                </x-ui.button>
-            </div>
-
         </div>
 
+        <x-ui.form-group
+            name="role"
+            label="権限"
+        >
+            <x-ui.select
+                name="role"
+                x-model="formData.role"
+                required
+            >
+                <option value="worker">一般ユーザー</option>
+                <option value="manager">管理者</option>
+                {{-- <option value="owner">オーナー</option> --}}
+            </x-ui.select>
+            <span class="px-2 text-gray-600 text-sm font-semibold">
+                変更前：
+                <span x-text="old.roleLabel"></span>
+            </span>
+        </x-ui.form-group>
+
+        {{ $rejectionReason }}
+
+
+        {{ $bottom_button }}
+
+    </div>
+
+</template>

@@ -5,7 +5,6 @@
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\Admin\UserChange\UserChangeApplicationController;
-use App\Http\Controllers\Admin\UserChangeRequestController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
@@ -91,18 +90,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //------------------------------
     // 登録・変更申請 管理者専用グループ
     Route::middleware(['role:manager'])
-        ->prefix('admin/requests/users')
-        ->name('admin.requests.users.')
+        ->prefix('admin/applications/users')
+        ->name('admin.applications.users.')
         ->group(function () {
 
             // 申請の削除
-            Route::delete('/{changeRequest}/destroy/', [UserChangeApplicationController::class, 'destroy'])
+            Route::delete('/{changeApplication}/destroy/', [UserChangeApplicationController::class, 'destroy'])
                 ->name('destroy');
             // 却下について確認した
-            Route::patch('/{changeRequest}/acknowledge/', [UserChangeApplicationController::class, 'acknowledge'])
+            Route::patch('/{changeApplication}/acknowledge/', [UserChangeApplicationController::class, 'acknowledge'])
                 ->name('rejection_acknowledge');
             // 申請内容の編集画面
-            Route::get('/{changeRequest}/edit', [UserChangeApplicationController::class, 'edit'])
+            Route::get('/{changeApplication}/edit', [UserChangeApplicationController::class, 'edit'])
                 ->name('edit');
             // 申請のステータスを変更する
             Route::patch('/{parentApplication}/{childApplication}/reapply', [UserChangeApplicationController::class, 'reapply'])
@@ -111,10 +110,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/', [UserChangeApplicationController::class, 'index'])
             ->name('index');
             // 申請内容の編集送信
-            Route::patch('/{changeRequest}/update/{targetUser?}', [UserChangeApplicationController::class, 'update'])
+            Route::patch('/{changeApplication}/update/{targetUser?}', [UserChangeApplicationController::class, 'update'])
                 ->name('update');
-            // Route::patch('/{changeRequest}/{targetUser?}/update', [UserChangeApplicationController::class, 'update'])
-            //     ->name('update');
             // 申請の作成画面
             Route::get('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'create'])
                 ->name('create');
@@ -133,11 +130,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->group(function () {
             Route::get('/', [UserApprovalController::class, 'index'])
                 ->name('index');
-            Route::get('/{changeRequest}', [UserApprovalController::class, 'show'])
+            Route::get('/{changeApplication}', [UserApprovalController::class, 'show'])
                 ->name('show');
-            Route::patch('/{changeRequest}/approve', [UserApprovalController::class, 'approve'])
+            Route::patch('/{changeApplication}/approve', [UserApprovalController::class, 'approve'])
                 ->name('approve');
-            Route::patch('/{changeRequest}/reject', [UserApprovalController::class, 'reject'])
+            Route::patch('/{changeApplication}/reject', [UserApprovalController::class, 'reject'])
                 ->name('reject');
         });
     // ユーザー情報閲覧

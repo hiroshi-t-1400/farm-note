@@ -5,7 +5,7 @@ import { tsToDate } from "../../dashboard/utils";
 import { ROLES } from "../../../../constants/roles";
 import { USER_STATUS } from "../../../../constants/userStatus";
 
-import { submitDisable } from "../requests/users/requestLogic";
+import { submitDisable } from "../applications/users/applicationLogic";
 
 export default (config) => {
 
@@ -19,7 +19,7 @@ export default (config) => {
     const isActive = checkStatus();
     let statusClass = '';
 
-    const editUrl =`${location.origin}/admin/requests/users/update/${userId}`
+    const editUrl =`${location.origin}/admin/applications/users/update/${userId}`
 
     let backUrl = getBackUrl();
 
@@ -74,11 +74,11 @@ export default (config) => {
                 alert(response.data.message);
                 window.location.replace(backUrl);
             } catch(e) {
-                this.handleRequestError(e);
+                this.handleApplicationError(e);
             }
         },
 
-        handleRequestError(error) {
+        handleApplicationError(error) {
             console.log({ 'error': error });
             alert(error.message);
         },

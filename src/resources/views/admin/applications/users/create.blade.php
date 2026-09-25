@@ -8,14 +8,14 @@
 
 
     <form
-        x-data="createUserChangeRequest({
-            initialModel: @js($requestData)
+        x-data="createUserChangeApplication({
+            initialModel: @js($applicationData)
         })"
         @submit.prevent="submit()"
         x-cloak
     >
 
-            <x-admin.requests.users.create />
+            <x-admin.applications.users.create />
 
     </form>
 

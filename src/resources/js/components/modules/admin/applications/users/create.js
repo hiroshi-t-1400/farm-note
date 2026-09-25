@@ -1,7 +1,7 @@
-// /var/www/src/resources/js/components/modules/admin/requests/users/create.js
+// /var/www/src/resources/js/components/modules/admin/applications/users/create.js
 
 import { getBackUrl } from "../../../../../utils";
-import { submitCreate, submitUpdate, loadUser } from "./requestLogic";
+import { submitCreate, submitUpdate, loadUser } from "./applicationLogic";
 
 export default (config) => {
 
@@ -18,7 +18,7 @@ export default (config) => {
         if (actionType === 'create') {
             return getBackUrl(`${location.origin}/dashboard`);
         }
-        return getBackUrl(`${location.origin}/admin/requests/users`);
+        return getBackUrl(`${location.origin}/admin/applications/users`);
     };
 
     const {old, formData} = loadUser(targetUser);
@@ -54,11 +54,11 @@ export default (config) => {
                 }
 
             } catch (e) {
-                this.handleRequestError(e);
+                this.handleApplicationError(e);
             }
         },
 
-        handleRequestError(error) {
+        handleApplicationError(error) {
             console.log({ 'error': error });
             if (error.type === 'validation') {
                 this.errors = error.errors;

@@ -1,28 +1,28 @@
-// /var/www/src/resources/js/components/modules/admin/requests/users/submitService.js
+// /var/www/src/resources/js/components/modules/admin/applications/users/submitService.js
 
-import axiosUserRequestClient from "./axiosUserRequestClient";
+import axiosUserApplicationClient from "./axiosUserApplicationClient";
 
 const submitService = {
 
     // 申請ロジックモデルへ、ユーザー情報新規登録・削除申請送信
-    createRequest(payload) {
-        return axiosUserRequestClient.post(
+    createApplication(payload) {
+        return axiosUserApplicationClient.post(
             `/store-create`,
             payload,
         );
     },
 
     // ユーザーのDisabe as deleteの申請
-    destroyRequest(targetUserId) {
-        return axiosUserRequestClient.post(
+    destroyApplication(targetUserId) {
+        return axiosUserApplicationClient.post(
             `/${targetUserId}/store-disable`
         );
     },
 
     // 既存ユーザー情報の更新
     // login_id,emailのuniqueルールのためuser情報をモデルバインディングで取得
-    updateRequest(targetUserId, payload) {
-        return axiosUserRequestClient.post(
+    updateApplication(targetUserId, payload) {
+        return axiosUserApplicationClient.post(
             `/${targetUserId}/store-update`,
             payload,
         );
@@ -30,36 +30,36 @@ const submitService = {
 
     // 申請内容の更新
     // 更新申請の変更であればuser情報の取得が必要
-    updateRequestData(requestDataId, targetUserId = null, payload) {
+    updateApplicationData(applicationDataId, targetUserId = null, payload) {
         let targetUrl = '';
         if(targetUserId === null) {
-            targetUrl = `/${requestDataId}/update`;
+            targetUrl = `/${applicationDataId}/update`;
         } else {
-            targetUrl = `/${requestDataId}/update/${targetUserId}`;
+            targetUrl = `/${applicationDataId}/update/${targetUserId}`;
         }
-        return axiosUserRequestClient.patch(
+        return axiosUserApplicationClient.patch(
             targetUrl,
             payload,
         );
     },
 
     // 申請の削除
-    deleteRequestData(requestDataId) {
-        return axiosUserRequestClient.delete(
-            `/${requestDataId}/destroy/`
+    deleteApplicationData(applicationDataId) {
+        return axiosUserApplicationClient.delete(
+            `/${applicationDataId}/destroy/`
         );
     },
 
     // 却下された申請を確認
-    acknowledgeRequestData(requestDataId) {
-        return axiosUserRequestClient.patch(
-            `/${requestDataId}/acknowledge/`
+    acknowledgeApplicationData(applicationDataId) {
+        return axiosUserApplicationClient.patch(
+            `/${applicationDataId}/acknowledge/`
         );
     },
 
     // 再申請の履歴を記録
     reapplyHistory(parentApplicationId, childApplicationId) {
-        return axiosUserRequestClient.patch(
+        return axiosUserApplicationClient.patch(
             `/${parentApplicationId}/${childApplicationId}/reapply`
         );
     },

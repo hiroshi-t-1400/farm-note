@@ -29,7 +29,7 @@ class UpdateSubmitRequest extends FormRequest
     public function rules(): array
     {
         $targetUser = $this->route('targetUser');
-        $targetRequest = $this->route('changeRequest');
+        $targetApplication = $this->route('changeApplication');
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -54,7 +54,7 @@ class UpdateSubmitRequest extends FormRequest
                             UserChangeApplication::STATUS_PENDING,
                         )
                     )
-                    ->ignore($targetRequest),
+                    ->ignore($targetApplication),
             ],
 
             'email' => [
@@ -76,7 +76,7 @@ class UpdateSubmitRequest extends FormRequest
                             UserChangeApplication::STATUS_PENDING,
                         )
                     )
-                    ->ignore($targetRequest),
+                    ->ignore($targetApplication),
             ],
 
             'password' => [

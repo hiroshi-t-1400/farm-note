@@ -25,7 +25,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'admin-menu.show']);
 
         // ユーザー管理関連
-        Permission::firstOrCreate(['name' => 'user-change.request']); // ユーザー情報の変更申請権限
+        Permission::firstOrCreate(['name' => 'user-change.application']); // ユーザー情報の変更申請権限
         Permission::firstOrCreate(['name' => 'user-change.approve']); // ユーザー情報の変更承認権限
         Permission::firstOrCreate(['name' => 'user-change.viewAny']);
         Permission::firstOrCreate(['name' => 'user-change.update']);
@@ -47,7 +47,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $roleManager->givePermissionTo([
             'work-logs.manage',
             'master-data.manage',
-            'user-change.request',
+            'user-change.application',
             'user-change.viewAny',
             'user-change.update',
             'users.view',

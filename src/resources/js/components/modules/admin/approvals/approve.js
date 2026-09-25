@@ -6,7 +6,7 @@ import { getBackUrl } from "../../../../utils";
 import { ACTION_LABELS } from "../../../../constants/actions";
 import { ROLES } from "../../../../constants/roles";
 import { loadUser, submitApproveApplication, submitRejectApplication } from "./approvalLogic";
-import { REQUEST_STATUS } from "../../../../constants/requestStatus";
+import { APPLICATION_STATUS } from "../../../../constants/applicationStatus";
 
 export default (config) => {
     let {
@@ -34,7 +34,7 @@ export default (config) => {
     const backUrl = getBackUrl(`${location.origin}/admin/approvals/users`);
 
     function getStatus() {
-        let temp = REQUEST_STATUS[status];
+        let temp = APPLICATION_STATUS[status];
         if(!parentApplicationId) return temp;
         return `再申請 ${temp}`;
     };
@@ -76,7 +76,7 @@ export default (config) => {
                 window.location.replace(this.backUrl);
             } catch(e) {
 
-                this.handleRequestError(e);
+                this.handleApplicationError(e);
             }
         },
 
@@ -96,11 +96,11 @@ export default (config) => {
                 // 一覧画面へ移動する
                 window.location.replace(this.backUrl);
             } catch(e) {
-                this.handleRequestError(e);
+                this.handleApplicationError(e);
             }
         },
 
-        handleRequestError(error) {
+        handleApplicationError(error) {
             console.log({ 'error': error });
             if (error.type === 'validation') {
                 this.errors = error.errors;

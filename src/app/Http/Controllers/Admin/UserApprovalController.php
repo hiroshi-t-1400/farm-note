@@ -13,31 +13,31 @@ class UserApprovalController extends Controller
     // 一覧
     public function index()
     {
-        $changeRequests = UserChangeApplication::where('status', 'pending')
+        $changeApplications = UserChangeApplication::where('status', 'pending')
             ->with(['targetUser', 'requester'])
             ->orderBy('parent_application_id', 'desc')
             ->orderBy('updated_at', 'asc')
             ->orderBy('created_at', 'asc')
             ->paginate(15);
 
-        return response()->view('/admin/approvals/index', compact('changeRequests'));
+        return response()->view('/admin/approvals/index', compact('changeApplications'));
     }
 
     // 承認操作画面表示
-    public function show(Request $request, UserChangeApplication $changeRequest)
+    public function show(Request $request, UserChangeApplication $changeApplication)
     {
-        return response()->view('admin.approvals.show', compact('changeRequest'))
+        return response()->view('admin.approvals.show', compact('changeApplication'))
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
             ->header('Pragma', 'no-cache')
             ->header('Expires', 'Sat, 01 Jan 2000 00:00:00 GMT');
     }
 
     // 承認ロジック
-    public function approve(Request $request, UserChangeApplication $changeRequest)
+    public function approve(Request $request, UserChangeApplication $changeApplication)
     {
         try {
             // モデルにカプセル化されたビジネスロジックの実行
-            $changeRequest->approve($request->user());
+            $changeApplication->approve($request->user());
 
             session()->flash('success', '申請を承認しました。');
 
@@ -55,7 +55,7 @@ class UserApprovalController extends Controller
         } catch (\Throwable $e) {
             // その他のエラーをLogを保存、messegeとして読み出せるように
             Log::error('ユーザー承認処理エラー', [
-                'change_request_id' => $changeRequest->id,
+                'change_application_id' => $changeApplication->id,
                 'user_id' => $request->user()->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -68,12 +68,12 @@ class UserApprovalController extends Controller
     }
 
     // 却下ロジック
-    public function reject(UserApprovalRequest $request, UserChangeApplication $changeRequest)
+    public function reject(UserApprovalRequest $request, UserChangeApplication $changeApplication)
     {
         $validated = $request->validated();
 
         try {
-            $changeRequest->reject($request->user(), $validated['rejection_reason'] ?? null);
+            $changeApplication->reject($request->user(), $validated['rejection_reason'] ?? null);
 
             session()->flash('success', '申請を却下しました。');
 
@@ -86,8 +86,8 @@ class UserApprovalController extends Controller
             ], 422);
         } catch (\Throwable $e) {
             // その他のエラーをLogを保存、messegeとして読み出せるように
-            Log::error('ユーザー登録棄却処理エラー', [
-                'change_request_id' => $changeRequest->id,
+            Log::error('ユーザー登録処理エラー', [
+                'change_application_id' => $changeApplication->id,
                 'user_id' => $request->user()->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

@@ -36,14 +36,14 @@ class UserChangeApplicationControllerTest extends TestCase
     public function test_access_user_change_index(): void
     {
         $response = $this->actingAs($this->manager)
-            ->get(route('admin.requests.users.index'));
+            ->get(route('admin.applications.users.index'));
 
         $response->assertStatus(200);
     }
 
-    public function test_manager_can_edit_own_user_change_request(): void
+    public function test_manager_can_edit_own_user_change_application(): void
     {
-        $changeRequest = UserChangeApplication::factory()->actionCreate()->create([
+        $changeApplication = UserChangeApplication::factory()->actionCreate()->create([
             'status' => 'pending',
             'payload' => [
                 'name' => '新規 太郎',
@@ -53,10 +53,10 @@ class UserChangeApplicationControllerTest extends TestCase
                 'password' => 'passowrd',
                 ],
             // 'requester' => ['id' => $this->manager->id],
-            'requested_by' => $this->manager->id,
+            'appied_by' => $this->manager->id,
         ]);
 
-        $changeRequest = [
+        $changeApplication = [
             'name' => 'テスト 太郎',
             'login_id' => 'test.taroh',
             'email' => 'testtaro@example.org',
@@ -64,34 +64,28 @@ class UserChangeApplicationControllerTest extends TestCase
         ];
 
         $response = $this->actingAs($this->manager)
-            ->patchJson(route('admin.requests.users.update', $changeRequest));
+            ->patchJson(route('admin.applications.users.update', $changeApplication));
 
         $response->assertStatus(200)
             ->assertJson([
                 'message' => 'ユーザー登録の申請を送信しました。'
             ]);
 
-        $this->assertDatabaseHas('user_change_request', [
+        $this->assertDatabaseHas('user_change_application', [
             'name' => 'テスト 太郎',
             'email' => 'testtaro@example.org',
         ]);
 
-        // // user_change_requests テーブルの状態が「approved」に更新されているか
-        // $this->assertDatabaseHas('user_change_requests', [
-        //     'id' => $changeRequest->id,
-        //     'status' => 'approved',
-        //     'approved_by' => $this->owner->id,
-        // ]);
     }
 
-    public function test_manager_can_create_request(): void
+    public function test_manager_can_create_application(): void
     {
         $response = $this->actingAs($this->manager)
-            ->get('/admin/requests/users');
+            ->get('/admin/applications/users');
 
         $actionType = 'create';
 
-        $requestData = [
+        $applicationData = [
             'name' => 'tomatotaro',
             'login_id' => 'tomatotaro',
             'email' => 'tomato1234@example.org',
@@ -99,10 +93,10 @@ class UserChangeApplicationControllerTest extends TestCase
             'role' => 'worker',
         ];
 
-        $url = route('admin.requests.users.store-create');
+        $url = route('admin.applications.users.store-create');
 
         $response = $this->actingAs($this->manager)
-            ->postJson($url, $requestData);
+            ->postJson($url, $applicationData);
 
         $response->assertStatus(200)
             ->assertJson([
