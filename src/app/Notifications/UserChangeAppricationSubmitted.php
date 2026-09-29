@@ -39,6 +39,7 @@ class UserChangeAppricationSubmitted extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'application_id' => $this->change_application->id,
             'action_type' => $this->change_application->action_type,
             'status' => $this->change_application->status,
             'parent_application_id' => $this->change_application->parent_application_id,

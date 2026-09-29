@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserChange\UserChangeApplicationController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\WorkController;
 use App\Models\Admin\UserChange\UserChangeApplication;
@@ -83,6 +84,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
             'permissions' => $user->getAllPermissions()->pluck('name'), // 付与されている全パーミッション名
         ];
     });
+
+    Route::get('/notifications/index', [NotificationController::class, 'index'])
+        ->name('notifications');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])
+        ->name('read_notification');
 
     // -----------------------------
     // ユーザー情報

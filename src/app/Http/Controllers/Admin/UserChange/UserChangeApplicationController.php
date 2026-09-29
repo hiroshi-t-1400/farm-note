@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -262,6 +263,14 @@ class UserChangeApplicationController extends Controller
         $changeApplication->update([
             'rejection_acknowledge_at' => now(),
         ]);
+
+        // 通知を既読に変更
+        Auth::user()->notifications()
+                ->where('data->application_id', $changeApplication->id)
+                ->update([
+                    'read_at' => now(),
+                ]);
+
 
         return response()->json([
             'status' => 'success',
