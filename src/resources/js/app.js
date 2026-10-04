@@ -17,6 +17,7 @@ import indexUserChangeApplication from './components/modules/admin/applications/
 import approveUser from './components/modules/admin/approvals/approve';
 import indexApprovals from './components/modules/admin/approvals/index';
 
+import notificationsIndex from './components/modules/notifications';
 import indexLog from './components/modules/dashboard/index';
 import recentLog from './components/modules/dashboard/recent';
 
@@ -44,6 +45,7 @@ Alpine.data('indexUserChangeApplication', indexUserChangeApplication);
 Alpine.data('approveUser', approveUser);
 Alpine.data('indexApprovals', indexApprovals);
 
+Alpine.data('notificationsIndex', notificationsIndex);
 Alpine.data('indexLog', indexLog);
 Alpine.data('recentLog', recentLog);
 
