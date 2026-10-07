@@ -85,10 +85,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ];
     });
 
+    // 通知
     Route::get('/notifications/index', [NotificationController::class, 'index'])
         ->name('notifications');
+    // Route::post('/notifications/read', [NotificationController::class, 'readAll'])
+    //     ->name('read-all-notifications');
+    Route::patch('/notifications/read', [NotificationController::class, 'markAsRead'])
+        ->name('read-approved-notifications');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])
-        ->name('read_notification');
+        ->name('read-notification');
 
     // -----------------------------
     // ユーザー情報

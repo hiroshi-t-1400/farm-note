@@ -7,7 +7,7 @@ export default (config) => {
 
     const data = config?.initialModels?.data;
     const path = config?.initialModels?.path;
-console.log(config?.initialModels);
+
     const indexData = data.map(r => ({
         id: r.id,
         targetUserId: r.target_user_id,

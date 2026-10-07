@@ -70,15 +70,16 @@ export default (config) => {
             let response = '';
             try {
                 response = await this.submit();
+
+                // 成功処理
+                const data = response.data;
+
+                await this.updateApplicationStatus(data.applicationId);
+                alert(data.message);
+                window.location.replace(backUrl);
             } catch(e) {
                 this.handleApplicationError(e);
             }
-
-            const data = response.data;
-
-            await this.updateApplicationStatus(data.applicationId);
-            alert(data.message);
-            window.location.replace(backUrl);
         },
 
         async submit() {

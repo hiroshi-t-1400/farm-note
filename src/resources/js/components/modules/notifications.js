@@ -1,18 +1,26 @@
 // /var/www/src/resources/js/components/modules/notifications.js
 
 // import { pagenation } from "../../api/transformers/pagenation";
+import { submitMarkAsReadSome } from "./notificationLogic";
 
 export default (config) => {
 
     const notificationDatas = config?.initialModel.map(n => {
-        n.data.displayDate = pastDays(n?.created_at);
+        const { data, ...rest } = n;
 
-        return n.data
+        const displayDate = pastDays(n?.created_at);
+
+        return {
+            ...data,
+            ...rest,
+            displayDate,
+        }
     });
 
-    const hasUnreadNotifications = config?.initialModel.length > 0 ?
-                                        true
-                                        : false;
+    const hasUnreadNotifications
+        = notificationDatas?.length > 0 ?
+            true
+            : false;
 
     // 日付を 今日or昨日or2026-10-10 のように段階的に表示
     function pastDays(date) {
@@ -35,5 +43,56 @@ export default (config) => {
     return {
         notificationDatas: notificationDatas,
         hasUnreadNotifications: hasUnreadNotifications,
+
+        hasNotificationApproved() {
+            return this.notificationDatas?.some(data => data.status === 'approved') || '';
+        },
+
+        async markApprovedNotificationsAsRead() {
+            const notificationIds = this.getUUID('approved');
+
+            try {
+                const response = await submitMarkAsReadSome(
+                    notificationIds
+                );
+
+                // 成功処理
+                // 既読化した通知を非表示にする
+                this.notificationDatas = this.disableNotifications('approved');
+
+                console.log({'response':response});
+                alert(response.data.message);
+            } catch(e) {
+                this.handleApplicationError(e);
+            }
+        },
+
+        /**
+         * @param {String} status
+         */
+        getUUID(status) {
+            return notificationDatas.filter(
+                data => data.status === status
+            ).map(
+                filtered => (
+                    filtered.id
+                ));
+        },
+
+        disableNotifications(status) {
+            return notificationDatas.filter(
+                data => data.status !== status
+            );
+        },
+
+        handleApplicationError(error) {
+            console.log({ 'error': error });
+            if (error.type === 'validation') {
+                this.errors = error.errors;
+                alert(error.message);
+                return;
+            }
+            alert(error.message);
+        },
     }
 }
