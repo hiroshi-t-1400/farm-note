@@ -37,6 +37,8 @@
                                     <svg x-show="sidebarOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
+
+                                    <x-ui.hamburger-badge />
                                 </button>
 
                                 <!-- アプリロゴ・タイトル -->
@@ -44,6 +46,9 @@
                                     🌱 農作業日誌
                                 </a>
                             </div>
+
+                            <!-- 通知表示 ベルアイコン -->
+                            <x-ui.notification-bell />
 
                             <!-- ユーザー表示 -->
                             <div class="flex flex-col p-0.5 px-2 rounded text-gray-700 font-semibold hover:bg-gray-100 hover:shadow relative">

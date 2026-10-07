@@ -11,15 +11,6 @@
         x-cloak
     >
 
-
-        <div>
-            <template x-if="hasRejected()">
-                <div class="bg-amber-50 border-l-4 border-amber-500 p-6 rounded-r-lg shadow-sm my-4 text-base font-bold text-amber-800">
-                    却下された申請を処理してください。
-                </div>
-            </template>
-        </div>
-
         <div class="flex flex-col ">
 
             <div class="hidden sm:grid sm:grid-cols-[10rem_5rem_10rem_8rem_minmax(6rem,_auto)_minmax(3rem,_1fr)] gap-x-4 items-center pb-2 mb-2 border-b-2 border-gray-200 text-xs font-bold text-gray-500 tracking-wider">

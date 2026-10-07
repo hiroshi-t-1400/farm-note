@@ -103,7 +103,7 @@ class UserChangeApplication extends Model
         });
     }
 
-    public function reject(User $approver, ?string $reason = null): void
+    public function reject(User $approver, ?string $rejection_reason = null): void
     {
         // 状態チェック、承認待ちではないときのフォールバック
         if ($this->status !== self::STATUS_PENDING) {
@@ -113,7 +113,7 @@ class UserChangeApplication extends Model
         $this->update([
             'status' => self::STATUS_REJECTED,
             'approved_by' => $approver->id,
-            'rejection_reason' => $reason,
+            'rejection_reason' => $rejection_reason,
         ]);
     }
 

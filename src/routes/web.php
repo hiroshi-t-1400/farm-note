@@ -2,14 +2,14 @@
 
 // use App\Http\Controllers\AuthController;
 
-use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\Admin\UserChange\UserChangeApplicationController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TestController;
-use App\Http\Controllers\UserController as ControllersUserController;
 use App\Http\Controllers\WorkController;
 use App\Models\Admin\UserChange\UserChangeApplication;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -85,6 +85,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ];
     });
 
+    // 通知
+    Route::get('/notifications/index', [NotificationController::class, 'index'])
+        ->name('notifications');
+    // Route::post('/notifications/read', [NotificationController::class, 'readAll'])
+    //     ->name('read-all-notifications');
+    Route::patch('/notifications/read', [NotificationController::class, 'markAsRead'])
+        ->name('read-approved-notifications');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])
+        ->name('read-notification');
+
     // -----------------------------
     // ユーザー情報
     //------------------------------
@@ -100,12 +110,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             // 却下について確認した
             Route::patch('/{changeApplication}/acknowledge/', [UserChangeApplicationController::class, 'acknowledge'])
                 ->name('rejection_acknowledge');
-            // 申請内容の編集画面
+            // 申請内容の確認画面および編集画面
             Route::get('/{changeApplication}/edit', [UserChangeApplicationController::class, 'edit'])
                 ->name('edit');
             // 申請のステータスを変更する
             Route::patch('/{parentApplication}/{childApplication}/reapply', [UserChangeApplicationController::class, 'reapply'])
-                ->name('reapplyHistory');
+                ->name('reapply_history');
 
             Route::get('/', [UserChangeApplicationController::class, 'index'])
             ->name('index');
@@ -141,9 +151,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('users')
         ->name('users.')
         ->group(function () {
-        Route::get('/', [ControllersUserController::class, 'index'])
+        Route::get('/', [UserController::class, 'index'])
             ->name('index');
-        Route::get('/{user}', [ControllersUserController::class, 'show'])
+        Route::get('/{user}', [UserController::class, 'show'])
             ->name('show');
     });
 
