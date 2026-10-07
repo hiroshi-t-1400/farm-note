@@ -3,14 +3,16 @@
 // import { pagenation } from "../../api/transformers/pagenation";
 
 export default (config) => {
-console.log(config?.initialModel);
 
     const notificationDatas = config?.initialModel.map(n => {
-
         n.data.displayDate = pastDays(n?.created_at);
 
         return n.data
     });
+
+    const hasUnreadNotifications = config?.initialModel.length > 0 ?
+                                        true
+                                        : false;
 
     // 日付を 今日or昨日or2026-10-10 のように段階的に表示
     function pastDays(date) {
@@ -30,9 +32,8 @@ console.log(config?.initialModel);
         }
     };
 
-
-console.log({'notificationDatas':notificationDatas});
     return {
         notificationDatas: notificationDatas,
+        hasUnreadNotifications: hasUnreadNotifications,
     }
 }
