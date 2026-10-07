@@ -10,6 +10,7 @@ use App\Notifications\UserChangeAppricationSubmitted;
 
 use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\User;
+use App\Notifications\UserChangeApplicationApproved;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -42,10 +43,26 @@ class UserChangeApplicationController extends Controller
 
         $changeApplication->load(['targetUser', 'requester']);
 
+        // 管理者向けの承認が実行された通知への処理
+        $notification = $request->user()
+            ->unreadNotifications()
+            ->where('type', UserChangeApplicationApproved::class)
+            ->where('data->application_id', $changeApplication->id)
+            ->first();
+        // nullsafe演算子で、通知が存在する場合は既読化
+        $notification?->markAsRead();
+
         if($changeApplication->status === 'rejected') {
-            return response()->view('admin.applications.users.reapply', compact('changeApplication'));
+            // 却下された申請の場合は専用の再申請reapply画面をレンダリング
+            return response()->view(
+                'admin.applications.users.reapply',
+                compact('changeApplication')
+            );
         } else {
-            return response()->view('admin.applications.users.edit', compact('changeApplication'));
+            return response()->view(
+                'admin.applications.users.edit',
+                compact('changeApplication')
+            );
         }
     }
 

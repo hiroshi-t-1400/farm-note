@@ -1,7 +1,7 @@
 {{-- /var/www/src/resources/views/components/ui/notification-bell.blade.php --}}
 
 {{-- <a href="{{ route('notifications.index') }}" --}}
-<a href="{{ route('dashboard') }}"
+<a href="{{ route('notifications') }}"
     class="relative inline-flex items-center"
     aria-label="通知">
     {{-- https://heroicons.com/ --}}

@@ -40,8 +40,10 @@ class UserChangeAppricationSubmitted extends Notification
     {
         return [
             'application_id' => $this->change_application->id,
+            'target_user_name' => $this->change_application->payload['name'],
             'action_type' => $this->change_application->action_type,
             'status' => $this->change_application->status,
+            'message' => '未処理の申請があります。',
             'parent_application_id' => $this->change_application->parent_application_id,
             'created_at' => $this->change_application->created_at,
             'updated_at' => $this->change_application->updated_at,

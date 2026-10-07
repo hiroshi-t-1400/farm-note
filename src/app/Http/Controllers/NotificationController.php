@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\User;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
@@ -10,7 +11,10 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = Auth::user()->notifications;
+
+        $notifications = Auth::user()
+            ->unreadNotifications()
+            ->get();
 
         return response()->view('notifications/index', compact('notifications'));
     }
