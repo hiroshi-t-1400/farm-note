@@ -47,7 +47,7 @@
         </x-ui.select>
 
         {{-- ユーザ登録に遷移 --}}
-        @can('user-change.request')
+        @can('user-change.application')
             <a href="" class="mx-5 text-bold">＋作業者を新規に追加する</a>
         @endcan
     </x-ui.form-group>

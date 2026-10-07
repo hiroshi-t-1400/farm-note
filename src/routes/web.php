@@ -2,14 +2,16 @@
 
 // use App\Http\Controllers\AuthController;
 
-use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\UserApprovalController;
-use App\Http\Controllers\Admin\UserChangeRequestController;
+use App\Http\Controllers\Admin\UserChange\UserChangeApplicationController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\WorkController;
+use App\Models\Admin\UserChange\UserChangeApplication;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -50,7 +52,6 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
     $request->fulfill();
 
     return redirect()->intended('/dashboard?verified=1');
-    // return response()->view('/dashboard');
 })->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
 
 // 確認メールの再送信
@@ -84,43 +85,77 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ];
     });
 
+    // 通知
+    Route::get('/notifications/index', [NotificationController::class, 'index'])
+        ->name('notifications');
+    // Route::post('/notifications/read', [NotificationController::class, 'readAll'])
+    //     ->name('read-all-notifications');
+    Route::patch('/notifications/read', [NotificationController::class, 'markAsRead'])
+        ->name('read-approved-notifications');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])
+        ->name('read-notification');
 
-    // 管理者専用グループ
+    // -----------------------------
+    // ユーザー情報
+    //------------------------------
+    // 登録・変更申請 管理者専用グループ
     Route::middleware(['role:manager'])
-        ->prefix('admin/requests')
-        ->name('admin.requests.')
-        ->group(function () {
-            Route::get('/users', [UserChangeRequestController::class, 'index'])->name('users.index');
-            Route::get('/users/create', [UserChangeRequestController::class, 'create'])->name('users.create');
-            Route::post('/users/create', [UserChangeRequestController::class, 'store'])->name('users.store');
-            Route::get('/users/{changeRequest}', [UserChangeRequestController::class, 'edit'])->name('users.edit');
-            Route::patch('/users/{changeRequest}/update', [UserChangeRequestController::class, 'update'])->name('users.update');
-    });
-
-    // オーナー専用グループ
-    Route::middleware(['role:owner'])
-        ->prefix('admin/approvals')
-        ->name('admin.approvals.')
+        ->prefix('admin/applications/users')
+        ->name('admin.applications.users.')
         ->group(function () {
 
-            // 1. 承認待ち一覧表示画面
-            Route::get('/users', [UserApprovalController::class, 'index'])
-                ->name('users.index');
+            // 申請の削除
+            Route::delete('/{changeApplication}/destroy/', [UserChangeApplicationController::class, 'destroy'])
+                ->name('destroy');
+            // 却下について確認した
+            Route::patch('/{changeApplication}/acknowledge/', [UserChangeApplicationController::class, 'acknowledge'])
+                ->name('rejection_acknowledge');
+            // 申請内容の確認画面および編集画面
+            Route::get('/{changeApplication}/edit', [UserChangeApplicationController::class, 'edit'])
+                ->name('edit');
+            // 申請のステータスを変更する
+            Route::patch('/{parentApplication}/{childApplication}/reapply', [UserChangeApplicationController::class, 'reapply'])
+                ->name('reapply_history');
 
-            // 2. 申請内容の詳細確認画面
-            Route::get('/users/{changeRequest}', [UserApprovalController::class, 'show'])
-                ->name('users.show');
-
-            // 3. 承認実行（usersテーブルへ反映）
-            Route::patch('/users/{changeRequest}/approve', [UserApprovalController::class, 'approve'])
-                ->name('users.approve');
-
-            // 4. 却下実行
-            Route::patch('/users/{changeRequest}/reject', [UserApprovalController::class, 'reject'])
-                ->name('users.reject');
+            Route::get('/', [UserChangeApplicationController::class, 'index'])
+            ->name('index');
+            // 申請内容の編集送信
+            Route::patch('/{changeApplication}/update/{targetUser?}', [UserChangeApplicationController::class, 'update'])
+                ->name('update');
+            // 申請の作成画面
+            Route::get('/{actionType}/{targetUser?}', [UserChangeApplicationController::class, 'create'])
+                ->name('create');
+            // 申請のHTTPリクエスト
+            Route::post('/store-create', [UserChangeApplicationController::class, 'storeCreate'])
+                ->name('store-create');
+            Route::post('/{targetUser}/store-update', [UserChangeApplicationController::class, 'storeUpdate'])
+                ->name('store-update');
+            Route::post('/{targetUser}/store-disable', [UserChangeApplicationController::class, 'storeDisable'])
+                ->name('store-disable');
         });
-
-
+    // 承認 オーナー専用グループ
+    Route::middleware(['role:owner'])
+        ->prefix('admin/approvals/users')
+        ->name('admin.approvals.users.')
+        ->group(function () {
+            Route::get('/', [UserApprovalController::class, 'index'])
+                ->name('index');
+            Route::get('/{changeApplication}', [UserApprovalController::class, 'show'])
+                ->name('show');
+            Route::patch('/{changeApplication}/approve', [UserApprovalController::class, 'approve'])
+                ->name('approve');
+            Route::patch('/{changeApplication}/reject', [UserApprovalController::class, 'reject'])
+                ->name('reject');
+        });
+    // ユーザー情報閲覧
+    Route::prefix('users')
+        ->name('users.')
+        ->group(function () {
+        Route::get('/', [UserController::class, 'index'])
+            ->name('index');
+        Route::get('/{user}', [UserController::class, 'show'])
+            ->name('show');
+    });
 
     // Route::get('/work-logs/index', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimpleAll');
     Route::get('/work-logs/index/{cropSeason?}', [WorkController::class, 'indexSimple'])->name('work-logs.indexSimple');

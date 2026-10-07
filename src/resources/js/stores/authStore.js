@@ -65,7 +65,7 @@ export function registerAuthStore(Alpine) {
             // リソースの作成者チェック
             // 作成者であれば操作を認可される箇所に適用
             if (resource) {
-                const creatorId = resource?.created_by ?? resource?.user_id ?? resource?.author_id ?? resource?.requested_by ?? resource.requesterId ?? resource.createdBy;
+                const creatorId = resource?.created_by ?? resource?.user_id ?? resource?.author_id ?? resource?.applied_by ?? resource.requesterId ?? resource.createdBy;
 
                 if (creatorId !== undefined) {
                     if (permission === 'update' || permission === 'delete') {

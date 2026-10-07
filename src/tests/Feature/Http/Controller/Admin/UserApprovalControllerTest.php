@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\User;
-use App\Models\UserChangeRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
@@ -34,9 +34,9 @@ class UserApprovalControllerTest extends TestCase
         $this->manager->assignRole($managerRole);
     }
 
-    public function test_owner_approve_user_create_request(): void
+    public function test_owner_approve_user_create_application(): void
     {
-        $changeRequest = UserChangeRequest::factory()->actionCreate()->create([
+        $changeApplication = UserChangeApplication::factory()->actionCreate()->create([
             'status' => 'pending',
             'payload' => [
                 'name' => '新規 太郎',
@@ -48,12 +48,12 @@ class UserApprovalControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->owner)
-            ->get(route('admin.approvals.users.show', $changeRequest));
+            ->get(route('admin.approvals.users.show', $changeApplication));
 
         $response->assertStatus(200);
 
         $response = $this->actingAs($this->owner)
-            ->patchJson(route('admin.approvals.users.approve', $changeRequest));
+            ->patchJson(route('admin.approvals.users.approve', $changeApplication));
 
         $response->assertStatus(200)
             ->assertJson([
@@ -65,18 +65,18 @@ class UserApprovalControllerTest extends TestCase
             'email' => 'new_user@example.com',
         ]);
 
-        // user_change_requests テーブルの状態が「approved」に更新されているか
-        $this->assertDatabaseHas('user_change_requests', [
-            'id' => $changeRequest->id,
+        // user_change_applications テーブルの状態が「approved」に更新されているか
+        $this->assertDatabaseHas('user_change_applications', [
+            'id' => $changeApplication->id,
             'status' => 'approved',
             'approved_by' => $this->owner->id,
         ]);
     }
 
 
-    public function test_owner_reject_user_create_request(): void
+    public function test_owner_reject_user_create_application(): void
     {
-        $changeRequest = UserChangeRequest::factory()->actionCreate()->create([
+        $changeApplication = UserChangeApplication::factory()->actionCreate()->create([
             'status' => 'pending',
             'payload' => [
                 'name' => '新規 太郎',
@@ -88,12 +88,12 @@ class UserApprovalControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->owner)
-            ->get(route('admin.approvals.users.show', $changeRequest));
+            ->get(route('admin.approvals.users.show', $changeApplication));
 
         $response->assertStatus(200);
 
         $response = $this->actingAs($this->owner)
-            ->patchJson(route('admin.approvals.users.reject', $changeRequest), [
+            ->patchJson(route('admin.approvals.users.reject', $changeApplication), [
                 'rejection_reason' => '入力内容に不備があります。',
             ]);
 
@@ -108,8 +108,8 @@ class UserApprovalControllerTest extends TestCase
         ]);
 
         // 申請テーブルの状態が変更されているか
-        $this->assertDatabaseHas('user_change_requests', [
-            'id' => $changeRequest->id,
+        $this->assertDatabaseHas('user_change_applications', [
+            'id' => $changeApplication->id,
             'status' => 'rejected',
             'approved_by' => $this->owner->id,
             'rejection_reason' => '入力内容に不備があります。',

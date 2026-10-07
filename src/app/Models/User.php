@@ -4,9 +4,11 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\Admin\UserChange\UserChangeApplication;
 use App\Models\WorkLog\WorkLog;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -84,8 +86,33 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     // 自分が出した申請の一覧
-    public function changeRequests(): HasMany
+    public function changeApplications(): HasMany
     {
-        return $this->hasMany(UserChangeRequest::class, 'requested_by');
+        return $this->hasMany(UserChangeApplication::class, 'applied_by');
+    }
+
+    public function scopeDefaultSort(Builder $query): Builder
+    {
+        $statusOrder = ['active', 'disabled'];
+
+        // Laravel TESTコントローラーSQliteへの対応
+        $driver = $query->getConnection()->getDriverName(); // データベースの種類を取得
+
+        if ($driver === 'sqlite') {
+            // SQLite用の CASE 式
+            $cases = [];
+            foreach ($statusOrder as $index => $status) {
+                $order = $index + 1;
+                $cases[] = "WHEN '{$status}' THEN {$order}";
+            }
+            $caseSql = "CASE status " . implode(' ', $cases) . " ELSE " . (count($statusOrder) + 1) . " END";
+
+            $query->orderByRaw($caseSql);
+        } else {
+            // MySql MariaDb用のFILED関数
+            $query->orderByRaw("FIELD(status, '" . implode("','", $statusOrder) . "')");
+        }
+
+        return $query->latest('created_at')->orderby('id', 'desc');
     }
 }

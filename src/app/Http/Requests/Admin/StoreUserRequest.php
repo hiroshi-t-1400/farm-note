@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -35,7 +36,7 @@ class StoreUserRequest extends FormRequest
                 'max:30',
                 'regex:/^[a-zA-Z][a-zA-Z0-9_.-]+$/',
                 Rule::unique('users', 'login_id')
-                ->ignore($this->user), // 更新時自分を判定から除外
+                    ->ignore($this->user), // 更新時自分を判定から除外
             ],
 
             'email' => [
@@ -45,14 +46,14 @@ class StoreUserRequest extends FormRequest
                 'email', // 開発用 @example.orgの許容
                 'max:255',
                 Rule::unique('users', 'email')
-                ->ignore($this->user),
+                    ->ignore($this->user),
             ],
 
             'password' => [
                 'required',
                 'string',
                 Password::min(10)
-                ->uncompromised(3),
+                    ->uncompromised(3),
                 'regex:/^[a-zA-Z0-9!@#$%&*\-_.]+$/',
             ],
 

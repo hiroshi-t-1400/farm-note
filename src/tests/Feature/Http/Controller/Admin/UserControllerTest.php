@@ -63,7 +63,7 @@ class UserControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_manager_request_create_user(): void
+    public function test_manager_apply_create_user(): void
     {
         $role = Role::create(['name' => 'manager']);
         // $role = Role::create(['name' => 'owner']);

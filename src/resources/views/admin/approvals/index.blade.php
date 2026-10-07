@@ -13,7 +13,7 @@
     </div>
 
     <div>
-        <x-admin.approvals :changeRequests="$changeRequests">
+        <x-admin.approvals :changeApplications="$changeApplications">
         </x-admin.approvals>
     </div>
 
